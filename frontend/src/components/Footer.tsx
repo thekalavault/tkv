@@ -59,7 +59,7 @@ export default function Footer() {
                 </a>
 
                 <a 
-                  href="mailto:contact@thekalavault.com" 
+                  href="mailto:admin@thekalavault.com" 
                   className="flex gap-4 items-start group text-xs w-fit" 
                   title="Email Us"
                 >
@@ -68,7 +68,7 @@ export default function Footer() {
                   </span>
                   <div>
                     <span className="font-label-caps text-[8.5px] uppercase block tracking-[0.15em] text-primary/40 mb-0.5 font-bold">DIRECT INQUIRIES</span>
-                    <span className="font-mono text-primary group-hover:text-gallery-gold transition-colors font-medium">contact@thekalavault.com</span>
+                    <span className="font-mono text-primary group-hover:text-gallery-gold transition-colors font-medium">admin@thekalavault.com</span>
                   </div>
                 </a>
               </div>
