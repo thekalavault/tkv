@@ -18,28 +18,36 @@ import { supportRouter } from './modules/support/support.routes';
 
 const app = express();
 
-// Determine allowed CORS origins
-const allowedOrigins = [
-  'http://localhost:3000', // Frontend dev
-  'http://localhost:4001', // Frontend dev 4001
-  'http://127.0.0.1:4001', // Frontend dev 4001 IP
-  'http://localhost:4000', // Backend dev
-  'https://thekalavault.com',
-  'https://www.thekalavault.com',
-  'https://app.thekalavault.com',
-  'https://tkv-u3pl.vercel.app',
-  'https://tkv-nu.vercel.app',
-  process.env.FRONTEND_URL, // Environment-specific
-].filter(Boolean);
-
 app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow if no origin (e.g. curl) or matches allowedOrigins, or is localhost/127.0.0.1 on any port
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://thekalavault.com',
+        'https://www.thekalavault.com',
+        'https://app.thekalavault.com',
+      ];
+
+      if (process.env.FRONTEND_URL) {
+        allowedOrigins.push(process.env.FRONTEND_URL);
+      }
+
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Allow any Vercel preview domain
+      if (origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
         callback(null, true);
       } else {
+        logger.warn({ origin }, 'CORS error');
         callback(new Error(`CORS policy: origin ${origin} not allowed`));
       }
     },
