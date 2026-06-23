@@ -28,6 +28,7 @@ const allowedOrigins = [
   'https://www.thekalavault.com',
   'https://app.thekalavault.com',
   'https://tkv-u3pl.vercel.app',
+  'https://tkv-nu.vercel.app',
   process.env.FRONTEND_URL, // Environment-specific
 ].filter(Boolean);
 
