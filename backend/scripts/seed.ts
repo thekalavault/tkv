@@ -16,10 +16,10 @@ async function seed() {
   });
 
   await prisma.user.upsert({
-    where: { email: 'admin@kalavault.com' },
+    where: { email: 'admin@thekalavault.com' },
     update: {},
     create: {
-      email: 'admin@kalavault.com',
+      email: 'admin@thekalavault.com',
       passwordHash,
       firstName: 'Kala',
       lastName: 'Vault',

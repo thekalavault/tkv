@@ -26,10 +26,10 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),
   // SMTP Configuration
   SMTP_HOST: z.string().optional().default('placeholder'),
-  SMTP_PORT: z.string().optional().default('587'),
-  SMTP_USER: z.string().optional().default('placeholder'),
-  SMTP_PASS: z.string().optional().default('placeholder'),
-  SMTP_FROM: z.string().optional().default('Kala Vault <no-reply@kalavault.com>'),
+  SMTP_PORT: z.coerce.number().optional().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional().default('Kala Vault <no-reply@thekalavault.com>'),
   ADMIN_EMAIL: z.string().optional().default('admin@thekalavault.com'),
 });
 

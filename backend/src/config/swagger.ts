@@ -8,8 +8,11 @@ const options: swaggerJsdoc.Options = {
       version: '1.0.0',
       description: 'Premium B2B artwork rental SaaS platform API',
       contact: {
-        name: 'Kala Vault Support',
-        email: 'support@kalavault.com',
+        name: 'API Support',
+        email: 'contact@thekalavault.com',
+      },
+      license: {
+        name: 'Private',
       },
     },
     servers: [
@@ -18,7 +21,7 @@ const options: swaggerJsdoc.Options = {
         description: 'Development server',
       },
       {
-        url: 'https://api.kalavault.com',
+        url: 'https://api.thekalavault.com',
         description: 'Production server',
       },
     ],

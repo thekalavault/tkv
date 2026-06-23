@@ -24,9 +24,10 @@ const allowedOrigins = [
   'http://localhost:4001', // Frontend dev 4001
   'http://127.0.0.1:4001', // Frontend dev 4001 IP
   'http://localhost:4000', // Backend dev
-  'https://kalavault.com',
-  'https://www.kalavault.com',
-  'https://app.kalavault.com',
+  'https://thekalavault.com',
+  'https://www.thekalavault.com',
+  'https://app.thekalavault.com',
+  'https://tkv-u3pl.vercel.app',
   process.env.FRONTEND_URL, // Environment-specific
 ].filter(Boolean);
 
