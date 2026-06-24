@@ -24,6 +24,9 @@ export default function CustomerDashboard() {
   const [catalogArtworks, setCatalogArtworks] = useState<CollectionArtwork[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
 
+  // Image loading state
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
   useEffect(() => {
@@ -250,9 +253,14 @@ export default function CustomerDashboard() {
 
                       return (
                         <div key={art.id} className="flex flex-col md:flex-row gap-8 bg-subtle-smoke p-0 border border-gallery-gold/20 hover:border-gallery-gold/50 transition-colors group shadow-sm">
-                          <div className="w-full md:w-64 aspect-[4/3] md:aspect-square relative overflow-hidden group/img shrink-0 bg-white">
-                            <img alt={art.title} className="w-full h-full object-cover grayscale group-hover/img:grayscale-0 transition-all duration-1000" src={imageUrl} />
-                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/img:opacity-100 transition-opacity"></div>
+                          <div className="w-full md:w-64 aspect-[4/3] md:aspect-square relative overflow-hidden group/img shrink-0 bg-stone-200 animate-pulse">
+                            <img 
+                              alt={art.title} 
+                              className={`w-full h-full object-cover grayscale group-hover/img:grayscale-0 transition-all duration-1000 ${loadedImages[art.id] ? 'opacity-100' : 'opacity-0'}`} 
+                              src={imageUrl} 
+                              onLoad={() => setLoadedImages(prev => ({...prev, [art.id]: true}))}
+                            />
+                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none"></div>
                           </div>
                           <div className="flex-1 flex flex-col justify-between p-6 pl-0">
                             <div>

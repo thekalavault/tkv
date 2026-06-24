@@ -117,7 +117,7 @@ export default function ArtworkDetail() {
         type: `monthly_${selectedMonths}` as any,
         imageUrl: artwork.localPath
       });
-      alert('Added to cart!');
+      navigate('/cart');
     } else if (actionType === 'full') {
       addToCart({
         artworkId: artwork.id,

@@ -338,8 +338,8 @@ model Contract {
 
 model CrmLead {
   id                 String       @id @default(uuid())
-  owner              User         @relation("LeadOwner", fields: [ownerId], references: [id])
-  ownerId            String
+  owner              User?        @relation("LeadOwner", fields: [ownerId], references: [id])
+  ownerId            String?
   customer           User?        @relation("LeadCustomer", fields: [customerId], references: [id])
   customerId         String?
   status             LeadStatus   @default(new)

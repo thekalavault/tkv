@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
@@ -15,6 +16,7 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
   const navigate = useNavigate();
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.05 });
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const getStartingPrice = () => {
     const orig = artwork.originalArtwork;
@@ -42,12 +44,17 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
       onClick={() => navigate(`/artwork/${artwork.id}`)}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="relative overflow-hidden bg-subtle-smoke shadow-sm hover:shadow-xl transition-shadow duration-700 no-select">
+      <div className="relative overflow-hidden bg-stone-200 shadow-sm hover:shadow-xl transition-shadow duration-700 no-select">
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-stone-200/50 animate-pulse z-0" />
+        )}
         <img
-          className="w-full h-auto object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag"
+          className={`w-full h-auto object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           alt={artwork.name}
           src={artwork.localPath}
           loading="lazy"
+          decoding="async"
+          onLoad={() => setImageLoaded(true)}
           onDragStart={(e) => e.preventDefault()}
           onContextMenu={(e) => e.preventDefault()}
         />

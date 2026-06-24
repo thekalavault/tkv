@@ -1,25 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { auth } from '../../../lib/firebase';
 
 export default function CRMManager() {
   const [activeTab, setActiveTab] = useState<'all' | 'create'>('all');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerName, setCustomerName] = useState('');
-  
+  const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchLeads = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const token = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+      const response = await fetch(`${apiUrl}/api/v1/crm/leads`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setLeads(result.data.map((lead: any) => ({
+          id: lead.id,
+          name: lead.contactName,
+          email: lead.email,
+          status: lead.status === 'new' ? 'New Inquiry' : lead.status,
+          tier: lead.pipelineStage || lead.source,
+          date: new Date(lead.createdAt).toLocaleDateString(),
+          value: lead.companyName || 'N/A'
+        })));
+      }
+    } catch (error) {
+      console.error('Failed to fetch leads', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
   const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder for backend API call
+    
+    const newLead = {
+      id: Date.now().toString(),
+      name: customerName,
+      email: customerEmail,
+      status: 'New Inquiry',
+      tier: 'Collector Tier',
+      date: 'Just now',
+      value: 'Pending'
+    };
+    
+    setLeads([newLead, ...leads]);
     alert(`Customer account for ${customerName} (${customerEmail}) created successfully! An invitation has been sent.`);
     setCustomerEmail('');
     setCustomerName('');
     setActiveTab('all');
   };
 
-  const mockLeads = [
-    { id: '1', name: 'Harrison Fine Arts', email: 'director@harrisonfinearts.com', status: 'Qualification', tier: 'Museum Tier', date: '2d ago', value: '$14,500/mo' },
-    { id: '2', name: 'Eleanor Vance', email: 'evance@private-estate.net', status: 'Contacted', tier: 'Private Collector', date: '5d ago', value: '$3,200/mo' },
-    { id: '3', name: 'The Meridian Group', email: 'curation@meridianhotels.com', status: 'Closed - Won', tier: 'Corporate', date: '1w ago', value: '$22,000/mo' },
-    { id: '4', name: 'Julian Cross', email: 'jcross.design@gmail.com', status: 'New Inquiry', tier: 'Collector Tier', date: '2h ago', value: 'Pending' },
-  ];
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Name', 'Email', 'Status', 'Tier', 'Date', 'Value'];
+    const rows = leads.map(lead => [
+      lead.id,
+      `"${lead.name}"`,
+      `"${lead.email}"`,
+      `"${lead.status}"`,
+      `"${lead.tier}"`,
+      `"${lead.date}"`,
+      `"${lead.value}"`
+    ]);
+    
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'crm_leads.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="flex flex-col gap-12 max-w-7xl mx-auto w-full">
@@ -40,12 +102,19 @@ export default function CRMManager() {
             <button className={`font-label-caps text-[10px] tracking-widest uppercase pb-1 ${activeTab === 'all' ? 'text-primary border-b-2 border-primary' : 'text-primary/40 hover:text-primary transition-colors'}`} onClick={() => setActiveTab('all')}>All Leads</button>
             <button className={`font-label-caps text-[10px] tracking-widest uppercase pb-1 ${activeTab === 'create' ? 'text-primary border-b-2 border-primary' : 'text-primary/40 hover:text-primary transition-colors'}`} onClick={() => setActiveTab('create')}>Create Customer</button>
           </div>
-          <button className="text-gallery-gold font-label-caps text-[10px] tracking-widest uppercase hover:text-primary transition-colors flex items-center gap-1">
+          <button 
+            onClick={handleExportCSV}
+            className="text-gallery-gold font-label-caps text-[10px] tracking-widest uppercase hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
+          >
             <span className="material-symbols-outlined text-[14px]">download</span> Export CSV
           </button>
         </div>
 
-        {activeTab === 'all' ? (
+        {loading ? (
+          <div className="p-12 flex justify-center">
+             <div className="w-8 h-8 border-2 border-gallery-gold/30 border-t-gallery-gold rounded-full animate-spin" />
+          </div>
+        ) : activeTab === 'all' ? (
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gallery-gold/10 bg-white">
@@ -56,7 +125,7 @@ export default function CRMManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gallery-gold/5">
-              {mockLeads.map((lead) => (
+              {leads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-subtle-smoke transition-colors group">
                   <td className="p-6">
                     <p className="font-display-md text-lg text-primary tracking-tight group-hover:text-gallery-gold transition-colors">{lead.name}</p>
@@ -76,7 +145,10 @@ export default function CRMManager() {
                     <p className="font-body-md text-xs text-primary/50 mt-1">Value: {lead.value}</p>
                   </td>
                   <td className="p-6 text-right">
-                    <button className="font-label-caps text-[9px] tracking-widest text-gallery-gold uppercase hover:text-primary transition-colors border border-gallery-gold/30 hover:border-primary px-4 py-2">
+                    <button 
+                      onClick={() => alert(`Reviewing lead: ${lead.name}`)}
+                      className="font-label-caps text-[9px] tracking-widest text-gallery-gold uppercase hover:text-primary transition-colors border border-gallery-gold/30 hover:border-primary px-4 py-2 cursor-pointer"
+                    >
                       Review
                     </button>
                   </td>
