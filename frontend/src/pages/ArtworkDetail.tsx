@@ -106,8 +106,8 @@ export default function ArtworkDetail() {
 
     if (actionType.startsWith('monthly')) {
       const price = Math.round(
-        artwork.metadata?.pricingTiers?.[selectedMonths.toString()] || 
-        artwork.rentalPriceCents || 
+        artwork.metadata?.pricingTiers?.[selectedMonths.toString()] ||
+        artwork.rentalPriceCents ||
         ((artwork.replacementValue || 0) / selectedMonths)
       );
       addToCart({
@@ -222,7 +222,7 @@ export default function ArtworkDetail() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     if (!id) {
       setLoading(false);
       return;
@@ -306,7 +306,7 @@ export default function ArtworkDetail() {
           {/* Viewer Container */}
           <div className="w-full h-full flex flex-col items-center justify-center max-w-4xl relative select-none mt-12 lg:mt-0">
             {!isInsitu ? (
-              <div 
+              <div
                 className="relative max-w-full max-h-[65vh] flex items-center justify-center group cursor-zoom-in rounded bg-transparent no-select"
                 onMouseMove={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
@@ -334,7 +334,7 @@ export default function ArtworkDetail() {
                   <div className={`absolute inset-0 border-[0.15cm] border-[#cca550] mix-blend-multiply opacity-80 transition-opacity duration-300 pointer-events-none ${isZoomed ? 'opacity-0' : 'opacity-100'}`} />
                   <div className={`absolute inset-0 border-[0.15cm] border-gallery-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.4),0_8px_25px_rgba(0,0,0,0.25)] opacity-90 transition-opacity duration-300 pointer-events-none ${isZoomed ? 'opacity-0' : 'opacity-100'}`} />
                   <div className={`absolute inset-[0.15cm] border border-black/40 transition-opacity duration-300 pointer-events-none ${isZoomed ? 'opacity-0' : 'opacity-100'}`} />
-                  
+
                   {/* Watermark overlay */}
                   <div className={`watermark-tiled absolute inset-0 transition-opacity duration-500 pointer-events-none ${isZoomed ? 'opacity-30' : 'opacity-100'}`} />
                 </div>
@@ -342,15 +342,15 @@ export default function ArtworkDetail() {
             ) : (
               <div id="insitu-container" className="relative w-full h-full aspect-[16/10] overflow-hidden rounded border border-outline/5 shadow-2xl bg-white" onContextMenu={(e) => e.preventDefault()}>
                 {/* Environment Room Background */}
-                <img 
-                  src={ENVS[activeEnv].url} 
-                  alt={ENVS[activeEnv].name} 
+                <img
+                  src={ENVS[activeEnv].url}
+                  alt={ENVS[activeEnv].name}
                   className="w-full h-full object-cover select-none no-drag"
                   onDragStart={(e) => e.preventDefault()}
                 />
-                
+
                 {/* Artwork Positioned on the Wall - Draggable */}
-                <div 
+                <div
                   style={{
                     position: 'absolute',
                     top: `${artPosition.top}%`,
@@ -364,16 +364,16 @@ export default function ArtworkDetail() {
                   onTouchStart={handleStartDrag}
                   className={`shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10 group/art select-none active:scale-[1.01] ${isDragging ? '' : 'transition-all duration-300'}`}
                 >
-                  <img 
-                    src={artwork.localPath} 
-                    alt={artwork.name} 
+                  <img
+                    src={artwork.localPath}
+                    alt={artwork.name}
                     className="w-full h-auto object-cover pointer-events-none"
                   />
                   {/* Subtle golden frame outline for the on-wall placement */}
                   <div className="absolute inset-0 border-[0.05cm] border-[#cca550] mix-blend-multiply opacity-90 pointer-events-none" />
                   <div className="absolute inset-0 border-[0.05cm] border-gallery-gold opacity-80 pointer-events-none" />
                 </div>
- 
+
                 {/* Drag Help Overlay */}
                 <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md text-white/80 border border-white/10 rounded-lg px-3 py-1.5 pointer-events-none z-30 shadow-[0_4px_15px_rgba(0,0,0,0.2)]">
                   <div className="flex items-center gap-1.5 text-[8.5px] font-label-caps uppercase tracking-wider">
@@ -381,7 +381,7 @@ export default function ArtworkDetail() {
                     <span>Drag painting to place</span>
                   </div>
                 </div>
- 
+
                 {/* Enter Immersive Mode Overlay Button */}
                 <button
                   onClick={() => setIsImmersive(true)}
@@ -391,18 +391,17 @@ export default function ArtworkDetail() {
                   <span className="material-symbols-outlined text-[16px]">open_in_full</span>
                   <span className="font-label-caps text-[9px] uppercase tracking-wider">Immersive Mode</span>
                 </button>
- 
+
                 {/* Room Selector overlay inside the InSitu container */}
                 <div className="absolute bottom-4 left-4 right-4 flex gap-2 justify-center bg-black/50 backdrop-blur-md p-2 border border-white/10 rounded">
                   {ENVS.map((env, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveEnv(idx)}
-                      className={`font-label-caps text-[9px] uppercase tracking-[0.15em] px-4 py-2 border transition-all duration-300 cursor-pointer ${
-                        activeEnv === idx
+                      className={`font-label-caps text-[9px] uppercase tracking-[0.15em] px-4 py-2 border transition-all duration-300 cursor-pointer ${activeEnv === idx
                           ? 'bg-paper-white text-primary border-paper-white shadow-sm font-bold'
                           : 'border-white/20 text-paper-white/80 hover:bg-white/10 hover:text-paper-white'
-                      }`}
+                        }`}
                     >
                       {env.name}
                     </button>
@@ -416,25 +415,23 @@ export default function ArtworkDetail() {
           <div className="mt-8 flex flex-wrap justify-center items-center gap-6 z-10 relative pointer-events-auto">
             {/* View Mode Toggle */}
             <div className="flex gap-2 border border-outline/10 rounded-full p-1 bg-white/50 backdrop-blur-md shadow-sm">
-              <button 
+              <button
                 onClick={() => setIsInsitu(false)}
-                className={`font-label-caps text-[10px] uppercase tracking-[0.2em] px-5 py-2.5 rounded-full cursor-pointer transition-all duration-300 ${
-                  !isInsitu 
-                    ? 'bg-primary text-paper-white shadow-md' 
+                className={`font-label-caps text-[10px] uppercase tracking-[0.2em] px-5 py-2.5 rounded-full cursor-pointer transition-all duration-300 ${!isInsitu
+                    ? 'bg-primary text-paper-white shadow-md'
                     : 'text-on-surface-variant hover:text-primary hover:bg-black/5'
-                }`}
+                  }`}
               >
                 Artwork Detail
               </button>
-              <button 
+              <button
                 onClick={() => setIsInsitu(true)}
-                className={`font-label-caps text-[10px] uppercase tracking-[0.2em] px-5 py-2.5 rounded-full cursor-pointer transition-all duration-300 ${
-                  isInsitu 
-                    ? 'bg-primary text-paper-white shadow-md' 
+                className={`font-label-caps text-[10px] uppercase tracking-[0.2em] px-5 py-2.5 rounded-full cursor-pointer transition-all duration-300 ${isInsitu
+                    ? 'bg-primary text-paper-white shadow-md'
                     : 'text-on-surface-variant hover:text-primary hover:bg-black/5'
-                }`}
+                  }`}
               >
-                In Situ View
+                Context View
               </button>
             </div>
 
@@ -463,7 +460,7 @@ export default function ArtworkDetail() {
           </div>
         </div>
 
-        <div 
+        <div
           data-lenis-prevent
           className="w-full lg:w-[40%] px-6 md:px-10 py-10 lg:py-14 bg-paper-white flex flex-col gap-10 lg:h-[calc(100vh-80px)] lg:overflow-y-auto border-l border-outline/10 hide-scrollbar overscroll-contain"
         >
@@ -518,15 +515,15 @@ export default function ArtworkDetail() {
           {/* Unified Acquisition Widget */}
           <div className="border-t border-outline/10 pt-6">
             <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-4">Acquisition Options</p>
-            
+
             <div className="flex gap-2 p-1 bg-subtle-smoke/50 border border-outline/5 rounded mb-6">
-              <button 
+              <button
                 onClick={() => setPurchaseMode('monthly')}
                 className={`flex-1 py-2.5 font-label-caps text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${purchaseMode === 'monthly' ? 'bg-white shadow-sm text-primary font-bold border border-outline/5' : 'text-primary/60 hover:text-primary'}`}
               >
                 Pay Monthly
               </button>
-              <button 
+              <button
                 onClick={() => setPurchaseMode('full')}
                 className={`flex-1 py-2.5 font-label-caps text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${purchaseMode === 'full' ? 'bg-white shadow-sm text-primary font-bold border border-outline/5' : 'text-primary/60 hover:text-primary'}`}
               >
@@ -538,9 +535,9 @@ export default function ArtworkDetail() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center bg-subtle-smoke/30 p-1 border border-outline/5 rounded">
                   {[3, 6, 9, 12].map(m => (
-                    <button 
+                    <button
                       key={m}
-                      onClick={() => setSelectedMonths(m as 3|6|9|12)}
+                      onClick={() => setSelectedMonths(m as 3 | 6 | 9 | 12)}
                       className={`flex-1 py-2 font-label-caps text-[10px] transition-colors cursor-pointer ${selectedMonths === m ? 'bg-primary text-white' : 'text-primary/70 hover:bg-black/5'}`}
                     >
                       {m} Months
@@ -551,21 +548,21 @@ export default function ArtworkDetail() {
                   <span className="font-body-md text-sm text-on-surface-variant">Monthly Investment</span>
                   <span className="font-display-md text-3xl text-primary">
                     ₹{Math.round(
-                      artwork.metadata?.pricingTiers?.[selectedMonths.toString()] || 
-                      artwork.rentalPriceCents || 
+                      artwork.metadata?.pricingTiers?.[selectedMonths.toString()] ||
+                      artwork.rentalPriceCents ||
                       ((artwork.replacementValue || 0) / selectedMonths)
                     ).toLocaleString('en-IN')}<span className="text-base text-primary/60 font-body-md">/mo</span>
                   </span>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <button 
+                  <button
                     onClick={() => handleAcquisition(`monthly_${selectedMonths}`)}
                     className="w-full font-label-caps text-[10px] uppercase tracking-[0.1em] px-6 py-4 bg-primary text-paper-white hover:bg-primary/90 transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[14px]">shopping_cart</span>
                     Add to Cart
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleAcquisition('info')}
                     className="w-full font-label-caps text-[10px] uppercase tracking-[0.1em] px-6 py-4 border border-primary text-primary hover:bg-primary/5 transition-colors duration-300 cursor-pointer"
                   >
@@ -582,14 +579,14 @@ export default function ArtworkDetail() {
                   </span>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <button 
+                  <button
                     onClick={() => handleAcquisition('full')}
                     className="w-full font-label-caps text-[10px] uppercase tracking-[0.1em] px-6 py-4 bg-gallery-gold text-primary hover:bg-gallery-gold/90 transition-colors shadow-sm cursor-pointer font-bold flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[14px]">inventory_2</span>
                     Acquire Now
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleAcquisition('info')}
                     className="w-full font-label-caps text-[10px] uppercase tracking-[0.1em] px-6 py-4 border border-primary text-primary hover:bg-primary/5 transition-colors duration-300 cursor-pointer"
                   >
@@ -653,15 +650,15 @@ export default function ArtworkDetail() {
             onContextMenu={(e) => e.preventDefault()}
           >
             {/* Environment Room Background */}
-            <img 
-              src={ENVS[activeEnv].url} 
-              alt={ENVS[activeEnv].name} 
+            <img
+              src={ENVS[activeEnv].url}
+              alt={ENVS[activeEnv].name}
               className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-95 no-drag"
               onDragStart={(e) => e.preventDefault()}
             />
-            
+
             {/* Artwork Positioned on the Wall - Draggable */}
-            <div 
+            <div
               style={{
                 position: 'absolute',
                 top: `${artPosition.top}%`,
@@ -675,9 +672,9 @@ export default function ArtworkDetail() {
               onTouchStart={handleStartDrag}
               className={`shadow-[0_40px_80px_rgba(0,0,0,0.8)] border border-white/10 z-10 group/immersive-art select-none active:scale-[1.01] ${isDragging ? '' : 'transition-all duration-300'}`}
             >
-              <img 
-                src={artwork.localPath} 
-                alt={artwork.name} 
+              <img
+                src={artwork.localPath}
+                alt={artwork.name}
                 className="w-full h-auto object-cover pointer-events-none"
               />
               {/* Subtle golden frame outline for the on-wall placement */}
@@ -703,11 +700,10 @@ export default function ArtworkDetail() {
                     <button
                       key={idx}
                       onClick={() => setActiveEnv(idx)}
-                      className={`font-label-caps text-[9px] uppercase tracking-[0.15em] px-4 py-2 border transition-all duration-300 cursor-pointer ${
-                        activeEnv === idx
+                      className={`font-label-caps text-[9px] uppercase tracking-[0.15em] px-4 py-2 border transition-all duration-300 cursor-pointer ${activeEnv === idx
                           ? 'bg-paper-white text-primary border-paper-white shadow-sm font-bold'
                           : 'border-white/20 text-paper-white/80 hover:bg-white/10 hover:text-paper-white'
-                      }`}
+                        }`}
                     >
                       {env.name}
                     </button>
@@ -723,11 +719,11 @@ export default function ArtworkDetail() {
                     {Math.round(artScale * 100)}% {artScale === 1.0 ? '(Default)' : ''}
                   </span>
                 </div>
-                <input 
-                  type="range" 
-                  min="0.5" 
-                  max="1.5" 
-                  step="0.05" 
+                <input
+                  type="range"
+                  min="0.5"
+                  max="1.5"
+                  step="0.05"
                   value={artScale}
                   onChange={(e) => setArtScale(parseFloat(e.target.value))}
                   className="w-full h-1 bg-white/20 appearance-none outline-none rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-gallery-gold [&::-webkit-slider-thumb]:rounded-full cursor-pointer"

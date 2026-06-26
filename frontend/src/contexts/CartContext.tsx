@@ -109,10 +109,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem('kalavault_cart', JSON.stringify(items));
-    }
-  }, [items, user]);
+    localStorage.setItem('kalavault_cart', JSON.stringify(items));
+  }, [items]);
 
   const addToCart = async (item: Omit<CartItem, 'id'>) => {
     const localId = crypto.randomUUID();
@@ -120,7 +118,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setItems((prev) => {
       const next = [...prev, newItem];
-      if (!user) localStorage.setItem('kalavault_cart', JSON.stringify(next));
+      localStorage.setItem('kalavault_cart', JSON.stringify(next));
       return next;
     });
 
@@ -154,7 +152,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeFromCart = async (id: string) => {
     setItems((prev) => {
       const next = prev.filter(item => item.id !== id);
-      if (!user) localStorage.setItem('kalavault_cart', JSON.stringify(next));
+      localStorage.setItem('kalavault_cart', JSON.stringify(next));
       return next;
     });
 
@@ -173,7 +171,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = async () => {
     setItems([]);
-    if (!user) localStorage.removeItem('kalavault_cart');
+    localStorage.removeItem('kalavault_cart');
 
     if (user) {
       try {

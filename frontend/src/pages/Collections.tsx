@@ -231,7 +231,7 @@ export default function Collections() {
         >
           <button
             onClick={() => setActiveTab('all')}
-            className={`font-label-caps text-[10px] uppercase tracking-[0.1em] px-6 py-2.5 whitespace-nowrap transition-all duration-300 cursor-pointer ${
+            className={`font-label-caps text-[12px] uppercase tracking-[0.1em] px-6 py-3 whitespace-nowrap transition-all duration-300 cursor-pointer ${
               activeTab === 'all'
                 ? 'bg-primary text-paper-white shadow-[0_2px_10px_rgba(0,0,0,0.1)]'
                 : 'text-on-surface-variant hover:text-gallery-gold hover:bg-paper-white/50 border border-transparent hover:border-gallery-gold/20'
@@ -243,7 +243,7 @@ export default function Collections() {
             <button
               key={collection.id}
               onClick={() => setActiveTab(collection.id)}
-              className={`font-label-caps text-[10px] uppercase tracking-[0.1em] px-6 py-2.5 whitespace-nowrap transition-all duration-300 cursor-pointer ${
+              className={`font-label-caps text-[12px] uppercase tracking-[0.1em] px-6 py-3 whitespace-nowrap transition-all duration-300 cursor-pointer ${
                 activeTab === collection.id
                   ? 'bg-primary text-paper-white shadow-[0_2px_10px_rgba(0,0,0,0.1)]'
                   : 'text-on-surface-variant hover:text-gallery-gold hover:bg-paper-white/50 border border-transparent hover:border-gallery-gold/20'

@@ -34,6 +34,12 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
 
   const hasTiers = (artwork.originalArtwork as any)?.metadata?.pricingTiers && Object.keys((artwork.originalArtwork as any).metadata.pricingTiers).length > 0;
 
+  const getOptimizedUrl = (url: string, width: number, quality: number) => {
+    if (!url) return '';
+    if (url.startsWith('/assets/')) return url; // Frontend static asset
+    return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
+  };
+
   return (
     <motion.div
       ref={ref}
@@ -49,12 +55,12 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
         <img
           className="absolute inset-0 w-full h-full object-cover z-0 blur-md scale-110"
           alt={artwork.name}
-          src={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(artwork.localPath)}&w=50&q=20`}
+          src={getOptimizedUrl(artwork.localPath, 50, 20)}
         />
         <img
           className={`w-full h-auto object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           alt={artwork.name}
-          src={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(artwork.localPath)}&w=800&q=80`}
+          src={getOptimizedUrl(artwork.localPath, 800, 80)}
           loading="lazy"
           decoding="async"
           onLoad={() => setImageLoaded(true)}
