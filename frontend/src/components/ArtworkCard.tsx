@@ -45,13 +45,16 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
       onContextMenu={(e) => e.preventDefault()}
     >
       <div className="relative overflow-hidden bg-stone-200 shadow-sm hover:shadow-xl transition-shadow duration-700 no-select">
-        {!imageLoaded && (
-          <div className="absolute inset-0 bg-stone-200/50 animate-pulse z-0" />
-        )}
+        {/* Base blurred placeholder loaded instantly */}
+        <img
+          className="absolute inset-0 w-full h-full object-cover z-0 blur-md scale-110"
+          alt={artwork.name}
+          src={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(artwork.localPath)}&w=50&q=20`}
+        />
         <img
           className={`w-full h-auto object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           alt={artwork.name}
-          src={artwork.localPath}
+          src={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(artwork.localPath)}&w=800&q=80`}
           loading="lazy"
           decoding="async"
           onLoad={() => setImageLoaded(true)}

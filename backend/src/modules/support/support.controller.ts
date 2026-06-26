@@ -27,22 +27,22 @@ export class SupportController {
       // We still want to send the email even if DB fails
     }
 
-    const success = await mailService.sendInquiryEmail({
-      fullName,
-      email,
-      phone,
-      entity,
-      interest,
-      message,
-    });
-
-    if (!success) {
-      throw new ApiError('Failed to send email inquiry. Please try again later.', 500);
+    try {
+      await mailService.sendInquiryEmail({
+        fullName,
+        email,
+        phone,
+        entity,
+        interest,
+        message,
+      });
+    } catch (e) {
+      console.error('Failed to send email inquiry:', e);
     }
 
     res.json({
       success: true,
-      message: 'Inquiry received and email sent successfully.',
+      message: 'Inquiry received successfully.',
     });
   }
 }

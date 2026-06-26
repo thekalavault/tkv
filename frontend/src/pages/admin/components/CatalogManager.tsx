@@ -41,8 +41,24 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
     }
   }, [currentUser]);
 
-  const loadArtworks = async () => {
+  const loadArtworks = async (forceRefresh = false) => {
     setLoading(true);
+    
+    const cacheKey = 'admin_kalavault_artworks';
+    if (!forceRefresh) {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed.timestamp && (Date.now() - parsed.timestamp < 1000 * 60 * 5)) {
+            setArtworks(parsed.data);
+            setLoading(false);
+            return;
+          }
+        } catch(e) {}
+      }
+    }
+
     try {
       const token = currentUser ? await currentUser.getIdToken() : '';
       const response = await fetch(`${API_BASE_URL}/api/v1/artworks?limit=50`, {
@@ -53,6 +69,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       if (response.ok) {
         const data = await response.json();
         setArtworks(data.items || []);
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data: data.items || [], timestamp: Date.now() }));
       } else {
         console.warn('Failed to load artworks from backend.');
       }
@@ -120,7 +137,15 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       setSuccessMessage(editingArtworkId ? 'Artwork updated successfully!' : 'Artwork created successfully!');
       resetForm();
       setIsModalOpen(false);
-      loadArtworks();
+      
+      // Clear global frontend caches so consumer app updates immediately
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('kalavault_artwork')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      loadArtworks(true);
       
       // Clear message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -235,7 +260,14 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       }
 
       setSuccessMessage(files.length > 1 ? `${files.length} images uploaded successfully!` : 'Image uploaded successfully!');
-      loadArtworks();
+      
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('kalavault_artwork')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      loadArtworks(true);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
       console.error(err);
@@ -273,6 +305,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       )}
 
       { /* Artwork Status Tracking */ }
+      {!isModalOpen && (
       <section>
         <div className="flex justify-between items-end mb-8 border-b border-gallery-gold/20 pb-4">
           <div>
@@ -358,11 +391,12 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
           </table>
         </div>
       </section>
+      )}
 
-      { /* Catalog Intake Form Modal */ }
+      { /* Catalog Intake Form View */ }
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white p-10 border border-gallery-gold/20 shadow-xl relative w-full max-w-4xl my-10 mx-auto">
+        <div className="w-full flex justify-center pb-24">
+          <div className="bg-white border border-gallery-gold/20 shadow-[0_20px_50px_rgba(212,175,55,0.05)] relative w-full max-w-4xl flex flex-col mx-auto">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-gallery-gold/5 to-transparent pointer-events-none rounded-bl-full" />
             <button 
               onClick={() => setIsModalOpen(false)}
@@ -371,243 +405,248 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
               <span className="material-symbols-outlined">close</span>
             </button>
 
-        <div className="flex justify-between items-start mb-8 relative z-10">
-          <div>
-            <h4 className="font-display-md text-3xl tracking-tight text-primary">
-              {editingArtworkId ? `Edit Artwork Info` : `Artwork Catalog Intake`}
-            </h4>
-            <p className="font-body-md text-primary/60 mt-2">
-              {editingArtworkId ? `Modify properties for asset ID ${sku}` : `Register new assets into the primary vault database.`}
-            </p>
-          </div>
-          <span className="material-symbols-outlined text-gallery-gold text-3xl font-light">inventory_2</span>
-        </div>
+            <div className="p-8 pb-4 shrink-0 border-b border-gallery-gold/10 relative z-10">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-display-md text-3xl tracking-tight text-primary">
+                    {editingArtworkId ? `Edit Artwork Info` : `Artwork Catalog Intake`}
+                  </h4>
+                  <p className="font-body-md text-primary/60 mt-2">
+                    {editingArtworkId ? `Modify properties for asset ID ${sku}` : `Register new assets into the primary vault database.`}
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-gallery-gold text-3xl font-light">inventory_2</span>
+              </div>
+            </div>
         
-        <form className="space-y-8 relative z-10" onSubmit={handleSaveArtwork}>
-          
-          {editingArtworkId && currentEditingArtwork?.images?.length > 0 && (
-            <div className="mb-8">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-4 block uppercase">CURRENT IMAGES GALLERY</label>
-              <div className="flex gap-4 overflow-x-auto pb-4">
-                {currentEditingArtwork.images.map((img: any) => {
-                  const url = img.fileKey.startsWith('http') ? img.fileKey : `${API_BASE_URL}/uploads/${img.fileKey}`;
-                  return (
-                    <div key={img.id} className="w-24 h-24 shrink-0 relative group">
-                      <img src={url} alt="artwork" className="w-full h-full object-cover border border-gallery-gold/20" />
+            <div className="p-8 flex-1 relative z-10">
+              <form id="artwork-form" className="space-y-8" onSubmit={handleSaveArtwork}>
+                {editingArtworkId && currentEditingArtwork?.images?.length > 0 && (
+                  <div className="mb-8">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-4 block uppercase">CURRENT IMAGES GALLERY</label>
+                    <div className="flex gap-4 overflow-x-auto pb-4">
+                      {currentEditingArtwork.images.map((img: any) => {
+                        const url = img.fileKey.startsWith('http') ? img.fileKey : `${API_BASE_URL}/uploads/${img.fileKey}`;
+                        return (
+                          <div key={img.id} className="w-24 h-24 shrink-0 relative group">
+                            <img src={url} alt="artwork" className="w-full h-full object-cover border border-gallery-gold/20" />
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                  </div>
+                )}
 
-          <div className="grid grid-cols-2 gap-8">
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">BARCODE / SKU *</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="Scan or Enter SKU" 
-                type="text" 
-                value={sku}
-                onChange={(e) => setSku(e.target.value)}
-                required
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ARTWORK NAME *</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="Artwork Title" 
-                type="text" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ARTIST</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="Artist Name" 
-                type="text" 
-                value={artist}
-                onChange={(e) => setArtist(e.target.value)}
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">CATEGORY</label>
-              <select 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg text-primary outline-none"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="painting">Painting</option>
-                <option value="sculpture">Sculpture</option>
-                <option value="photography">Photography</option>
-                <option value="mixed_media">Mixed Media</option>
-                <option value="installation">Installation</option>
-              </select>
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">PRICING: BASE MONTHLY RENTAL (₹) *</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="e.g. 15000" 
-                type="number" 
-                value={rentalPriceCents}
-                onChange={(e) => setRentalPriceCents(e.target.value !== '' ? Number(e.target.value) : '')}
-                required
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">PRICING: REPLACEMENT VALUE (₹) *</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="e.g. 1000000" 
-                type="number" 
-                value={replacementValue}
-                onChange={(e) => setReplacementValue(e.target.value !== '' ? Number(e.target.value) : '')}
-                required
-              />
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">BARCODE / SKU *</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="Scan or Enter SKU" 
+                      type="text" 
+                      value={sku}
+                      onChange={(e) => setSku(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ARTWORK NAME *</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="Artwork Title" 
+                      type="text" 
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ARTIST</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="Artist Name" 
+                      type="text" 
+                      value={artist}
+                      onChange={(e) => setArtist(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">CATEGORY</label>
+                    <select 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg text-primary outline-none"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <option value="painting">Painting</option>
+                      <option value="sculpture">Sculpture</option>
+                      <option value="photography">Photography</option>
+                      <option value="mixed_media">Mixed Media</option>
+                      <option value="installation">Installation</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">PRICING: BASE MONTHLY RENTAL (₹) *</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="e.g. 15000" 
+                      type="number" 
+                      value={rentalPriceCents}
+                      onChange={(e) => setRentalPriceCents(e.target.value !== '' ? Number(e.target.value) : '')}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">PRICING: REPLACEMENT VALUE (₹) *</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="e.g. 1000000" 
+                      type="number" 
+                      value={replacementValue}
+                      onChange={(e) => setReplacementValue(e.target.value !== '' ? Number(e.target.value) : '')}
+                      required
+                    />
+                  </div>
+
+                  {/* Duration Pricing Tiers */}
+                  <div className="col-span-2 grid grid-cols-4 gap-4 p-4 bg-subtle-smoke/50 border border-gallery-gold/10">
+                    <div className="col-span-4 mb-2">
+                      <label className="font-label-caps text-[10px] tracking-widest text-primary uppercase">Duration-Based Pricing (₹) - Optional</label>
+                      <p className="text-xs text-primary/50 mt-1">Specify exact monthly prices for these durations. If left blank, defaults to base pricing.</p>
+                    </div>
+                    
+                    <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                      <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">3 Months</label>
+                      <input 
+                        className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
+                        placeholder="Price in ₹" type="number" 
+                        value={price3Months} onChange={(e) => setPrice3Months(e.target.value !== '' ? Number(e.target.value) : '')}
+                      />
+                    </div>
+                    <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                      <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">6 Months</label>
+                      <input 
+                        className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
+                        placeholder="Price in ₹" type="number" 
+                        value={price6Months} onChange={(e) => setPrice6Months(e.target.value !== '' ? Number(e.target.value) : '')}
+                      />
+                    </div>
+                    <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                      <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">9 Months</label>
+                      <input 
+                        className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
+                        placeholder="Price in ₹" type="number" 
+                        value={price9Months} onChange={(e) => setPrice9Months(e.target.value !== '' ? Number(e.target.value) : '')}
+                      />
+                    </div>
+                    <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                      <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">12 Months</label>
+                      <input 
+                        className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
+                        placeholder="Price in ₹" type="number" 
+                        value={price12Months} onChange={(e) => setPrice12Months(e.target.value !== '' ? Number(e.target.value) : '')}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">STYLE</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="e.g. Contemporary, Abstract" 
+                      type="text" 
+                      value={style}
+                      onChange={(e) => setStyle(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">MEDIUM</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="e.g. Oil on Canvas" 
+                      type="text" 
+                      value={medium}
+                      onChange={(e) => setMedium(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">YEAR CREATED</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="e.g. 2024" 
+                      type="number" 
+                      value={yearCreated}
+                      onChange={(e) => setYearCreated(e.target.value !== '' ? Number(e.target.value) : '')}
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">DIMENSIONS & SIZE</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="e.g. 120 x 150 cm" 
+                      type="text" 
+                      value={dimensions}
+                      onChange={(e) => setDimensions(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">STATUS</label>
+                    <select 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg text-primary outline-none"
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                    >
+                      <option value="available">Available</option>
+                      <option value="rented">Rented</option>
+                      <option value="reserved">Reserved</option>
+                      <option value="maintenance">Maintenance</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ASSIGN TO CUSTOMER (EMAIL)</label>
+                    <input 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
+                      placeholder="customer@email.com" 
+                      type="email" 
+                      value={ownerEmail}
+                      onChange={(e) => setOwnerEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">DESCRIPTION *</label>
+                    <textarea 
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30 resize-none mt-1" 
+                      placeholder="Document style, narrative, or condition notes..." 
+                      rows={2}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+              </form>
             </div>
 
-            {/* Duration Pricing Tiers */}
-            <div className="col-span-2 grid grid-cols-4 gap-4 p-4 bg-subtle-smoke/50 border border-gallery-gold/10">
-              <div className="col-span-4 mb-2">
-                <label className="font-label-caps text-[10px] tracking-widest text-primary uppercase">Duration-Based Pricing (₹) - Optional</label>
-                <p className="text-xs text-primary/50 mt-1">Specify exact monthly prices for these durations. If left blank, defaults to base pricing.</p>
-              </div>
-              
-              <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-                <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">3 Months</label>
-                <input 
-                  className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
-                  placeholder="Price in ₹" type="number" 
-                  value={price3Months} onChange={(e) => setPrice3Months(e.target.value !== '' ? Number(e.target.value) : '')}
-                />
-              </div>
-              <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-                <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">6 Months</label>
-                <input 
-                  className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
-                  placeholder="Price in ₹" type="number" 
-                  value={price6Months} onChange={(e) => setPrice6Months(e.target.value !== '' ? Number(e.target.value) : '')}
-                />
-              </div>
-              <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-                <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">9 Months</label>
-                <input 
-                  className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
-                  placeholder="Price in ₹" type="number" 
-                  value={price9Months} onChange={(e) => setPrice9Months(e.target.value !== '' ? Number(e.target.value) : '')}
-                />
-              </div>
-              <div className="border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-                <label className="font-label-caps text-[8px] tracking-widest text-primary/60 mb-2 block uppercase">12 Months</label>
-                <input 
-                  className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base placeholder:text-primary/30" 
-                  placeholder="Price in ₹" type="number" 
-                  value={price12Months} onChange={(e) => setPrice12Months(e.target.value !== '' ? Number(e.target.value) : '')}
-                />
-              </div>
-            </div>
-
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">STYLE</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="e.g. Contemporary, Abstract" 
-                type="text" 
-                value={style}
-                onChange={(e) => setStyle(e.target.value)}
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">MEDIUM</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="e.g. Oil on Canvas" 
-                type="text" 
-                value={medium}
-                onChange={(e) => setMedium(e.target.value)}
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">YEAR CREATED</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="e.g. 2024" 
-                type="number" 
-                value={yearCreated}
-                onChange={(e) => setYearCreated(e.target.value !== '' ? Number(e.target.value) : '')}
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">DIMENSIONS & SIZE</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="e.g. 120 x 150 cm" 
-                type="text" 
-                value={dimensions}
-                onChange={(e) => setDimensions(e.target.value)}
-              />
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">STATUS</label>
-              <select 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg text-primary outline-none"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="available">Available</option>
-                <option value="rented">Rented</option>
-                <option value="reserved">Reserved</option>
-                <option value="maintenance">Maintenance</option>
-              </select>
-            </div>
-            <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ASSIGN TO CUSTOMER (EMAIL)</label>
-              <input 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                placeholder="customer@email.com" 
-                type="email" 
-                value={ownerEmail}
-                onChange={(e) => setOwnerEmail(e.target.value)}
-              />
-            </div>
-            <div className="col-span-2 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-              <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">DESCRIPTION *</label>
-              <textarea 
-                className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30 resize-none mt-1" 
-                placeholder="Document style, narrative, or condition notes..." 
-                rows={2}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              ></textarea>
-            </div>
-          </div>
-          <div className="flex justify-end gap-6 pt-6">
-            {editingArtworkId && (
+            <div className="p-6 shrink-0 border-t border-gallery-gold/10 bg-subtle-smoke/30 flex justify-end gap-6">
+              {editingArtworkId && (
+                <button 
+                  className="px-8 py-3 font-label-caps text-[10px] tracking-widest text-primary hover:text-gallery-gold transition-colors uppercase cursor-pointer" 
+                  type="button"
+                  onClick={resetForm}
+                >
+                  CANCEL EDIT
+                </button>
+              )}
               <button 
-                className="px-8 py-3 font-label-caps text-[10px] tracking-widest text-primary hover:text-gallery-gold transition-colors uppercase cursor-pointer" 
-                type="button"
-                onClick={resetForm}
+                form="artwork-form"
+                className="px-10 py-3 font-label-caps text-[10px] tracking-widest uppercase bg-primary text-white hover:bg-gallery-gold relative transition-colors cursor-pointer shadow-sm" 
+                type="submit"
               >
-                CANCEL EDIT
+                {editingArtworkId ? 'UPDATE ARTWORK' : 'SAVE TO VAULT'}
               </button>
-            )}
-            <button 
-              className="px-10 py-3 font-label-caps text-[10px] tracking-widest uppercase bg-primary text-white hover:bg-gallery-gold relative transition-colors cursor-pointer shadow-sm" 
-              type="submit"
-            >
-              {editingArtworkId ? 'UPDATE ARTWORK' : 'SAVE TO VAULT'}
-            </button>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
-  )}
-</div>
   );
 }

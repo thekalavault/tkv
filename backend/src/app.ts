@@ -16,6 +16,9 @@ import { artworkRouter } from './modules/artworks/artwork.routes';
 import { userRouter } from './modules/users/users.routes';
 import { supportRouter } from './modules/support/support.routes';
 import { crmRouter } from './modules/crm/crm.routes';
+import cartRoutes from './modules/cart/cart.routes';
+import favoritesRoutes from './modules/favorites/favorites.routes';
+import imagesRoutes from './modules/images/images.routes';
 
 const app = express();
 
@@ -103,6 +106,9 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/artworks', artworkRouter);
 app.use('/api/v1/support', supportRouter);
 app.use('/api/v1/crm', crmRouter);
+app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/favorites', favoritesRoutes);
+app.use('/api/v1/images', imagesRoutes);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {

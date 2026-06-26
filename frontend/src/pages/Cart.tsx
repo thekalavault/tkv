@@ -29,7 +29,7 @@ export default function Cart() {
                   <div key={item.id} className="flex gap-6 bg-white p-6 border border-outline/10 shadow-sm">
                     {item.imageUrl && (
                       <div className="w-24 h-24 shrink-0 bg-subtle-smoke">
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                        <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(item.imageUrl)}&w=150&q=70`} alt={item.name} className="w-full h-full object-cover" />
                       </div>
                     )}
                     <div className="flex-1">

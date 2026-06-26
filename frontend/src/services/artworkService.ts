@@ -27,7 +27,7 @@ export interface ArtworksResponse {
   items: Artwork[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 // Local artworks data - for development/demo
 const LOCAL_ARTWORKS: Artwork[] = [
@@ -99,7 +99,22 @@ const LOCAL_ARTWORKS: Artwork[] = [
   },
 ];
 
-export async function fetchArtworks(page = 1, limit = 24): Promise<ArtworksResponse> {
+export async function fetchArtworks(page = 1, limit = 24, forceRefresh = false): Promise<ArtworksResponse> {
+  const cacheKey = `kalavault_artworks_${page}_${limit}`;
+  
+  if (!forceRefresh) {
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        // 10 minute cache TTL
+        if (parsed.timestamp && (Date.now() - parsed.timestamp < 1000 * 60 * 10)) {
+          return parsed.data;
+        }
+      } catch(e) {}
+    }
+  }
+
   try {
     const token = auth.currentUser ? await auth.currentUser.getIdToken() : '';
     const response = await fetch(`${API_BASE_URL}/api/v1/artworks?page=${page}&limit=${limit}`, {
@@ -107,12 +122,12 @@ export async function fetchArtworks(page = 1, limit = 24): Promise<ArtworksRespo
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      cache: 'no-store',
     });
 
     if (response.ok) {
       const data = await response.json();
       if (data.items && data.items.length > 0) {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
         return data;
       }
       // Fallback to local data if API returns empty
@@ -137,7 +152,22 @@ export async function fetchArtworks(page = 1, limit = 24): Promise<ArtworksRespo
   };
 }
 
-export async function fetchArtworkById(id: string): Promise<Artwork | null> {
+export async function fetchArtworkById(id: string, forceRefresh = false): Promise<Artwork | null> {
+  const cacheKey = `kalavault_artwork_${id}`;
+  
+  if (!forceRefresh) {
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        // 15 minute cache TTL
+        if (parsed.timestamp && (Date.now() - parsed.timestamp < 1000 * 60 * 15)) {
+          return parsed.data;
+        }
+      } catch(e) {}
+    }
+  }
+
   try {
     const token = auth.currentUser ? await auth.currentUser.getIdToken() : '';
     const response = await fetch(`${API_BASE_URL}/api/v1/artworks/${id}`, {
@@ -145,12 +175,14 @@ export async function fetchArtworkById(id: string): Promise<Artwork | null> {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      cache: 'no-store',
     });
 
     if (response.ok) {
       const data = await response.json();
-      if (data) return data;
+      if (data) {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+        return data;
+      }
     }
   } catch (error) {
     console.error('API fetch by ID failed:', error);
