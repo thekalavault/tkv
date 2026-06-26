@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function createAdmin() {
-  const email = 'admin7@tkv.com';
+  const email = 'admin7@tkv.co';
   const password = 'artstartshere@7';
 
   try {

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
@@ -16,7 +15,6 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
   const navigate = useNavigate();
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.05 });
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const getStartingPrice = () => {
     const orig = artwork.originalArtwork;
@@ -34,12 +32,6 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
 
   const hasTiers = (artwork.originalArtwork as any)?.metadata?.pricingTiers && Object.keys((artwork.originalArtwork as any).metadata.pricingTiers).length > 0;
 
-  const getOptimizedUrl = (url: string, width: number, quality: number) => {
-    if (!url) return '';
-    if (url.startsWith('/assets/')) return url; // Frontend static asset
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
-  };
-
   return (
     <motion.div
       ref={ref}
@@ -50,20 +42,12 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
       onClick={() => navigate(`/artwork/${artwork.id}`)}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="relative overflow-hidden bg-stone-200 shadow-sm hover:shadow-xl transition-shadow duration-700 no-select">
-        {/* Base blurred placeholder loaded instantly */}
+      <div className="relative overflow-hidden bg-subtle-smoke shadow-sm hover:shadow-xl transition-shadow duration-700 no-select">
         <img
-          className="absolute inset-0 w-full h-full object-cover z-0 blur-md scale-110"
+          className="w-full h-auto object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag"
           alt={artwork.name}
-          src={getOptimizedUrl(artwork.localPath, 50, 20)}
-        />
-        <img
-          className={`w-full h-auto object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          alt={artwork.name}
-          src={getOptimizedUrl(artwork.localPath, 800, 80)}
+          src={artwork.localPath}
           loading="lazy"
-          decoding="async"
-          onLoad={() => setImageLoaded(true)}
           onDragStart={(e) => e.preventDefault()}
           onContextMenu={(e) => e.preventDefault()}
         />
