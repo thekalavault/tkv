@@ -34,6 +34,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
   // Upload state
   const [uploadingForArtworkId, setUploadingForArtworkId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (currentUser) {
@@ -90,6 +91,14 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       return;
     }
 
+    const currentArt = artworks.find(a => a.id === editingArtworkId);
+    const hasExistingImages = editingArtworkId && currentArt?.images?.length > 0;
+
+    if (!hasExistingImages && selectedFiles.length === 0) {
+      setError('Please upload at least one image for the artwork.');
+      return;
+    }
+
     const payload = {
       sku,
       title,
@@ -132,6 +141,46 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.message || 'Failed to save artwork');
+      }
+
+      const savedData = await response.json();
+      const artworkId = editingArtworkId || savedData.id;
+
+      if (selectedFiles.length > 0 && artworkId) {
+        for (const file of selectedFiles) {
+          const imgResponse = await fetch(`${API_BASE_URL}/api/v1/artworks/${artworkId}/images`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              variant: 'gallery',
+              mimeType: file.type || 'image/jpeg',
+              order: 0,
+            }),
+          });
+
+          if (imgResponse.ok) {
+            const { uploadUrl } = await imgResponse.json();
+            const uploadHeaders: Record<string, string> = {
+              'Content-Type': file.type || 'image/jpeg',
+            };
+            const isMock = uploadUrl.startsWith('/');
+            if (isMock) {
+              uploadHeaders['Authorization'] = `Bearer ${token}`;
+            }
+
+            const uploadResp = await fetch(isMock ? `${API_BASE_URL}${uploadUrl}` : uploadUrl, {
+              method: isMock ? 'POST' : 'PUT',
+              headers: uploadHeaders,
+              body: file,
+            });
+            if (!uploadResp.ok) {
+              console.error('Failed to upload file content to R2/Mock');
+            }
+          }
+        }
       }
 
       setSuccessMessage(editingArtworkId ? 'Artwork updated successfully!' : 'Artwork created successfully!');
@@ -178,6 +227,23 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
     setIsModalOpen(true);
   };
 
+  const generateNextSku = (currentArtworks: any[]) => {
+    let maxNumber = 0;
+    currentArtworks.forEach(art => {
+      if (art.sku && typeof art.sku === 'string') {
+        const match = art.sku.match(/^TKV-(\d+)$/i);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      }
+    });
+    const nextNumber = maxNumber + 1;
+    return `TKV-${String(nextNumber).padStart(3, '0')}`;
+  };
+
   const resetForm = () => {
     setEditingArtworkId(null);
     setSku('');
@@ -195,8 +261,8 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
     setReplacementValue('');
     setPrice3Months('');
     setPrice6Months('');
-    setPrice9Months('');
     setPrice12Months('');
+    setSelectedFiles([]);
   };
 
   const handleUploadImageClick = (artworkId: string) => {
@@ -313,7 +379,11 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
             <h4 className="font-display-md text-4xl tracking-tight text-primary">Artwork Tracking</h4>
           </div>
           <button 
-            onClick={() => { resetForm(); setIsModalOpen(true); }}
+            onClick={() => { 
+              resetForm(); 
+              setSku(generateNextSku(artworks)); 
+              setIsModalOpen(true); 
+            }}
             className="bg-primary text-white py-3 px-6 font-label-caps text-[11px] tracking-widest uppercase transition-all hover:bg-gallery-gold flex items-center justify-center gap-2 cursor-pointer shadow-sm"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
@@ -438,6 +508,24 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                 )}
 
                 <div className="grid grid-cols-2 gap-8">
+                  <div className="col-span-2 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
+                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">UPLOAD IMAGES *</label>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setSelectedFiles(Array.from(e.target.files));
+                        }
+                      }}
+                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-base text-primary/80" 
+                    />
+                    {selectedFiles.length > 0 && (
+                      <p className="text-xs text-primary/60 mt-2">{selectedFiles.length} file(s) selected</p>
+                    )}
+                  </div>
+
                   <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
                     <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">BARCODE / SKU *</label>
                     <input 
