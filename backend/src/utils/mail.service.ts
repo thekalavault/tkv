@@ -1,45 +1,37 @@
-// @ts-ignore
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { config } from '../config';
 import { logger } from '../shared/logger/logger';
 
 export class MailService {
-  private transporter: nodemailer.Transporter | null = null;
+  private resend: Resend | null = null;
 
   constructor() {
-    if (config.smtpHost && config.smtpHost !== 'placeholder') {
+    if (config.resendApiKey && config.resendApiKey !== 'placeholder') {
       try {
-        this.transporter = nodemailer.createTransport({
-          host: config.smtpHost,
-          port: config.smtpPort,
-          secure: config.smtpPort === 465, // true for 465, false for other ports
-          auth: {
-            user: config.smtpUser,
-            pass: config.smtpPass,
-          },
-        });
-        logger.info('✅ SMTP Mailer initialized successfully');
+        this.resend = new Resend(config.resendApiKey);
+        logger.info('✅ Resend Mailer initialized successfully');
       } catch (err) {
-        logger.error({ err }, '❌ Failed to initialize SMTP Mailer');
+        logger.error({ err }, '❌ Failed to initialize Resend Mailer');
       }
     } else {
-      logger.warn('⚠️ SMTP credentials not configured. Outgoing emails will be logged to console.');
+      logger.warn('⚠️ Resend API key not configured. Outgoing emails will be logged to console.');
     }
   }
 
-  async sendMail(to: string, subject: string, html: string): Promise<boolean> {
-    if (this.transporter) {
+  async sendMail(to: string, subject: string, html: string, replyTo?: string): Promise<boolean> {
+    if (this.resend) {
       try {
-        await this.transporter.sendMail({
+        await this.resend.emails.send({
           from: config.smtpFrom,
           to,
           subject,
           html,
+          reply_to: replyTo,
         });
-        logger.info({ to, subject }, '📧 Email sent successfully via SMTP');
+        logger.info({ to, subject }, '📧 Email sent successfully via Resend');
         return true;
       } catch (err) {
-        logger.error({ err, to, subject }, '❌ Failed to send email via SMTP');
+        logger.error({ err, to, subject }, '❌ Failed to send email via Resend');
         return false;
       }
     } else {
@@ -118,25 +110,7 @@ export class MailService {
       </div>
     `;
 
-    if (this.transporter) {
-      try {
-        await this.transporter.sendMail({
-          from: config.smtpFrom,
-          to: config.adminEmail,
-          replyTo: inquiry.email,
-          subject,
-          html,
-        });
-        logger.info({ email: inquiry.email, subject }, '📧 Inquiry email sent successfully to admin');
-        return true;
-      } catch (err) {
-        logger.error({ err, email: inquiry.email, subject }, '❌ Failed to send inquiry email to admin');
-        return false;
-      }
-    } else {
-      logger.info({ inquiry, html }, '📝 [MOCK EMAIL LOGGER] Admin Inquiry generated:');
-      return true;
-    }
+    return this.sendMail(config.adminEmail, subject, html, inquiry.email);
   }
 }
 

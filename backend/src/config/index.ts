@@ -31,6 +31,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional().default('Kala Vault <no-reply@thekalavault.com>'),
   ADMIN_EMAIL: z.string().optional().default('admin@thekalavault.com'),
+  RESEND_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -71,4 +72,5 @@ export const config = {
   smtpPass: parsed.data.SMTP_PASS,
   smtpFrom: parsed.data.SMTP_FROM,
   adminEmail: parsed.data.ADMIN_EMAIL,
+  resendApiKey: parsed.data.RESEND_API_KEY || parsed.data.SMTP_PASS, // Fallback to SMTP_PASS if RESEND_API_KEY is not explicitly set
 };
