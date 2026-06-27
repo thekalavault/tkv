@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver'; // Not needed but kept for other potential uses if any, actually I'll just remove the import in the next block.
 import { ArtworkTierBadge } from './ArtworkTierInfo';
 import { CollectionArtwork } from '../lib/collectionsData';
 import { useFavorites } from '../contexts/FavoritesContext';
@@ -16,7 +16,6 @@ interface ArtworkCardProps {
 export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { ref, isVisible } = useIntersectionObserver({ threshold: 0.05 });
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -38,9 +37,9 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
 
   return (
     <motion.div
-      ref={ref}
       initial={{ opacity: 0, y: 20 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "100px" }}
       transition={{ duration: 0.6, delay: (index % 6) * 0.05 }}
       className="group cursor-pointer flex flex-col break-inside-avoid mb-6 md:mb-8"
       onClick={() => navigate(`/artwork/${artwork.id}`)}

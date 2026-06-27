@@ -24,24 +24,47 @@ export default function Cart() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="md:col-span-2 space-y-6">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-6 bg-white p-6 border border-outline/10 shadow-sm">
-                    {item.imageUrl && (
-                      <div className="w-24 h-24 shrink-0 bg-subtle-smoke">
-                        <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/images/optimize?url=${encodeURIComponent(item.imageUrl)}&w=150&q=70`} alt={item.name} className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <h4 className="font-display-md text-xl text-primary">{item.name}</h4>
-                      <p className="font-label-caps text-[10px] text-gallery-gold mt-1 uppercase">Type: {item.type.replace('_', ' ')}</p>
-                      <p className="font-display-sm text-lg text-primary mt-2">₹{item.price.toLocaleString('en-IN')}</p>
-                    </div>
-                    <button onClick={() => removeFromCart(item.id)} className="text-primary/50 hover:text-red-500 transition-colors cursor-pointer">
-                      <span className="material-symbols-outlined">delete</span>
-                    </button>
-                  </div>
-                ))}
+              <div className="md:col-span-2 bg-subtle-smoke border border-gallery-gold/20 p-0 overflow-hidden shadow-sm h-max">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b border-gallery-gold/20 text-left bg-white">
+                      <th className="p-6 font-label-caps text-[10px] tracking-widest text-primary/60 uppercase">Artwork Details</th>
+                      <th className="p-6 font-label-caps text-[10px] tracking-widest text-primary/60 uppercase">Price</th>
+                      <th className="p-6 font-label-caps text-[10px] tracking-widest text-primary/60 uppercase text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gallery-gold/10">
+                    {cartItems.map((item) => (
+                      <tr key={item.id} className="hover:bg-white transition-all group">
+                        <td className="p-6 w-full md:w-auto">
+                          <div className="flex items-center gap-6">
+                            {item.imageUrl && (
+                              <div className="w-20 h-20 bg-white overflow-hidden group-hover:ring-1 group-hover:ring-gallery-gold/30 transition-all border border-gallery-gold/10 shrink-0">
+                                <img 
+                                  src={item.imageUrl.startsWith('http') || item.imageUrl.startsWith('/') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/uploads/${item.imageUrl}`} 
+                                  alt={item.name} 
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-display-md text-xl leading-tight mb-1 group-hover:text-gallery-gold transition-colors tracking-tight">{item.name}</p>
+                              <p className="font-label-caps text-[10px] tracking-widest text-primary/50 uppercase">Type: {item.type.replace('_', ' ')}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-6 align-middle hidden md:table-cell">
+                          <p className="font-display-md text-lg text-primary">₹{item.price.toLocaleString('en-IN')}</p>
+                        </td>
+                        <td className="p-6 text-right align-middle">
+                          <button onClick={() => removeFromCart(item.id)} className="text-primary/50 hover:text-red-500 transition-colors cursor-pointer p-2 rounded-full hover:bg-red-500/10" title="Remove from Cart">
+                            <span className="material-symbols-outlined text-[20px]">delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
               <div className="bg-subtle-smoke p-8 border border-gallery-gold/20 h-max">
                 <h4 className="font-display-md text-2xl mb-6 border-b border-outline/10 pb-4">Order Summary</h4>
