@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useCart } from '../contexts/CartContext';
 import TopNavBar from '../components/TopNavBar';
-import { fetchArtworkById, Artwork } from '../services/artworkService';
+import { fetchArtworkById, getArtworkImagePath, Artwork } from '../services/artworkService';
 import { CollectionArtwork } from '../lib/collectionsData';
 import ArtworkCard from '../components/ArtworkCard';
 
@@ -26,7 +26,7 @@ export default function Favorites() {
             name: art.title,
             size: art.dimensions || 'Variable',
             fileName: '',
-            localPath: art.localImagePath || '',
+            localPath: getArtworkImagePath(art),
             tier: 'medium' as any,
             originalArtwork: art,
           } as CollectionArtwork;
