@@ -81,10 +81,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     syncBackend();
   }, [user]);
 
-  // Save to localStorage on change
-  useEffect(() => {
-    localStorage.setItem('kalavault_favorites', JSON.stringify(favorites));
-  }, [favorites]);
 
   const addFavorite = async (id: string) => {
     setFavorites((prev) => {

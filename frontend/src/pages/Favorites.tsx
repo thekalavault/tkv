@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useCart } from '../contexts/CartContext';
 import TopNavBar from '../components/TopNavBar';
 import { fetchArtworkById, Artwork } from '../services/artworkService';
 import { CollectionArtwork } from '../lib/collectionsData';
@@ -8,6 +9,7 @@ import ArtworkCard from '../components/ArtworkCard';
 
 export default function Favorites() {
   const { favorites, removeFavorite } = useFavorites();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const [favoriteArtworks, setFavoriteArtworks] = useState<CollectionArtwork[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,9 +44,31 @@ export default function Favorites() {
       <TopNavBar />
       <main className="flex-1 mt-24 max-w-[1600px] w-full mx-auto px-6 md:px-12 py-16">
         <div className="reveal">
-          <section className="space-y-2 mb-10 border-b border-gallery-gold/20 pb-4">
-            <span className="font-label-caps text-[10px] tracking-widest text-gallery-gold uppercase block">CURATED</span>
-            <h3 className="font-display-md text-4xl tracking-tight text-primary">Your Favorites</h3>
+          <section className="flex justify-between items-end mb-10 border-b border-gallery-gold/20 pb-4">
+            <div className="space-y-2">
+              <span className="font-label-caps text-[10px] tracking-widest text-gallery-gold uppercase block">CURATED</span>
+              <h3 className="font-display-md text-4xl tracking-tight text-primary">Your Favorites</h3>
+            </div>
+            {favoriteArtworks.length > 0 && (
+              <button 
+                onClick={() => {
+                  favoriteArtworks.forEach(art => {
+                    addToCart({
+                      artworkId: art.id,
+                      name: art.name,
+                      price: art.originalArtwork?.replacementValue || 0,
+                      type: 'full',
+                      imageUrl: art.localPath
+                    });
+                  });
+                  navigate('/cart');
+                }}
+                className="bg-primary text-white font-label-caps text-[11px] tracking-widest uppercase px-6 py-3 hover:bg-gallery-gold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
+                Add All to Cart
+              </button>
+            )}
           </section>
           
           {loading ? (

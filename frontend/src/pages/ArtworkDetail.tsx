@@ -437,6 +437,10 @@ export default function ArtworkDetail() {
 
             <button
               onClick={() => {
+                if (!user) {
+                  navigate(`/signin?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+                  return;
+                }
                 if (!artwork) return;
                 if (isFavorite(artwork.id)) {
                   removeFavorite(artwork.id);

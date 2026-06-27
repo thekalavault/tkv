@@ -108,9 +108,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     syncBackend();
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem('kalavault_cart', JSON.stringify(items));
-  }, [items]);
 
   const addToCart = async (item: Omit<CartItem, 'id'>) => {
     const localId = crypto.randomUUID();

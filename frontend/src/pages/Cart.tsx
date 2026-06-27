@@ -65,8 +65,8 @@ export default function Cart() {
                   }}
                   className="w-full bg-gallery-gold text-primary font-bold font-label-caps text-[11px] tracking-widest uppercase px-6 py-4 hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">lock</span>
-                  Pay Now
+                  <span className="material-symbols-outlined text-[16px]">inventory_2</span>
+                  Acquire Now
                 </button>
               </div>
             </div>

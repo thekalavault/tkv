@@ -5,6 +5,7 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { ArtworkTierBadge } from './ArtworkTierInfo';
 import { CollectionArtwork } from '../lib/collectionsData';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ArtworkCardProps {
   artwork: CollectionArtwork;
@@ -14,6 +15,7 @@ interface ArtworkCardProps {
 
 export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { ref, isVisible } = useIntersectionObserver({ threshold: 0.05 });
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -74,6 +76,10 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
         <button
           onClick={(e) => {
             e.stopPropagation(); // prevent navigation
+            if (!user) {
+              navigate('/signin');
+              return;
+            }
             if (isFavorite(artwork.id)) {
               removeFavorite(artwork.id);
             } else {
