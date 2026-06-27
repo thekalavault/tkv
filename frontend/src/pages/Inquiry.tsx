@@ -15,7 +15,7 @@ export default function Inquiry() {
   const [fullName, setFullName] = useState('');
   const [entity, setEntity] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+91 ');
 
   useEffect(() => {
     if (artworkName) {
@@ -143,7 +143,7 @@ export default function Inquiry() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="border-b border-outline/20 py-3 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors" 
-                      placeholder="+1 (555) 000-0000" 
+                      placeholder="+91 98765 43210" 
                     />
                   </div>
                 </div>

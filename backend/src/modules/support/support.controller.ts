@@ -10,8 +10,10 @@ export class SupportController {
     if (!fullName || !email || !interest || !message) {
       throw new ApiError('Missing required fields: fullName, email, interest, and message are required.', 400);
     }
-    try {
-      await prisma.crmLead.create({
+
+    // Fire and forget in the background so it doesn't block the frontend response
+    Promise.allSettled([
+      prisma.crmLead.create({
         data: {
           contactName: fullName,
           email,
@@ -21,24 +23,17 @@ export class SupportController {
           pipelineStage: interest,
           metadata: { message }
         }
-      });
-    } catch (err) {
-      console.error('Failed to create CRM lead from inquiry:', err);
-      // We still want to send the email even if DB fails
-    }
+      }).catch(err => console.error('Failed to create CRM lead from inquiry:', err)),
 
-    try {
-      await mailService.sendInquiryEmail({
+      mailService.sendInquiryEmail({
         fullName,
         email,
         phone,
         entity,
         interest,
         message,
-      });
-    } catch (e) {
-      console.error('Failed to send email inquiry:', e);
-    }
+      }).catch(e => console.error('Failed to send email inquiry:', e))
+    ]);
 
     res.json({
       success: true,
