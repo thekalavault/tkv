@@ -26,7 +26,7 @@ export class MailService {
           to,
           subject,
           html,
-          reply_to: replyTo,
+          replyTo,
         });
         logger.info({ to, subject }, '📧 Email sent successfully via Resend');
         return true;

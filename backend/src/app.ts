@@ -22,7 +22,9 @@ import imagesRoutes from './modules/images/images.routes';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -64,10 +66,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Only use csurf in production
-if (config.nodeEnv === 'production') {
-  app.use(csurf({ cookie: { httpOnly: true, sameSite: 'strict', secure: true } }));
-}
+// Only use csurf in production (disabled for REST API)
+// if (config.nodeEnv === 'production') {
+//   app.use(csurf({ cookie: { httpOnly: true, sameSite: 'strict', secure: true } }));
+// }
 
 // Serve uploaded files statically
 import path from 'path';
