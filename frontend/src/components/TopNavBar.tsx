@@ -125,34 +125,37 @@ export default function TopNavBar() {
                   {link.name}
                 </Link>
               ))}
-              <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
-                <Link to="/favorites" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
-                  <span className="material-symbols-outlined text-[20px]">favorite</span>
-                  {favorites.length > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-gallery-gold text-paper-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                      {favorites.length}
-                    </span>
-                  )}
-                </Link>
-                <Link to="/cart" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
-                  <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
-                  {cartItems.length > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-gallery-gold text-paper-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                      {cartItems.length}
-                    </span>
-                  )}
-                </Link>
-
-                {currentUser ? (
-                  <Link to="/customer" title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
-                    <span className="material-symbols-outlined text-[20px]">person</span>
-                  </Link>
-                ) : (
-                  <Link to="/signin" className="font-label-caps text-[10px] font-bold uppercase tracking-[0.2em] text-paper-white bg-gallery-gold px-6 py-2.5 hover:bg-primary hover:text-paper-white transition-all duration-500 whitespace-nowrap shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_20px_rgba(0,0,0,0.5)] ml-2">
+              {currentUser ? (
+                <>
+                  <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
+                    <Link to="/customer" title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
+                      <span className="material-symbols-outlined text-[20px]">person</span>
+                    </Link>
+                    <Link to="/favorites" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
+                      <span className="material-symbols-outlined text-[20px]">favorite</span>
+                      {favorites.length > 0 && (
+                        <span className="absolute -top-1 -right-2 bg-gallery-gold text-paper-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                          {favorites.length}
+                        </span>
+                      )}
+                    </Link>
+                    <Link to="/cart" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
+                      <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
+                      {cartItems.length > 0 && (
+                        <span className="absolute -top-1 -right-2 bg-gallery-gold text-paper-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                          {cartItems.length}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link to="/signin" className="font-label-caps text-[10px] font-bold uppercase tracking-[0.2em] text-paper-white bg-gallery-gold px-6 py-2.5 hover:bg-primary hover:text-paper-white transition-all duration-500 whitespace-nowrap shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_20px_rgba(0,0,0,0.5)]">
                     SIGN IN
                   </Link>
-                )}
-              </div>
+                </>
+              )}
             </div>
             
             {/* Mobile Menu Button */}

@@ -10,7 +10,7 @@ export default function Cart() {
     <div className="bg-paper-white text-primary min-h-screen flex flex-col font-body-md overflow-x-hidden selection:bg-gallery-gold/30">
       <TopNavBar />
       <main className="flex-1 mt-24 max-w-[1600px] w-full mx-auto px-6 md:px-12 py-16">
-        <div className="reveal">
+        <div>
           <section className="space-y-2 mb-10 border-b border-gallery-gold/20 pb-4">
             <span className="font-label-caps text-[10px] tracking-widest text-gallery-gold uppercase block">CHECKOUT</span>
             <h3 className="font-display-md text-4xl tracking-tight text-primary">Your Cart</h3>
