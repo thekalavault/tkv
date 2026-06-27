@@ -128,7 +128,7 @@ export default function TopNavBar() {
               {currentUser ? (
                 <>
                   <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
-                    <Link to="/customer" title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
+                    <Link to={currentUser.email?.toLowerCase().includes('admin') ? "/admin" : "/customer"} title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
                       <span className="material-symbols-outlined text-[20px]">person</span>
                     </Link>
                     <Link to="/favorites" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
@@ -223,7 +223,7 @@ export default function TopNavBar() {
                  {currentUser ? (
                    <>
                      <Link 
-                       to="/customer" 
+                       to={currentUser.email?.toLowerCase().includes('admin') ? "/admin" : "/customer"} 
                        className="font-label-caps text-[14px] font-bold uppercase tracking-[0.2em] text-paper-white bg-primary px-10 py-4 hover:bg-gallery-gold transition-colors block text-center"
                      >
                        ACCOUNT
