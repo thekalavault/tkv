@@ -28,6 +28,10 @@ export default function CRMManager() {
           date: new Date(lead.createdAt).toLocaleDateString(),
           value: lead.companyName || 'N/A'
         })));
+      } else if (response.status === 403) {
+        alert("You do not have permission to view leads. You must be logged in as an Admin (e.g., admin7@tkv.com).");
+      } else {
+        console.error('Failed to fetch leads:', response.status);
       }
     } catch (error) {
       console.error('Failed to fetch leads', error);
