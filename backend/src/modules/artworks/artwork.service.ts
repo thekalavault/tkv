@@ -8,7 +8,7 @@ import { prisma } from '../../shared/db/prisma';
 
 const artworkRepository = new ArtworkRepository();
 const r2Service = new CloudflareR2Service();
-const PUBLIC_R2_URL = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://www.thekalavault.com';
+const PUBLIC_R2_URL = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://assets.kalavault.com';
 
 function mapArtworkImages(artwork: any) {
   if (artwork.images) {
