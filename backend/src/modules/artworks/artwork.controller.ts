@@ -35,6 +35,11 @@ export class ArtworkController {
     res.json(artwork);
   }
 
+  async delete(req: Request, res: Response) {
+    await artworkService.deleteArtwork(req.params.id);
+    res.status(204).send();
+  }
+
   async generateUploadUrl(req: Request, res: Response) {
     const url = await artworkService.createImageUploadUrl(req.params.id, req.body);
     res.json(url);
@@ -43,6 +48,11 @@ export class ArtworkController {
   async getImageUrl(req: Request, res: Response) {
     const url = await artworkService.getSignedImageUrl(req.params.imageId);
     res.json(url);
+  }
+
+  async deleteImage(req: Request, res: Response) {
+    await artworkService.deleteArtworkImage(req.params.imageId);
+    res.status(204).send();
   }
 
   async getArtworkImageById(imageId: string) {

@@ -158,6 +158,15 @@ export class ArtworkService {
     return artworkRepository.updateArtwork(id, updateData);
   }
 
+  async deleteArtwork(id: string) {
+    const artwork = await artworkRepository.findArtworkById(id);
+    if (!artwork) {
+      throw new ApiError('Artwork not found', 404);
+    }
+    await artworkRepository.deleteArtwork(id);
+    return true;
+  }
+
   async createImageUploadUrl(artworkId: string, body: Record<string, any>) {
     const artwork = await artworkRepository.findArtworkById(artworkId);
     if (!artwork) {
@@ -216,6 +225,15 @@ export class ArtworkService {
     } catch (err) {
       return { url: `/uploads/${image.fileKey}`, mimeType: image.mimeType, variant: image.variant };
     }
+  }
+
+  async deleteArtworkImage(imageId: string) {
+    const image = await artworkRepository.findArtworkImageById(imageId);
+    if (!image) {
+      throw new ApiError('Artwork image not found', 404);
+    }
+    await artworkRepository.deleteArtworkImage(imageId);
+    return true;
   }
 
   async getArtworkImageById(imageId: string) {

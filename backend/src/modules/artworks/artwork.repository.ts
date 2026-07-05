@@ -30,6 +30,10 @@ export class ArtworkRepository {
     return prisma.artwork.update({ where: { id }, data });
   }
 
+  async deleteArtwork(id: string) {
+    return prisma.artwork.delete({ where: { id } });
+  }
+
   async createArtworkImage(data: {
     artworkId: string;
     fileKey: string;
@@ -44,5 +48,9 @@ export class ArtworkRepository {
 
   async findArtworkImageById(imageId: string) {
     return prisma.artworkImage.findUnique({ where: { id: imageId } });
+  }
+
+  async deleteArtworkImage(imageId: string) {
+    return prisma.artworkImage.delete({ where: { id: imageId } });
   }
 }
