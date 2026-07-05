@@ -12,6 +12,7 @@ export class UsersService {
         lastName: true,
         phone: true,
         status: true,
+        role: true,
       },
     });
 
@@ -72,5 +73,32 @@ export class UsersService {
     ]);
 
     return { page, limit, total, items };
+  }
+
+  async updateUserRole(userId: string, roleName: 'admin' | 'account_manager' | 'operations' | 'customer') {
+    const role = await prisma.role.findUnique({ where: { name: roleName } });
+    if (!role) {
+      throw new ApiError('Role not found', 400);
+    }
+    
+    return prisma.user.update({
+      where: { id: userId },
+      data: { roleId: role.id },
+      include: { role: true },
+    });
+  }
+
+  async deleteUser(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new ApiError('User not found', 404);
+    }
+    
+    // Perform a soft delete or hard delete depending on your schema
+    // In this case we'll hard delete, but realistically you'd want to cascade or soft delete
+    return prisma.user.update({
+      where: { id: userId },
+      data: { status: 'suspended', deletedAt: new Date() }
+    });
   }
 }

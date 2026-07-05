@@ -95,22 +95,26 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
         </button>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-gallery-gold/10 flex justify-between items-center gap-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-display-sm text-[16px] font-semibold text-primary tracking-tight group-hover:text-gallery-gold transition-colors duration-300 truncate leading-tight">
+      <div className="mt-5 flex flex-col gap-2">
+        <div className="flex justify-between items-start gap-4">
+          <h3 className="font-display-md text-[18px] md:text-[20px] text-primary tracking-tight group-hover:text-gallery-gold transition-colors duration-300 truncate leading-tight flex-1">
             {artwork.name}
           </h3>
-          <span className="text-[9px] font-label-caps tracking-widest text-on-surface-variant/60 uppercase block mt-1">
-            Value: ₹{(artwork.originalArtwork?.replacementValue || 15000).toLocaleString('en-IN')}
-          </span>
+          <div className="flex-shrink-0">
+            <span className="text-[12px] font-bold font-body-md text-primary bg-stone-100 px-3 py-1.5 rounded-full border border-outline/10 shadow-sm flex items-center">
+              {hasTiers ? <span className="text-[10px] font-normal text-on-surface-variant mr-1">From</span> : ''}
+              ₹{getStartingPrice().toLocaleString('en-IN')}<span className="text-[10px] font-normal text-on-surface-variant ml-0.5">/mo</span>
+            </span>
+          </div>
         </div>
-        <div className="text-right flex flex-col items-end justify-center flex-shrink-0">
-          <span className="text-[10px] font-bold font-label-caps tracking-wider text-gallery-gold bg-gallery-gold/5 px-2 py-0.5 rounded border border-gallery-gold/15 shadow-[0_2px_8px_rgba(212,175,55,0.04)]">
-            {hasTiers ? 'From ' : ''}₹{getStartingPrice().toLocaleString('en-IN')}/mo
-          </span>
-          <span className="text-[8px] font-label-caps tracking-widest text-on-surface-variant/50 uppercase mt-0.5 block">
-            Lease
-          </span>
+        <div className="flex justify-between items-center mt-3">
+          <div className="flex items-center gap-2 bg-stone-100/80 px-3 py-1.5 rounded-md border border-outline/5 shadow-sm">
+            <span className="material-symbols-outlined text-[14px] text-gallery-gold">verified</span>
+            <span className="text-[11px] font-label-caps tracking-widest text-on-surface-variant/90 uppercase">
+              Value <span className="text-primary font-bold ml-1.5">₹{(artwork.originalArtwork?.replacementValue || 15000).toLocaleString('en-IN')}</span>
+            </span>
+          </div>
+          <span className="text-[11px] font-label-caps tracking-widest text-gallery-gold font-bold uppercase border-b border-gallery-gold/30 pb-0.5">Lease Available</span>
         </div>
       </div>
     </motion.div>

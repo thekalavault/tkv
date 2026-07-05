@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchArtworks } from '../../../services/artworkService';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export default function CatalogManager({ currentUser }: { currentUser: any }) {
-  const [artworks, setArtworks] = useState<any[]>([]);
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -36,50 +38,13 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  useEffect(() => {
-    if (currentUser) {
-      loadArtworks();
-    }
-  }, [currentUser]);
+  const { data, isLoading: artworksLoading } = useQuery({
+    queryKey: ['admin-artworks'],
+    queryFn: () => fetchArtworks(1, 50),
+    enabled: !!currentUser
+  });
 
-  const loadArtworks = async (forceRefresh = false) => {
-    setLoading(true);
-    
-    const cacheKey = 'admin_kalavault_artworks';
-    if (!forceRefresh) {
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (parsed.timestamp && (Date.now() - parsed.timestamp < 1000 * 60 * 5)) {
-            setArtworks(parsed.data);
-            setLoading(false);
-            return;
-          }
-        } catch(e) {}
-      }
-    }
-
-    try {
-      const token = currentUser ? await currentUser.getIdToken() : '';
-      const response = await fetch(`${API_BASE_URL}/api/v1/artworks?limit=50`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setArtworks(data.items || []);
-        sessionStorage.setItem(cacheKey, JSON.stringify({ data: data.items || [], timestamp: Date.now() }));
-      } else {
-        console.warn('Failed to load artworks from backend.');
-      }
-    } catch (err) {
-      console.error('Error fetching artworks:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const artworks = data?.items || [];
 
   const handleSaveArtwork = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,14 +152,8 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       resetForm();
       setIsModalOpen(false);
       
-      // Clear global frontend caches so consumer app updates immediately
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('kalavault_artwork')) {
-          sessionStorage.removeItem(key);
-        }
-      });
-      
-      loadArtworks(true);
+      // Invalidate queries so admin panel and frontend refetch immediately
+      queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
       
       // Clear message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -327,13 +286,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
 
       setSuccessMessage(files.length > 1 ? `${files.length} images uploaded successfully!` : 'Image uploaded successfully!');
       
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('kalavault_artwork')) {
-          sessionStorage.removeItem(key);
-        }
-      });
-      
-      loadArtworks(true);
+      queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
       console.error(err);
@@ -342,6 +295,57 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       setUploadingForArtworkId(null);
       setLoading(false);
       if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleDeleteArtwork = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this artwork? This action cannot be undone.')) return;
+    
+    setLoading(true);
+    try {
+      const token = currentUser ? await currentUser.getIdToken() : '';
+      const response = await fetch(`${API_BASE_URL}/api/v1/artworks/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete artwork');
+      }
+
+      setSuccessMessage('Artwork deleted successfully!');
+      
+      queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
+    } catch (err: any) {
+      setError(err.message || 'Error occurred while deleting artwork.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteImage = async (artworkId: string, imageId: string) => {
+    if (!window.confirm('Are you sure you want to delete this image?')) return;
+    
+    try {
+      const token = currentUser ? await currentUser.getIdToken() : '';
+      const response = await fetch(`${API_BASE_URL}/api/v1/artworks/${artworkId}/images/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete image');
+      }
+
+      setSuccessMessage('Image deleted successfully!');
+      
+      queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
+    } catch (err: any) {
+      setError(err.message || 'Error occurred while deleting image.');
     }
   };
 
@@ -401,7 +405,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gallery-gold/10">
-              {loading ? (
+              {artworksLoading ? (
                 <tr>
                   <td colSpan={3} className="p-12 text-center text-primary/50 font-label-caps text-xs">
                     Syncing database records...
@@ -416,7 +420,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
               ) : (
                 artworks.map((art) => {
                   const imageUrl = art.images && art.images[0] 
-                    ? (art.images[0].fileKey.startsWith('http') ? art.images[0].fileKey : `${API_BASE_URL}/uploads/${art.images[0].fileKey}`)
+                    ? (art.images[0].fileKey.startsWith('http') ? art.images[0].fileKey : `${API_BASE_URL}${art.images[0].fileKey.startsWith('/') ? '' : '/uploads/'}${art.images[0].fileKey}`)
                     : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&q=80&w=200';
                   return (
                     <tr key={art.id} className="hover:bg-white transition-all group flex-row">
@@ -450,6 +454,12 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                             className="px-3 py-1.5 text-[10px] bg-primary text-white font-label-caps tracking-widest uppercase hover:bg-gallery-gold transition-all cursor-pointer"
                           >
                             Edit
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteArtwork(art.id)}
+                            className="px-3 py-1.5 text-[10px] bg-red-500/10 text-red-500 border border-red-500/30 font-label-caps tracking-widest uppercase hover:bg-red-500 hover:text-white transition-all cursor-pointer"
+                          >
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -496,10 +506,17 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                     <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-4 block uppercase">CURRENT IMAGES GALLERY</label>
                     <div className="flex gap-4 overflow-x-auto pb-4">
                       {currentEditingArtwork.images.map((img: any) => {
-                        const url = img.fileKey.startsWith('http') ? img.fileKey : `${API_BASE_URL}/uploads/${img.fileKey}`;
+                        const url = img.fileKey.startsWith('http') ? img.fileKey : `${API_BASE_URL}${img.fileKey.startsWith('/') ? '' : '/uploads/'}${img.fileKey}`;
                         return (
                           <div key={img.id} className="w-24 h-24 shrink-0 relative group">
                             <img src={url} alt="artwork" className="w-full h-full object-cover border border-gallery-gold/20" />
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteImage(editingArtworkId, img.id)}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-md z-10"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">close</span>
+                            </button>
                           </div>
                         );
                       })}

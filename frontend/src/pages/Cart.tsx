@@ -41,7 +41,7 @@ export default function Cart() {
                             {item.imageUrl && (
                               <div className="w-20 h-20 bg-white overflow-hidden group-hover:ring-1 group-hover:ring-gallery-gold/30 transition-all border border-gallery-gold/10 shrink-0">
                                 <img 
-                                  src={item.imageUrl.startsWith('http') || item.imageUrl.startsWith('/') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/uploads/${item.imageUrl}`} 
+                                  src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${item.imageUrl.startsWith('/') ? '' : '/uploads/'}${item.imageUrl}`} 
                                   alt={item.name} 
                                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                                 />

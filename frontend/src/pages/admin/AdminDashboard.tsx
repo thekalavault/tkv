@@ -8,13 +8,14 @@ import CatalogManager from './components/CatalogManager';
 import HomepageEditor from './components/HomepageEditor';
 import CRMManager from './components/CRMManager';
 import ContractManager from './components/ContractManager';
+import UsersManager from './components/UsersManager';
 
 export default function AdminDashboard() {
   const { user: currentUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   // Tab Routing State
-  const [activeTab, setActiveTab] = useState<'catalog' | 'homepage' | 'crm' | 'contracts'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'homepage' | 'crm' | 'contracts' | 'users'>('catalog');
 
   useEffect(() => {
     if (!authLoading && !currentUser) {
@@ -83,6 +84,18 @@ export default function AdminDashboard() {
             <span className="font-label-caps text-[11px] tracking-widest uppercase">Contracts</span>
           </button>
 
+          <button 
+            onClick={() => setActiveTab('users')}
+            className={`text-left font-bold py-3 pl-4 flex items-center gap-4 transition-all w-full border-l-2 ${
+              activeTab === 'users' 
+                ? 'border-gallery-gold bg-gallery-gold/5 text-primary' 
+                : 'border-transparent text-primary/70 hover:bg-gallery-gold/5 hover:text-gallery-gold group'
+            }`}
+          >
+            <span className={`material-symbols-outlined text-[18px] ${activeTab !== 'users' && 'group-hover:text-gallery-gold'}`}>shield_person</span>
+            <span className="font-label-caps text-[11px] tracking-widest uppercase">Users & Roles</span>
+          </button>
+
         </nav>
         
         <div className="px-6 pb-8 mt-auto flex flex-col gap-4">
@@ -105,6 +118,7 @@ export default function AdminDashboard() {
               {activeTab === 'homepage' && 'Homepage Editor'}
               {activeTab === 'crm' && 'Leads & Relationships'}
               {activeTab === 'contracts' && 'Lease Agreements'}
+              {activeTab === 'users' && 'Users & Roles'}
             </h2>
             <div className="flex items-center gap-2 bg-gallery-gold/10 border border-gallery-gold/30 px-3 py-1.5">
               <span className="flex h-1.5 w-1.5 relative">
@@ -139,6 +153,7 @@ export default function AdminDashboard() {
           {activeTab === 'homepage' && <HomepageEditor />}
           {activeTab === 'crm' && <CRMManager />}
           {activeTab === 'contracts' && <ContractManager />}
+          {activeTab === 'users' && <UsersManager />}
         </div>
 
         { /* Footer */ }

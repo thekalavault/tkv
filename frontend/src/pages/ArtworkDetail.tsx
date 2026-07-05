@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { useQuery } from '@tanstack/react-query';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import { getArtworkDetailById, getAdjacentArtworks, ArtworkDetailedInfo } from '../services/artworkDetailService';
-import { getArtworkImageWithWatermark } from '../services/artworkService';
 import { ArtworkTierBadge, PricingDetails } from '../components/ArtworkTierInfo';
 import ArtworkCard from '../components/ArtworkCard';
 import { useCart } from '../contexts/CartContext';
@@ -65,11 +65,24 @@ export default function ArtworkDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [artwork, setArtwork] = useState<ArtworkDetailedInfo | null>(null);
-  const [watermarkedImage, setWatermarkedImage] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [imageLoading, setImageLoading] = useState(true);
-  const [adjacent, setAdjacent] = useState({ prev: null as any, next: null as any });
+  
+  const { data: artwork, isLoading: isArtworkLoading } = useQuery({
+    queryKey: ['artwork', id],
+    queryFn: () => getArtworkDetailById(id!),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5 // 5 minutes
+  });
+
+  const { data: adjacentData } = useQuery({
+    queryKey: ['adjacent-artwork', id],
+    queryFn: () => getAdjacentArtworks(id!),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5 // 5 minutes
+  });
+
+  const loading = isArtworkLoading;
+  const adjacent = adjacentData || { prev: null, next: null };
+
   const [isInsitu, setIsInsitu] = useState(false);
   const [activeEnv, setActiveEnv] = useState(0);
   const [isImmersive, setIsImmersive] = useState(false);
@@ -79,6 +92,9 @@ export default function ArtworkDetail() {
 
   const { addToCart } = useCart();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+
+  // Active Image State
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Hover Zoom State
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
@@ -106,8 +122,8 @@ export default function ArtworkDetail() {
 
     if (actionType.startsWith('monthly')) {
       const price = Math.round(
-        artwork.metadata?.pricingTiers?.[selectedMonths.toString()] ||
-        artwork.rentalPriceCents ||
+        artwork.originalArtwork?.metadata?.pricingTiers?.[selectedMonths.toString()] ||
+        artwork.originalArtwork?.rentalPriceCents ||
         ((artwork.replacementValue || 0) / selectedMonths)
       );
       addToCart({
@@ -222,28 +238,6 @@ export default function ArtworkDetail() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      try {
-        const artworkData = await getArtworkDetailById(id);
-        if (artworkData) {
-          setArtwork(artworkData);
-          const adjacentData = await getAdjacentArtworks(id);
-          setAdjacent(adjacentData);
-        }
-      } catch (err) {
-        console.error("Error fetching artwork data:", err);
-      } finally {
-        setLoading(false);
-      }
-    }, 50);
-
-    return () => clearTimeout(timer);
   }, [id]);
 
   if (loading) {
@@ -306,23 +300,28 @@ export default function ArtworkDetail() {
           {/* Viewer Container */}
           <div className="w-full h-full flex flex-col items-center justify-center max-w-4xl relative select-none mt-12 lg:mt-0">
             {!isInsitu ? (
-              <div
-                className="relative max-w-full max-h-[65vh] flex items-center justify-center group cursor-zoom-in rounded bg-transparent no-select"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = ((e.clientX - rect.left) / rect.width) * 100;
-                  const y = ((e.clientY - rect.top) / rect.height) * 100;
-                  setZoomPos({ x, y });
-                }}
-                onMouseEnter={() => setIsZoomed(true)}
-                onMouseLeave={() => setIsZoomed(false)}
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                <div className="relative inline-block overflow-hidden shadow-2xl">
-                  <img
-                    src={artwork.localPath}
-                    alt={artwork.name}
-                    className="max-h-[65vh] max-w-full w-auto h-auto block object-contain transition-transform duration-300 ease-out no-drag"
+              <div className="flex flex-col items-center justify-center w-full">
+                <div
+                  className="relative max-w-full max-h-[60vh] flex items-center justify-center group cursor-zoom-in rounded bg-transparent no-select"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    setZoomPos({ x, y });
+                  }}
+                  onMouseEnter={() => setIsZoomed(true)}
+                  onMouseLeave={() => setIsZoomed(false)}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <div className="relative inline-block overflow-hidden shadow-2xl">
+                    <img
+                      src={artwork?.originalArtwork?.images?.length ? 
+                        (artwork.originalArtwork.images[activeImageIndex].fileKey.startsWith('http') 
+                          ? artwork.originalArtwork.images[activeImageIndex].fileKey 
+                          : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${artwork.originalArtwork.images[activeImageIndex].fileKey.startsWith('/') ? '' : '/uploads/'}${artwork.originalArtwork.images[activeImageIndex].fileKey}`)
+                        : artwork.localPath}
+                      alt={artwork.name}
+                      className="max-h-[60vh] max-w-full w-auto h-auto block object-contain transition-transform duration-300 ease-out no-drag"
                     style={{
                       transformOrigin: isZoomed ? `${zoomPos.x}% ${zoomPos.y}%` : 'center',
                       transform: isZoomed ? 'scale(2.2)' : 'scale(1)',
@@ -338,6 +337,27 @@ export default function ArtworkDetail() {
                   {/* Watermark overlay */}
                   <div className={`watermark-tiled absolute inset-0 transition-opacity duration-500 pointer-events-none ${isZoomed ? 'opacity-30' : 'opacity-100'}`} />
                 </div>
+              </div>
+              
+              {/* Thumbnail Gallery Row */}
+              {artwork?.originalArtwork?.images && artwork.originalArtwork.images.length > 1 && (
+                <div className="flex gap-3 mt-6 overflow-x-auto py-2 px-4 max-w-full justify-center">
+                  {artwork.originalArtwork.images.map((img, idx) => {
+                    const imgUrl = img.fileKey.startsWith('http') ? img.fileKey : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${img.fileKey.startsWith('/') ? '' : '/uploads/'}${img.fileKey}`;
+                    return (
+                      <button
+                        key={img.id}
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`relative w-16 h-16 shrink-0 rounded overflow-hidden border-2 transition-all cursor-pointer ${
+                          activeImageIndex === idx ? 'border-gallery-gold scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={imgUrl} alt={`${artwork.name} - view ${idx + 1}`} className="w-full h-full object-cover" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               </div>
             ) : (
               <div id="insitu-container" className="relative w-full h-full aspect-[16/10] overflow-hidden rounded border border-outline/5 shadow-2xl bg-white" onContextMenu={(e) => e.preventDefault()}>
@@ -470,49 +490,56 @@ export default function ArtworkDetail() {
         >
           {/* Title and stats */}
           <div>
-            <h1 className="font-display-lg text-4xl md:text-5xl text-primary mb-6 tracking-tight">
+            <h1 className="font-display-lg text-4xl md:text-6xl text-primary mb-3 tracking-tight leading-tight">
               {artwork.name}
             </h1>
-            <p className="font-body-md text-on-surface-variant leading-relaxed mb-6">
+            <p className="font-body-md text-primary/70 text-lg md:text-xl mb-8 uppercase tracking-widest font-light">
+              By {artwork.artist || 'Kalavault Curated'}
+            </p>
+            
+            <p className="font-body-md text-on-surface-variant leading-relaxed mb-8 text-base md:text-lg">
               {artwork.description}
             </p>
 
             {/* Artwork Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 bg-subtle-smoke/50 rounded border border-gallery-gold/10">
-                <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Value</p>
-                <p className="font-display-md text-base text-primary">₹{(artwork.replacementValue || 0).toLocaleString('en-IN')}</p>
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="p-4 bg-white rounded-lg border border-gallery-gold/20 shadow-sm flex flex-col justify-center items-center text-center">
+                <p className="font-label-caps text-[10px] text-gallery-gold uppercase tracking-[0.2em] mb-2">Value</p>
+                <p className="font-display-md text-xl text-primary">₹{(artwork.replacementValue || 0).toLocaleString('en-IN')}</p>
               </div>
-              <div className="p-3 bg-subtle-smoke/50 rounded border border-gallery-gold/10">
-                <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Year</p>
-                <p className="font-display-md text-base text-primary">{artwork.yearCreated}</p>
+              <div className="p-4 bg-white rounded-lg border border-gallery-gold/20 shadow-sm flex flex-col justify-center items-center text-center">
+                <p className="font-label-caps text-[10px] text-gallery-gold uppercase tracking-[0.2em] mb-2">Year</p>
+                <p className="font-display-md text-xl text-primary">{artwork.yearCreated}</p>
               </div>
-              <div className="p-3 bg-subtle-smoke/50 rounded border border-gallery-gold/10">
-                <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Tier</p>
-                <div className="flex items-center">
-                  <ArtworkTierBadge tier={artwork.tier} showLabel={true} className="text-[8px]" />
+              <div className="p-4 bg-white rounded-lg border border-gallery-gold/20 shadow-sm flex flex-col justify-center items-center text-center">
+                <p className="font-label-caps text-[10px] text-gallery-gold uppercase tracking-[0.2em] mb-2">Tier</p>
+                <div className="flex justify-center items-center h-[28px]">
+                  <ArtworkTierBadge tier={artwork.tier} showLabel={true} className="text-[10px]" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Details */}
-          <div className="border-t border-outline/10 pt-6 space-y-4">
-            <div>
-              <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Medium</p>
-              <p className="font-body-md text-primary text-sm">{artwork.medium}</p>
-            </div>
-            <div>
-              <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Condition</p>
-              <p className="font-body-md text-primary text-sm">{artwork.condition}</p>
-            </div>
-            <div>
-              <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Customization</p>
-              <p className="font-body-md text-primary text-sm">Available upon request</p>
-            </div>
-            <div>
-              <p className="font-label-caps text-[9px] text-gallery-gold uppercase tracking-wider mb-1">Provenance</p>
-              <p className="font-body-md text-primary text-xs leading-relaxed">{artwork.provenance}</p>
+          <div className="border-t border-gallery-gold/20 pt-8 space-y-6">
+            <h3 className="font-display-md text-2xl text-primary mb-2">Properties</h3>
+            <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+              <div>
+                <p className="font-label-caps text-[10px] text-primary/50 uppercase tracking-[0.15em] mb-1">Medium</p>
+                <p className="font-body-md text-primary text-base font-medium">{artwork.medium}</p>
+              </div>
+              <div>
+                <p className="font-label-caps text-[10px] text-primary/50 uppercase tracking-[0.15em] mb-1">Dimensions</p>
+                <p className="font-body-md text-primary text-base font-medium">{artwork.size}</p>
+              </div>
+              <div>
+                <p className="font-label-caps text-[10px] text-primary/50 uppercase tracking-[0.15em] mb-1">Condition</p>
+                <p className="font-body-md text-primary text-base font-medium">{artwork.condition}</p>
+              </div>
+              <div>
+                <p className="font-label-caps text-[10px] text-primary/50 uppercase tracking-[0.15em] mb-1">Provenance</p>
+                <p className="font-body-md text-primary text-sm font-medium">{artwork.provenance}</p>
+              </div>
             </div>
           </div>
 
@@ -552,8 +579,8 @@ export default function ArtworkDetail() {
                   <span className="font-body-md text-sm text-on-surface-variant">Monthly Investment</span>
                   <span className="font-display-md text-3xl text-primary">
                     ₹{Math.round(
-                      artwork.metadata?.pricingTiers?.[selectedMonths.toString()] ||
-                      artwork.rentalPriceCents ||
+                      artwork.originalArtwork?.metadata?.pricingTiers?.[selectedMonths.toString()] ||
+                      artwork.originalArtwork?.rentalPriceCents ||
                       ((artwork.replacementValue || 0) / selectedMonths)
                     ).toLocaleString('en-IN')}<span className="text-base text-primary/60 font-body-md">/mo</span>
                   </span>

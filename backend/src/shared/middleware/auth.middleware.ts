@@ -21,7 +21,7 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
   // 1. Dev Bypass / Mock Mode
   if (token === 'offline-token-dummy' || token.startsWith('offline-')) {
     const defaultUser = await prisma.user.findFirst({
-      where: { email: { contains: 'admin' } },
+      where: { email: 'admin@thekalavault.com' },
       include: { role: true }
     });
     
@@ -83,7 +83,7 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
 
         // Create if missing
         if (!dbUser) {
-          const isAdmin = firebaseUser.email === 'admin7@tkv.com' || firebaseUser.email === 'admin@thekalavault.com';
+          const isAdmin = firebaseUser.email === 'admin@thekalavault.com';
           const roleName = isAdmin ? 'admin' : 'customer';
 
           const role = await prisma.role.upsert({

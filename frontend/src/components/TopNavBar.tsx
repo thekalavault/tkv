@@ -17,7 +17,7 @@ export default function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, dbUser } = useAuth();
   const { items: cartItems } = useCart();
   const { favorites } = useFavorites();
 
@@ -80,31 +80,14 @@ export default function TopNavBar() {
   return (
     <>
       <nav className={`fixed top-0 w-full z-50 px-4 md:px-8 transition-all duration-500 ${isScrolled ? 'bg-paper-white/95 backdrop-blur-md py-2 border-b border-transparent shadow-sm' : (isHeroDark ? 'bg-black/10 backdrop-blur-sm py-3 border-b border-transparent' : 'bg-paper-white/50 backdrop-blur-[10px] py-3 border-b border-transparent')}`}>
-        <div className="flex md:grid md:grid-cols-3 items-center justify-between w-full">
-          {/* Left Links */}
-          <div className="hidden md:flex gap-8 items-center justify-start">
-            {navLinks.slice(0, 2).map((link) => (
-              <Link 
-                key={link.path}
-                className={`font-label-caps text-[13px] font-semibold tracking-[0.15em] uppercase transition-colors duration-300 ${
-                  isActive(link.path) 
-                    ? 'text-gallery-gold border-b border-gallery-gold pb-0.5' 
-                    : linkColorClass
-                }`} 
-                to={link.path}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Center Logo */}
-          <div className="flex justify-start md:justify-center text-center">
-            <Link to="/" className="flex items-center justify-center transition-transform duration-300 hover:scale-[1.02]">
+        <div className="flex items-center justify-between w-full">
+          {/* Left Logo */}
+          <div className="flex justify-start text-left">
+            <Link to="/" className="flex items-center justify-start transition-transform duration-300 hover:scale-[1.02]">
               <KalaVaultLogo 
                 variant="alternate" 
                 theme={isHeroDark ? 'white' : 'gold'} 
-                className="scale-90 md:scale-100 origin-left md:origin-center"
+                className="scale-90 md:scale-100 origin-left"
               />
             </Link>
           </div>
@@ -112,7 +95,7 @@ export default function TopNavBar() {
           {/* Right Links & Button / Mobile Menu Button */}
           <div className="flex items-center justify-end">
             <div className="hidden md:flex gap-8 items-center justify-end">
-               {navLinks.slice(2).map((link) => (
+               {navLinks.map((link) => (
                 <Link 
                   key={link.path}
                   className={`font-label-caps text-[13px] font-semibold tracking-[0.15em] uppercase transition-colors duration-300 ${
@@ -128,7 +111,7 @@ export default function TopNavBar() {
               {currentUser ? (
                 <>
                   <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
-                    <Link to={currentUser.email?.toLowerCase().includes('admin') ? "/admin" : "/customer"} title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
+                    <Link to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"} title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
                       <span className="material-symbols-outlined text-[20px]">person</span>
                     </Link>
                     <Link to="/favorites" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
@@ -223,7 +206,7 @@ export default function TopNavBar() {
                  {currentUser ? (
                    <>
                      <Link 
-                       to={currentUser.email?.toLowerCase().includes('admin') ? "/admin" : "/customer"} 
+                       to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"} 
                        className="font-label-caps text-[14px] font-bold uppercase tracking-[0.2em] text-paper-white bg-primary px-10 py-4 hover:bg-gallery-gold transition-colors block text-center"
                      >
                        ACCOUNT

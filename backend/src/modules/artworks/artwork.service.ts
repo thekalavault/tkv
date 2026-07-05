@@ -8,6 +8,20 @@ import { prisma } from '../../shared/db/prisma';
 
 const artworkRepository = new ArtworkRepository();
 const r2Service = new CloudflareR2Service();
+const PUBLIC_R2_URL = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://www.thekalavault.com';
+
+function mapArtworkImages(artwork: any) {
+  if (artwork.images) {
+    artwork.images = artwork.images.map((img: any) => {
+      if (img.fileKey.startsWith('http')) return img;
+      if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
+        return { ...img, fileKey: `/uploads/${img.fileKey}` };
+      }
+      return { ...img, fileKey: `${PUBLIC_R2_URL}/${img.fileKey}` };
+    });
+  }
+  return artwork;
+}
 
 export class ArtworkService {
   async listArtworks(query: Record<string, any>) {
@@ -32,25 +46,7 @@ export class ArtworkService {
       artworkRepository.countArtworks(where),
     ]);
 
-    const mappedItems = await Promise.all(items.map(async (artwork: any) => {
-      if (artwork.images) {
-        artwork.images = await Promise.all(artwork.images.map(async (img: any) => {
-          if (img.fileKey.startsWith('http')) {
-            return img;
-          }
-          if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
-            return { ...img, fileKey: `/uploads/${img.fileKey}` };
-          }
-          try {
-            const url = await r2Service.getSignedAssetUrl(img.fileKey);
-            return { ...img, fileKey: url };
-          } catch (err) {
-            return { ...img, fileKey: `/uploads/${img.fileKey}` };
-          }
-        }));
-      }
-      return artwork;
-    }));
+    const mappedItems = items.map(mapArtworkImages);
 
     return { page, limit, total, items: mappedItems };
   }
@@ -60,23 +56,16 @@ export class ArtworkService {
     if (!artwork) {
       throw new ApiError('Artwork not found', 404);
     }
-    if (artwork.images) {
-      artwork.images = await Promise.all(artwork.images.map(async (img: any) => {
-        if (img.fileKey.startsWith('http')) {
-          return img;
-        }
-        if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
-          return { ...img, fileKey: `/uploads/${img.fileKey}` };
-        }
-        try {
-          const url = await r2Service.getSignedAssetUrl(img.fileKey);
-          return { ...img, fileKey: url };
-        } catch (err) {
-          return { ...img, fileKey: `/uploads/${img.fileKey}` };
-        }
-      }));
-    }
-    return artwork;
+    return mapArtworkImages(artwork);
+  }
+
+  async getAdjacentArtworks(id: string) {
+    return artworkRepository.findAdjacentArtworks(id);
+  }
+
+  async getRelatedArtworks(id: string, limit: number = 4) {
+    const related = await artworkRepository.findRelatedArtworks(id, limit);
+    return related.map(mapArtworkImages);
   }
 
   async listMyCollection(userId: string) {
@@ -86,23 +75,7 @@ export class ArtworkService {
       include: { images: true }
     });
 
-    return Promise.all(items.map(async (artwork: any) => {
-      if (artwork.images) {
-        artwork.images = await Promise.all(artwork.images.map(async (img: any) => {
-          if (img.fileKey.startsWith('http')) return img;
-          if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
-            return { ...img, fileKey: `/uploads/${img.fileKey}` };
-          }
-          try {
-            const url = await r2Service.getSignedAssetUrl(img.fileKey);
-            return { ...img, fileKey: url };
-          } catch (err) {
-            return { ...img, fileKey: `/uploads/${img.fileKey}` };
-          }
-        }));
-      }
-      return artwork;
-    }));
+    return items.map(mapArtworkImages);
   }
 
   async createArtwork(data: Record<string, any>) {
@@ -210,15 +183,26 @@ export class ArtworkService {
       return { url: `/uploads/${image.fileKey}`, mimeType: image.mimeType, variant: image.variant };
     }
 
-    try {
-      const url = await r2Service.getSignedAssetUrl(image.fileKey);
-      return { url, mimeType: image.mimeType, variant: image.variant };
-    } catch (err) {
-      return { url: `/uploads/${image.fileKey}`, mimeType: image.mimeType, variant: image.variant };
-    }
+    return { url: `${PUBLIC_R2_URL}/${image.fileKey}`, mimeType: image.mimeType, variant: image.variant };
   }
 
   async getArtworkImageById(imageId: string) {
     return artworkRepository.findArtworkImageById(imageId);
+  }
+
+  async deleteArtwork(id: string) {
+    const artwork = await artworkRepository.findArtworkById(id);
+    if (!artwork) throw new ApiError('Artwork not found', 404);
+
+    await artworkRepository.deleteArtwork(id);
+    return { success: true };
+  }
+
+  async deleteArtworkImage(imageId: string) {
+    const image = await artworkRepository.findArtworkImageById(imageId);
+    if (!image) throw new ApiError('Artwork image not found', 404);
+
+    await artworkRepository.deleteArtworkImage(imageId);
+    return { success: true };
   }
 }

@@ -48,14 +48,13 @@ export async function getArtworkDetailById(id: string): Promise<ArtworkDetailedI
     originalArtwork: artwork,
   };
 
-  // Fetch related artworks (this could be optimized on the backend, doing it here for simplicity)
+  // Fetch related artworks from the optimized backend endpoint
   let relatedArtworks: CollectionArtwork[] = [];
   try {
-    const list = await fetchArtworks(1, 20);
-    relatedArtworks = list.items
-      .filter(a => a.id !== artwork.id && determineTierFromValue(a.replacementValue) === tier)
-      .slice(0, 4)
-      .map(a => ({
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/artworks/${id}/related?limit=4`);
+    if (response.ok) {
+      const list = await response.json();
+      relatedArtworks = list.map((a: any) => ({
         id: a.id,
         name: a.title,
         size: a.dimensions || 'Variable',
@@ -64,6 +63,7 @@ export async function getArtworkDetailById(id: string): Promise<ArtworkDetailedI
         tier: determineTierFromValue(a.replacementValue),
         originalArtwork: a,
       }));
+    }
   } catch (err) {
     console.error('Failed to fetch related artworks', err);
   }
@@ -150,21 +150,14 @@ function getRandomMedium(): string {
   return mediums[Math.floor(Math.random() * mediums.length)];
 }
 
-/**
- * Get next and previous artworks for navigation
- * Now async to query the list if needed
- */
 export async function getAdjacentArtworks(currentId: string) {
   try {
-    const list = await fetchArtworks(1, 100);
-    const currentIndex = list.items.findIndex(art => art.id === currentId);
-    if (currentIndex === -1) return { prev: null, next: null };
-
-    return {
-      prev: currentIndex > 0 ? { id: list.items[currentIndex - 1].id } : null,
-      next: currentIndex < list.items.length - 1 ? { id: list.items[currentIndex + 1].id } : null,
-    };
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/v1/artworks/${currentId}/adjacent`);
+    if (response.ok) {
+      return await response.json();
+    }
   } catch (err) {
-    return { prev: null, next: null };
+    console.error('Failed to fetch adjacent artworks', err);
   }
+  return { prev: null, next: null };
 }

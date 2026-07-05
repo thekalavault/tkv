@@ -17,7 +17,7 @@ export default function SignIn() {
   const handleNavigation = (role: string, emailStr: string) => {
     if (redirectUrl) {
       navigate(redirectUrl);
-    } else if (role === 'admin' || emailStr.toLowerCase().includes('admin')) {
+    } else if (role === 'admin' || emailStr.toLowerCase() === 'admin@thekalavault.com') {
       navigate('/admin');
     } else {
       // Redirect customers to Collections to pick artworks (Onboarding flow)
@@ -37,7 +37,20 @@ export default function SignIn() {
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
       }
-      handleNavigation(email.toLowerCase().includes('admin') ? 'admin' : 'customer', userCredential.user.email || '');
+      let role = 'customer';
+      try {
+        const token = await userCredential.user.getIdToken();
+        const response = await fetch('http://localhost:3000/api/v1/users/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          role = data.role.name;
+        }
+      } catch (e) {
+        console.error("Could not fetch profile for routing", e);
+      }
+      handleNavigation(['admin', 'account_manager', 'operations'].includes(role) ? 'admin' : 'customer', userCredential.user.email || '');
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
         setError('Invalid email or password. Do you need to create an account?');
@@ -55,7 +68,20 @@ export default function SignIn() {
     setError('');
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
-      handleNavigation((userCredential.user.email || '').toLowerCase().includes('admin') ? 'admin' : 'customer', userCredential.user.email || '');
+      let role = 'customer';
+      try {
+        const token = await userCredential.user.getIdToken();
+        const response = await fetch('http://localhost:3000/api/v1/users/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          role = data.role.name;
+        }
+      } catch (e) {
+        console.error("Could not fetch profile for routing", e);
+      }
+      handleNavigation(['admin', 'account_manager', 'operations'].includes(role) ? 'admin' : 'customer', userCredential.user.email || '');
     } catch (err: any) {
       console.error('Google Sign-In failed:', err);
       setError(err.message || 'Google Authentication failed');

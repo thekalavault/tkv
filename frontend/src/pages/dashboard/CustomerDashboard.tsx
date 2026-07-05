@@ -241,7 +241,7 @@ export default function CustomerDashboard() {
                   ) : (
                     artworks.map((art, index) => {
                       const imageUrl = art.images && art.images[0]
-                        ? (art.images[0].fileKey.startsWith('http') ? art.images[0].fileKey : `${API_BASE_URL}/uploads/${art.images[0].fileKey}`)
+                        ? (art.images[0].fileKey.startsWith('http') ? art.images[0].fileKey : `${API_BASE_URL}${art.images[0].fileKey.startsWith('/') ? '' : '/uploads/'}${art.images[0].fileKey}`)
                         : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&q=80&w=600';
 
                       const acquiredDate = new Date(art.metadata?.acquiredAt || art.createdAt || new Date());

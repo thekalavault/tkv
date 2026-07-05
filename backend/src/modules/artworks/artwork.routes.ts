@@ -11,10 +11,14 @@ const controller = new ArtworkController();
 router.get('/', asyncHandler((req, res) => controller.list(req, res)));
 router.get('/my-collection', authGuard, asyncHandler((req, res) => controller.myCollection(req, res)));
 router.get('/:id', asyncHandler((req, res) => controller.getById(req, res)));
+router.get('/:id/adjacent', asyncHandler((req, res) => controller.getAdjacent(req, res)));
+router.get('/:id/related', asyncHandler((req, res) => controller.getRelated(req, res)));
 router.post('/', authGuard, roleGuard(['admin', 'operations']), asyncHandler((req, res) => controller.create(req, res)));
 router.put('/:id', authGuard, roleGuard(['admin', 'operations']), asyncHandler((req, res) => controller.update(req, res)));
 router.post('/:id/images', authGuard, roleGuard(['admin', 'operations']), asyncHandler((req, res) => controller.generateUploadUrl(req, res)));
 router.get('/:id/images/:imageId/url', authGuard, asyncHandler((req, res) => controller.getImageUrl(req, res)));
+router.delete('/:id', authGuard, roleGuard(['admin', 'operations']), asyncHandler((req, res) => controller.delete(req, res)));
+router.delete('/:id/images/:imageId', authGuard, roleGuard(['admin', 'operations']), asyncHandler((req, res) => controller.deleteImage(req, res)));
 
 // Mock file upload endpoint
 router.post('/:id/images/:imageId/upload-mock',

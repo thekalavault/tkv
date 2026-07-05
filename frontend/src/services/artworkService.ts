@@ -11,6 +11,8 @@ export interface Artwork {
   rentalPriceCents?: number;
   replacementValue?: number;
   status?: string;
+  sku?: string;
+  metadata?: any;
   localImagePath?: string; // Path to local image file
   images?: {
     id: string;
@@ -99,22 +101,7 @@ const LOCAL_ARTWORKS: Artwork[] = [
   },
 ];
 
-export async function fetchArtworks(page = 1, limit = 24, forceRefresh = false): Promise<ArtworksResponse> {
-  const cacheKey = `kalavault_artworks_${page}_${limit}`;
-  
-  if (!forceRefresh) {
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        // 10 minute cache TTL
-        if (parsed.timestamp && (Date.now() - parsed.timestamp < 1000 * 60 * 10)) {
-          return parsed.data;
-        }
-      } catch(e) {}
-    }
-  }
-
+export async function fetchArtworks(page = 1, limit = 24): Promise<ArtworksResponse> {
   try {
     const token = auth.currentUser ? await auth.currentUser.getIdToken() : '';
     const response = await fetch(`${API_BASE_URL}/api/v1/artworks?page=${page}&limit=${limit}`, {
@@ -127,10 +114,8 @@ export async function fetchArtworks(page = 1, limit = 24, forceRefresh = false):
     if (response.ok) {
       const data = await response.json();
       if (data.items && data.items.length > 0) {
-        sessionStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
         return data;
       }
-      // Fallback to local data if API returns empty
       return {
         page,
         limit,
@@ -152,22 +137,7 @@ export async function fetchArtworks(page = 1, limit = 24, forceRefresh = false):
   };
 }
 
-export async function fetchArtworkById(id: string, forceRefresh = false): Promise<Artwork | null> {
-  const cacheKey = `kalavault_artwork_${id}`;
-  
-  if (!forceRefresh) {
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        // 15 minute cache TTL
-        if (parsed.timestamp && (Date.now() - parsed.timestamp < 1000 * 60 * 15)) {
-          return parsed.data;
-        }
-      } catch(e) {}
-    }
-  }
-
+export async function fetchArtworkById(id: string): Promise<Artwork | null> {
   try {
     const token = auth.currentUser ? await auth.currentUser.getIdToken() : '';
     const response = await fetch(`${API_BASE_URL}/api/v1/artworks/${id}`, {
@@ -178,11 +148,7 @@ export async function fetchArtworkById(id: string, forceRefresh = false): Promis
     });
 
     if (response.ok) {
-      const data = await response.json();
-      if (data) {
-        sessionStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
-        return data;
-      }
+      return await response.json();
     }
   } catch (error) {
     console.error('API fetch by ID failed:', error);

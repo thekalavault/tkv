@@ -29,7 +29,7 @@ export default function CRMManager() {
           value: lead.companyName || 'N/A'
         })));
       } else if (response.status === 403) {
-        alert("You do not have permission to view leads. You must be logged in as an Admin (e.g., admin7@tkv.com).");
+        alert("You do not have permission to view leads. You must be logged in as an Admin (e.g., admin@thekalavault.com).");
       } else {
         console.error('Failed to fetch leads:', response.status);
       }

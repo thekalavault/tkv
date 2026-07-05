@@ -23,6 +23,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Cart from "./pages/Cart";
 import Favorites from "./pages/Favorites";
+import SalesDashboard from "./pages/sales/SalesDashboard";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="/customer" element={<CustomerDashboard />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/favorites" element={<Favorites />} />
+            <Route path="/sales" element={<SalesDashboard />} />
           </Routes>
         </FavoritesProvider>
       </CartProvider>
