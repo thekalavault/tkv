@@ -10,6 +10,14 @@ export interface AuthRequest extends Request {
 
 // JWT secret removed (Supabase auth used)
 
+import { getApps, initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+
+// Initialize firebase admin if not already initialized
+if (!getApps().length) {
+  initializeApp();
+}
+
 export async function authGuard(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
@@ -18,8 +26,8 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
 
   const token = authHeader.replace('Bearer ', '');
   
-  // 1. Dev Bypass / Mock Mode
-  if (token === 'offline-token-dummy' || token.startsWith('offline-')) {
+  // 1. Dev Bypass / Mock Mode - SECURED: Only in non-production
+  if ((token === 'offline-token-dummy' || token.startsWith('offline-')) && process.env.NODE_ENV !== 'production') {
     const defaultUser = await prisma.user.findFirst({
       where: { email: { contains: 'admin' } },
       include: { role: true }
@@ -33,6 +41,8 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
       };
       return next();
     }
+  } else if ((token === 'offline-token-dummy' || token.startsWith('offline-')) && process.env.NODE_ENV === 'production') {
+    throw new ApiError('Offline tokens are not permitted in production', 401);
   }
 
   // 3. Supabase token verification
@@ -68,22 +78,19 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
     };
     return next();
   } catch (error) {
-    // FALLBACK: If Supabase fails, see if it's a valid Firebase token
+    // FALLBACK: Verify Firebase token PROPERLY using firebase-admin
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = Buffer.from(base64, 'base64').toString('utf8');
-      const firebaseUser = JSON.parse(jsonPayload);
+      const decodedToken = await getAuth().verifyIdToken(token);
       
-      if (firebaseUser && firebaseUser.email) {
+      if (decodedToken && decodedToken.email) {
         let dbUser = await prisma.user.findUnique({
-          where: { email: firebaseUser.email },
+          where: { email: decodedToken.email },
           include: { role: true },
         });
 
         // Create if missing
         if (!dbUser) {
-          const isAdmin = firebaseUser.email === 'admin7@tkv.com' || firebaseUser.email === 'admin@thekalavault.com';
+          const isAdmin = decodedToken.email === 'admin7@tkv.com' || decodedToken.email === 'admin@thekalavault.com';
           const roleName = isAdmin ? 'admin' : 'customer';
 
           const role = await prisma.role.upsert({
@@ -94,10 +101,10 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
 
           dbUser = await prisma.user.create({
             data: {
-              email: firebaseUser.email,
+              email: decodedToken.email,
               passwordHash: 'firebase-auth-managed',
-              firstName: firebaseUser.name ? firebaseUser.name.split(' ')[0] : '',
-              lastName: firebaseUser.name ? firebaseUser.name.split(' ').slice(1).join(' ') : '',
+              firstName: decodedToken.name ? decodedToken.name.split(' ')[0] : '',
+              lastName: decodedToken.name ? decodedToken.name.split(' ').slice(1).join(' ') : '',
               roleId: role.id,
               status: 'active',
             },
@@ -113,7 +120,7 @@ export async function authGuard(req: AuthRequest, res: Response, next: NextFunct
         return next();
       }
     } catch(decodeErr) {
-       // Ignore decode errors
+       // Ignore decode errors and fall through to throw below
     }
 
     throw new ApiError('Invalid access token', 401);

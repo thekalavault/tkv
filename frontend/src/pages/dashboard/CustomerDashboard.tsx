@@ -30,8 +30,12 @@ export default function CustomerDashboard() {
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
   useEffect(() => {
-    if (!authLoading && !currentUser) {
-      navigate('/signin');
+    if (!authLoading) {
+      if (!currentUser) {
+        navigate('/signin');
+      } else if (currentUser.email === 'admin@thekalavault.com') {
+        navigate('/admin'); // Redirect admin to admin dashboard
+      }
     }
   }, [currentUser, authLoading, navigate]);
 
