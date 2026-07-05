@@ -25,17 +25,6 @@ export class ArtworkController {
     res.json(artwork);
   }
 
-  async getAdjacent(req: Request, res: Response) {
-    const result = await artworkService.getAdjacentArtworks(req.params.id);
-    res.json(result);
-  }
-
-  async getRelated(req: Request, res: Response) {
-    const limit = Number(req.query.limit) || 4;
-    const result = await artworkService.getRelatedArtworks(req.params.id, limit);
-    res.json(result);
-  }
-
   async create(req: Request, res: Response) {
     const artwork = await artworkService.createArtwork(req.body);
     res.status(201).json(artwork);
@@ -58,15 +47,5 @@ export class ArtworkController {
 
   async getArtworkImageById(imageId: string) {
     return artworkService.getArtworkImageById(imageId);
-  }
-
-  async delete(req: Request, res: Response) {
-    const result = await artworkService.deleteArtwork(req.params.id);
-    res.json(result);
-  }
-
-  async deleteImage(req: Request, res: Response) {
-    const result = await artworkService.deleteArtworkImage(req.params.imageId);
-    res.json(result);
   }
 }

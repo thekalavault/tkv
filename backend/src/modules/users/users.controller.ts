@@ -19,15 +19,4 @@ export class UsersController {
     const users = await usersService.listUsers(req.query);
     res.json(users);
   }
-
-  async updateRole(req: AuthRequest, res: Response) {
-    const { role } = req.body;
-    const updated = await usersService.updateUserRole(req.params.id, role);
-    res.json(updated);
-  }
-
-  async deleteUser(req: AuthRequest, res: Response) {
-    await usersService.deleteUser(req.params.id);
-    res.status(204).send();
-  }
 }

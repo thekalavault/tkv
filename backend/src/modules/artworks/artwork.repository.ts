@@ -45,46 +45,4 @@ export class ArtworkRepository {
   async findArtworkImageById(imageId: string) {
     return prisma.artworkImage.findUnique({ where: { id: imageId } });
   }
-
-  async deleteArtwork(id: string) {
-    await prisma.artworkImage.deleteMany({ where: { artworkId: id } });
-    return prisma.artwork.delete({ where: { id } });
-  }
-
-  async deleteArtworkImage(imageId: string) {
-    return prisma.artworkImage.delete({ where: { id: imageId } });
-  }
-
-  async findAdjacentArtworks(currentId: string) {
-    const current = await prisma.artwork.findUnique({ where: { id: currentId } });
-    if (!current) return { prev: null, next: null };
-    
-    const prev = await prisma.artwork.findFirst({
-      where: { createdAt: { gt: current.createdAt } },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true }
-    });
-    
-    const next = await prisma.artwork.findFirst({
-      where: { createdAt: { lt: current.createdAt } },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true }
-    });
-    
-    return { prev, next };
-  }
-
-  async findRelatedArtworks(currentId: string, limit: number) {
-    const current = await prisma.artwork.findUnique({ where: { id: currentId } });
-    if (!current) return [];
-
-    return prisma.artwork.findMany({
-      where: { 
-        id: { not: currentId },
-        category: current.category
-      },
-      take: limit,
-      include: { images: true }
-    });
-  }
 }
