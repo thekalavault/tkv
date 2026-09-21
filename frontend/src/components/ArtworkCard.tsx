@@ -1,19 +1,23 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useIntersectionObserver } from '../hooks/useIntersectionObserver'; // Not needed but kept for other potential uses if any, actually I'll just remove the import in the next block.
-import { ArtworkTierBadge } from './ArtworkTierInfo';
 import { CollectionArtwork } from '../lib/collectionsData';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
+import { getArtworkDetailById } from '../services/artworkDetailService';
 
 interface ArtworkCardProps {
   artwork: CollectionArtwork;
   index?: number;
+  variant?: 'collections' | 'standard';
   key?: any;
 }
 
-export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
+const ArtworkCard = memo(function ArtworkCard({ 
+  artwork, 
+  index = 0,
+  variant = 'standard'
+}: ArtworkCardProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
@@ -21,7 +25,7 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
 
   const getStartingPrice = () => {
     const orig = artwork.originalArtwork;
-    if (!orig) return Math.round(15000 * 0.012); // fallback
+    if (!orig) return 15000;
     let minPrice = orig.rentalPriceCents ? orig.rentalPriceCents : Math.round((orig.replacementValue || 15000) * 0.012);
     
     if ((orig as any).metadata?.pricingTiers) {
@@ -33,90 +37,143 @@ export default function ArtworkCard({ artwork, index = 0 }: ArtworkCardProps) {
     return minPrice;
   };
 
+  const getFullMrp = () => {
+    const orig = artwork.originalArtwork;
+    if (!orig) return 35000;
+    if (orig.replacementValue && orig.replacementValue > 0) {
+      return orig.replacementValue;
+    }
+    if (orig.rentalPriceCents && orig.rentalPriceCents > 0) {
+      return Math.round(orig.rentalPriceCents / 0.012);
+    }
+    return 35000;
+  };
+
   const hasTiers = (artwork.originalArtwork as any)?.metadata?.pricingTiers && Object.keys((artwork.originalArtwork as any).metadata.pricingTiers).length > 0;
+  const startingPrice = getStartingPrice();
+  const fullMrp = getFullMrp();
+  const artistName = (artwork as any).artist || (artwork.originalArtwork as any)?.artist || 'Museum Archival Edition';
+
+  const isCollectionsVariant = variant === 'collections';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "100px" }}
-      transition={{ duration: 0.6, delay: (index % 6) * 0.05 }}
-      className="group cursor-pointer flex flex-col break-inside-avoid mb-6 md:mb-8"
+      viewport={{ once: true, margin: "60px" }}
+      transition={{ duration: 0.4, delay: (index % 3) * 0.06 }}
+      className={`group cursor-pointer flex flex-col items-center justify-between text-center w-full h-full transition-colors duration-300 ${
+        isCollectionsVariant 
+          ? 'p-2 sm:p-3' 
+          : ''
+      }`}
+      onMouseEnter={() => getArtworkDetailById(artwork.id)}
       onClick={() => navigate(`/artwork/${artwork.id}`)}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="relative overflow-hidden bg-stone-200 shadow-sm hover:shadow-xl transition-shadow duration-700 no-select">
+      {/* Artwork in Thin Luxury Wooden Frame Finish */}
+      <div className="w-full flex-1 flex items-center justify-center p-2 min-h-[280px] sm:min-h-[320px] md:min-h-[360px] relative">
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-stone-200/50 animate-pulse z-0" />
+          <div className="absolute inset-4 bg-[#EFE8DD]/50 animate-pulse" />
         )}
-        <img
-          className={`w-full h-auto object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center group-hover:scale-115 no-drag relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          alt={artwork.name}
-          src={artwork.localPath}
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setImageLoaded(true)}
-          onDragStart={(e) => e.preventDefault()}
-          onContextMenu={(e) => e.preventDefault()}
-        />
 
-        {/* Tiled watermark repeating overlay - remains slightly visible on hover */}
-        <div className="watermark-tiled opacity-100 group-hover:opacity-35 transition-opacity duration-500" />
+        {/* Thin Gallery Wooden Frame */}
+        <div className="relative group/art inline-flex items-center justify-center p-[3px] bg-gradient-to-b from-[#3E2419] via-[#2A160F] to-[#1E0E08] border-[4px] sm:border-[5px] border-[#341B12] shadow-[0_12px_28px_rgba(26,13,8,0.28)] group-hover:shadow-[0_18px_38px_rgba(26,13,8,0.38)] group-hover:border-[#422317] transition-all duration-300">
+          
+          {/* Subtle Inner Gold Hairline Bevel */}
+          <div className="relative p-[1px] bg-gradient-to-tr from-[#9E7D38]/60 via-[#DFC07D]/80 to-[#9E7D38]/60 shadow-inner overflow-hidden">
+            <div className="bg-[#120704] flex items-center justify-center overflow-hidden">
+              <img
+                className={`max-h-[290px] sm:max-h-[330px] md:max-h-[370px] w-auto max-w-full object-contain block mx-auto transition-transform duration-300 group-hover:scale-[1.01] no-drag ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                alt={artwork.name}
+                src={artwork.localPath}
+                loading="lazy"
+                decoding="async"
+                onLoad={() => setImageLoaded(true)}
+                onDragStart={(e) => e.preventDefault()}
+                onContextMenu={(e) => e.preventDefault()}
+              />
+            </div>
+          </div>
 
-
-        {/* Shadow gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
-
-        {/* Golden frame effect - fades out on hover */}
-        <div className="absolute inset-0 border-[0.15cm] border-[#cca550] shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] z-20 pointer-events-none mix-blend-multiply opacity-90 transition-opacity duration-500 group-hover:opacity-0" />
-        <div className="absolute inset-0 border-[0.15cm] border-gallery-gold z-20 pointer-events-none shadow-[inset_0_4px_15px_rgba(0,0,0,0.5),0_10px_30px_rgba(0,0,0,0.3)] opacity-80 transition-opacity duration-500 group-hover:opacity-0" />
-        
-        {/* Like Button overlay */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); // prevent navigation
-            if (!user) {
-              navigate('/signin');
-              return;
-            }
-            if (isFavorite(artwork.id)) {
-              removeFavorite(artwork.id);
-            } else {
-              addFavorite(artwork.id);
-            }
-          }}
-          className={`absolute top-4 right-4 z-30 p-2 rounded-full backdrop-blur-md border border-white/20 transition-all duration-300 shadow-lg cursor-pointer ${
-            isFavorite(artwork.id) ? 'bg-primary/90 text-white' : 'bg-white/80 text-primary hover:bg-white hover:text-gallery-gold'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">
-            {isFavorite(artwork.id) ? 'favorite' : 'favorite_border'}
-          </span>
-        </button>
+          {/* Favorite Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!user) {
+                navigate('/signin');
+                return;
+              }
+              if (isFavorite(artwork.id)) {
+                removeFavorite(artwork.id);
+              } else {
+                addFavorite(artwork.id);
+              }
+            }}
+            aria-label="Add to favorites"
+            className={`absolute top-2 right-2 z-30 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md ${
+              isFavorite(artwork.id) 
+                ? 'bg-[#7B2431] text-[#FAF6F0] border border-[#DFC07D]/60' 
+                : 'bg-white/95 backdrop-blur-xs text-[#1E1412] hover:bg-[#7B2431] hover:text-[#FAF6F0] border border-[#C5A059]/40'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[14px] sm:text-[15px]">
+              {isFavorite(artwork.id) ? 'favorite' : 'favorite_border'}
+            </span>
+          </button>
+        </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-2">
-        <div className="flex justify-between items-start gap-4">
-          <h3 className="font-display-md text-[18px] md:text-[20px] text-primary tracking-tight group-hover:text-gallery-gold transition-colors duration-300 truncate leading-tight flex-1">
+      {/* Centered Luxury Typography Below Image */}
+      {isCollectionsVariant ? (
+        <div className="mt-4 flex flex-col items-center justify-center space-y-1 w-full px-2">
+          {/* Artwork Title */}
+          <h3 
+            title={artwork.name}
+            className="font-cinzel text-[13px] sm:text-[14px] font-bold text-[#1E1412] tracking-[0.16em] uppercase group-hover:text-[#4A0E17] transition-colors duration-200 truncate max-w-[280px]"
+          >
             {artwork.name}
           </h3>
-          <div className="flex-shrink-0">
-            <span className="text-[12px] font-bold font-body-md text-primary bg-stone-100 px-3 py-1.5 rounded-full border border-outline/10 shadow-sm flex items-center">
-              {hasTiers ? <span className="text-[10px] font-normal text-on-surface-variant mr-1">From</span> : ''}
-              ₹{getStartingPrice().toLocaleString('en-IN')}<span className="text-[10px] font-normal text-on-surface-variant ml-0.5">/mo</span>
+
+          {/* Author / Artist */}
+          <p 
+            title={artistName}
+            className="font-cormorant italic text-[14px] sm:text-[15px] text-[#1E1412]/75 tracking-wide truncate max-w-[280px]"
+          >
+            {artistName}
+          </p>
+
+          {/* Lease Available & Full MRP */}
+          <div className="pt-2 flex flex-col items-center space-y-1">
+            <span className="inline-flex items-center gap-1.5 text-[9.5px] sm:text-[10px] font-cinzel font-bold tracking-[0.24em] text-[#C5A059] uppercase">
+              <span className="w-1.5 h-1.5 bg-[#C5A059]" />
+              LEASE AVAILABLE
+            </span>
+            <span className="text-[12px] sm:text-[12.5px] font-sans text-[#1E1412]/70 font-medium tracking-wide">
+              <span className="text-[10px] uppercase tracking-widest text-[#1E1412]/45 font-semibold mr-1">MRP</span>
+              <span className="font-bold text-[#1E1412] text-[13px]">₹{fullMrp.toLocaleString('en-IN')}</span>
             </span>
           </div>
         </div>
-        <div className="flex justify-between items-center mt-3">
-          <div className="flex items-center gap-2 bg-stone-100/80 px-3 py-1.5 rounded-md border border-outline/5 shadow-sm">
-            <span className="material-symbols-outlined text-[14px] text-gallery-gold">verified</span>
-            <span className="text-[11px] font-label-caps tracking-widest text-on-surface-variant/90 uppercase">
-              Value <span className="text-primary font-bold ml-1.5">₹{(artwork.originalArtwork?.replacementValue || 15000).toLocaleString('en-IN')}</span>
+      ) : (
+        <div className="mt-4 flex flex-col items-center justify-center space-y-1 w-full px-2">
+          <h3 className="font-cinzel text-[13.5px] md:text-[14.5px] font-bold text-[#1E1412] tracking-[0.14em] uppercase group-hover:text-[#4A0E17] transition-colors duration-200 truncate w-full">
+            {artwork.name}
+          </h3>
+          <p className="font-cormorant italic text-[13.5px] md:text-[14.5px] text-[#1E1412]/70 truncate w-full">
+            {artistName}
+          </p>
+          <div className="pt-1">
+            <span className="font-sans text-[11px] md:text-[11.5px] text-[#1E1412]/75 font-semibold tracking-wider uppercase">
+              {hasTiers ? 'FROM ' : ''}
+              <span className="text-[#C5A059] font-extrabold">₹{startingPrice.toLocaleString('en-IN')}</span>
+              <span className="text-[10px] text-[#1E1412]/50 tracking-normal font-normal"> / MO</span>
             </span>
           </div>
-          <span className="text-[11px] font-label-caps tracking-widest text-gallery-gold font-bold uppercase border-b border-gallery-gold/30 pb-0.5">Lease Available</span>
         </div>
-      </div>
+      )}
     </motion.div>
   );
-}
+});
+
+export default ArtworkCard;

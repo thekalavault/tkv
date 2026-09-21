@@ -1,104 +1,148 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import TopNavBar from '../components/TopNavBar';
+import Footer from '../components/Footer';
 
 export default function Cart() {
   const { items: cartItems, total: cartTotal, removeFromCart, clearCart } = useCart();
-  const navigate = useNavigate();
 
   return (
-    <div className="bg-paper-white text-primary min-h-screen flex flex-col font-body-md overflow-x-hidden selection:bg-gallery-gold/30">
+    <div className="bg-[#FAF6F0] text-[#1E1412] min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-[#C5A059]/30 pt-[100px] md:pt-[130px]">
       <TopNavBar />
-      <main className="flex-1 mt-24 max-w-[1600px] w-full mx-auto px-6 md:px-12 py-16">
+      
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-6 md:px-12 py-12 md:py-16">
         <div>
-          <section className="space-y-2 mb-10 border-b border-gallery-gold/20 pb-4">
-            <span className="font-label-caps text-[10px] tracking-widest text-gallery-gold uppercase block">CHECKOUT</span>
-            <h3 className="font-display-md text-4xl tracking-tight text-primary">Your Cart</h3>
+          <section className="space-y-3 mb-12 border-b border-[#C5A059]/25 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <span className="text-[10.5px] tracking-[0.35em] font-cinzel text-[#4A0E17] uppercase block font-bold">
+                Acquisition Portfolio
+              </span>
+              <h1 className="font-cinzel text-3xl md:text-5xl tracking-tight text-[#1E1412] font-semibold">
+                Curated Selection Cart
+              </h1>
+            </div>
+            {cartItems.length > 0 && (
+              <p className="text-xs font-cinzel font-bold text-[#1E1412]/60 uppercase tracking-wider">
+                {cartItems.length} {cartItems.length === 1 ? 'Masterwork' : 'Masterworks'} Reserved
+              </p>
+            )}
           </section>
+
           {cartItems.length === 0 ? (
-            <div className="bg-subtle-smoke p-12 border border-gallery-gold/20 text-center">
-              <p className="font-body-md text-primary/60 mb-6">Your cart is currently empty.</p>
-              <Link to="/customer?tab=catalog" className="px-8 py-3 bg-primary text-white font-label-caps text-[11px] tracking-widest uppercase hover:bg-gallery-gold transition-colors inline-block">
-                Browse Artwork
+            <div className="bg-[#FAF6F0] p-16 md:p-24 rounded-3xl border border-[#C5A059]/30 text-center shadow-sm max-w-2xl mx-auto">
+              <div className="w-16 h-16 rounded-full border border-[#C5A059]/40 bg-[#F5EFEB] flex items-center justify-center mx-auto mb-6 text-[#4A0E17]">
+                <span className="material-symbols-outlined text-[30px]">shopping_bag</span>
+              </div>
+              <h2 className="font-cinzel text-2xl md:text-3xl text-[#1E1412] mb-3 font-semibold">
+                Your Acquisition Portfolio is Empty
+              </h2>
+              <p className="text-sm text-[#1E1412]/70 mb-8 max-w-md mx-auto font-body-md">
+                Explore our curatorial vault of museum-grade original masterworks and dynamic rotation collections.
+              </p>
+              <Link to="/collections" className="pill-button pill-button-bordeaux text-xs">
+                Browse Gallery Vault
+                <span className="material-symbols-outlined text-[15px] text-[#DFC07D]">arrow_forward</span>
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="md:col-span-2 bg-subtle-smoke border border-gallery-gold/20 p-0 overflow-hidden shadow-sm h-max">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-gallery-gold/20 text-left bg-white">
-                      <th className="p-6 font-label-caps text-[10px] tracking-widest text-primary/60 uppercase">Artwork Details</th>
-                      <th className="p-6 font-label-caps text-[10px] tracking-widest text-primary/60 uppercase">Price</th>
-                      <th className="p-6 font-label-caps text-[10px] tracking-widest text-primary/60 uppercase text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gallery-gold/10">
-                    {cartItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-white transition-all group">
-                        <td className="p-6 w-full md:w-auto">
-                          <div className="flex items-center gap-6">
-                            {item.imageUrl && (
-                              <div className="w-20 h-20 bg-white overflow-hidden group-hover:ring-1 group-hover:ring-gallery-gold/30 transition-all border border-gallery-gold/10 shrink-0">
-                                <img 
-                                  src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${item.imageUrl.startsWith('/') ? '' : '/uploads/'}${item.imageUrl}`} 
-                                  alt={item.name} 
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                                />
-                              </div>
-                            )}
-                            <div>
-                              <p className="font-display-md text-xl leading-tight mb-1 group-hover:text-gallery-gold transition-colors tracking-tight">{item.name}</p>
-                              <p className="font-label-caps text-[10px] tracking-widest text-primary/50 uppercase">Type: {item.type.replace('_', ' ')}</p>
-                            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+              {/* Table / List */}
+              <div className="lg:col-span-2 bg-[#FAF6F0] rounded-3xl border border-[#C5A059]/30 p-6 md:p-8 shadow-[0_10px_40px_rgba(74,14,23,0.04)] overflow-hidden">
+                <div className="divide-y divide-[#C5A059]/20">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="py-6 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group">
+                      <div className="flex items-center gap-5">
+                        {item.imageUrl && (
+                          <div className="w-24 h-24 rounded-2xl bg-[#241611] overflow-hidden border border-[#3D251C] shrink-0 relative shadow-inner p-1">
+                            <img 
+                              src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${item.imageUrl.startsWith('/') ? '' : '/uploads/'}${item.imageUrl}`} 
+                              alt={item.name} 
+                              className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-105" 
+                            />
                           </div>
-                        </td>
-                        <td className="p-6 align-middle hidden md:table-cell">
-                          <p className="font-display-md text-lg text-primary">₹{item.price.toLocaleString('en-IN')}</p>
-                        </td>
-                        <td className="p-6 text-right align-middle">
-                          <button onClick={() => removeFromCart(item.id)} className="text-primary/50 hover:text-red-500 transition-colors cursor-pointer p-2 rounded-full hover:bg-red-500/10" title="Remove from Cart">
-                            <span className="material-symbols-outlined text-[20px]">delete</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        )}
+                        <div>
+                          <span className="text-[9px] uppercase tracking-[0.25em] font-cinzel px-2.5 py-0.5 rounded-full bg-[#4A0E17]/10 text-[#4A0E17] border border-[#4A0E17]/20 inline-block mb-1.5 font-bold">
+                            {item.type.replace('_', ' ')}
+                          </span>
+                          <h3 className="font-cinzel text-xl md:text-2xl text-[#1E1412] font-semibold leading-snug group-hover:text-[#4A0E17] transition-colors">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs font-sans text-[#1E1412]/55 mt-1">
+                            Verified Provenance &amp; Certificate Included
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-4 sm:pt-0 border-t sm:border-t-0 border-[#C5A059]/15">
+                        <p className="font-cinzel text-2xl text-[#1E1412] font-bold">
+                          ₹{item.price.toLocaleString('en-IN')}
+                        </p>
+                        <button 
+                          onClick={() => removeFromCart(item.id)} 
+                          className="text-[#1E1412]/40 hover:text-[#4A0E17] transition-colors cursor-pointer p-2 rounded-full hover:bg-[#4A0E17]/10 flex items-center gap-1 text-xs" 
+                          title="Remove from Cart"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                          <span className="sm:hidden font-sans">Remove</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="bg-subtle-smoke p-8 border border-gallery-gold/20 h-max">
-                <h4 className="font-display-md text-2xl mb-6 border-b border-outline/10 pb-4">Order Summary</h4>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="font-body-md text-primary/70">Subtotal</span>
-                  <span className="font-body-md text-primary font-bold">₹{cartTotal.toLocaleString('en-IN')}</span>
+
+              {/* Order Summary */}
+              <div className="bg-[#FAF6F0] p-8 rounded-3xl border border-[#C5A059]/35 shadow-[0_10px_40px_rgba(74,14,23,0.06)] sticky top-[140px]">
+                <span className="text-[10px] uppercase tracking-[0.3em] font-cinzel text-[#4A0E17] mb-2 block font-bold">
+                  Transaction Summary
+                </span>
+                <h4 className="font-cinzel text-2xl text-[#1E1412] font-semibold mb-6 pb-4 border-b border-[#C5A059]/20">
+                  Valuation Total
+                </h4>
+
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[#1E1412]/70">Subtotal</span>
+                    <span className="text-[#1E1412] font-mono font-medium">₹{cartTotal.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[#1E1412]/70">White-Glove Delivery</span>
+                    <span className="text-[#C5A059] font-cinzel text-xs uppercase tracking-wider font-bold">Complimentary</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm pb-4 border-b border-[#C5A059]/20">
+                    <span className="text-[#1E1412]/70">Curatorial Insurance &amp; Tax</span>
+                    <span className="text-[#1E1412]/60 text-xs font-mono">Calculated at Checkout</span>
+                  </div>
+                  <div className="flex justify-between items-baseline pt-2">
+                    <span className="text-xs uppercase tracking-[0.2em] font-cinzel text-[#1E1412]/70 font-bold">Total Valuation</span>
+                    <span className="font-cinzel text-3xl text-[#1E1412] font-bold">₹{cartTotal.toLocaleString('en-IN')}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center mb-8 pb-4 border-b border-outline/10">
-                  <span className="font-body-md text-primary/70">Taxes & Fees</span>
-                  <span className="font-body-md text-primary/70">Calculated at checkout</span>
-                </div>
-                <div className="flex justify-between items-end mb-8">
-                  <span className="font-label-caps text-[11px] tracking-widest">Total</span>
-                  <span className="font-display-md text-3xl text-primary">₹{cartTotal.toLocaleString('en-IN')}</span>
-                </div>
+
                 <button 
                   onClick={() => {
-                    alert('Redirecting to Razorpay checkout...');
+                    alert('Redirecting to Razorpay secure acquisition gateway...');
                     window.open('https://razorpay.com', '_blank');
                     clearCart();
                   }}
-                  className="w-full bg-gallery-gold text-primary font-bold font-label-caps text-[11px] tracking-widest uppercase px-6 py-4 hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full pill-button pill-button-bordeaux justify-center shadow-xl text-xs tracking-[0.2em] uppercase py-4 mb-4"
                 >
-                  <span className="material-symbols-outlined text-[16px]">inventory_2</span>
-                  Acquire Now
+                  <span className="material-symbols-outlined text-[18px] text-[#DFC07D]">verified_user</span>
+                  Proceed to Secure Acquisition
                 </button>
+
+                <p className="text-[11px] font-sans text-[#1E1412]/50 text-center flex items-center justify-center gap-1.5 font-medium">
+                  <span className="material-symbols-outlined text-[13px] text-[#C5A059]">lock</span>
+                  Encrypted 256-Bit Escrow &amp; Advisory Protection
+                </p>
               </div>
             </div>
           )}
         </div>
       </main>
-      <footer className="w-full px-12 py-12 flex flex-col items-center justify-center bg-paper-white border-t border-gallery-gold/20 mt-auto">
-        <p className="font-label-caps text-[9px] tracking-widest uppercase text-primary/40">© 2026 The Kala Vault. All Rights Reserved.</p>
-      </footer>
+
+      <Footer />
     </div>
   );
 }

@@ -4,7 +4,7 @@
  */
 
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
@@ -24,11 +24,19 @@ import Privacy from "./pages/Privacy";
 import Cart from "./pages/Cart";
 import Favorites from "./pages/Favorites";
 import SalesDashboard from "./pages/sales/SalesDashboard";
+import Preloader from "./components/Preloader";
+import { prefetchArtworks } from "./services/artworkService";
 
 export default function App() {
   const { pathname } = useLocation();
+  const [showPreloader, setShowPreloader] = useState(true);
 
   const lenisRef = useRef<Lenis | null>(null);
+
+  useEffect(() => {
+    // Eagerly prefetch all backend artworks on application load
+    prefetchArtworks().catch(() => {});
+  }, []);
 
   useEffect(() => {
     lenisRef.current = new Lenis({
@@ -62,6 +70,7 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
         <FavoritesProvider>
+          {showPreloader && <Preloader onComplete={() => setShowPreloader(false)} />}
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/collections" element={<Collections />} />
@@ -73,6 +82,7 @@ export default function App() {
             <Route path="/subscriptions" element={<Subscriptions />} />
             <Route path="/inquire" element={<Inquiry />} />
             <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignIn />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/customer" element={<CustomerDashboard />} />
             <Route path="/cart" element={<Cart />} />

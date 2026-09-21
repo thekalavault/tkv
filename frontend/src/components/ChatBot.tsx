@@ -116,45 +116,45 @@ export default function ChatBot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.9, filter: 'blur(4px)' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="mb-6 w-[350px] md:w-[400px] bg-matte-black/90 backdrop-blur-2xl shadow-[0_32px_64px_rgba(0,0,0,0.7)] border border-gallery-gold/20 flex flex-col overflow-hidden rounded-2xl"
+            className="mb-6 w-[350px] md:w-[400px] bg-[#160D0A]/95 backdrop-blur-2xl shadow-[0_32px_64px_rgba(0,0,0,0.8)] border border-[#C5A059]/30 flex flex-col overflow-hidden rounded-3xl"
             style={{ height: '580px' }}
           >
             {/* Header */}
-            <div className="relative p-5 border-b border-gallery-gold/10 overflow-hidden">
+            <div className="relative p-5 border-b border-[#C5A059]/20 overflow-hidden bg-gradient-to-r from-[#4A0E17]/40 via-[#160D0A] to-[#241611]">
               {/* Dynamic animated gradient background for header */}
               <motion.div 
                 animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 z-0 bg-[length:200%_200%] opacity-30"
-                style={{ backgroundImage: 'linear-gradient(45deg, rgba(212,175,55,0.05), rgba(212,175,55,0.2), rgba(0,0,0,0))' }}
+                className="absolute inset-0 z-0 bg-[length:200%_200%] opacity-25"
+                style={{ backgroundImage: 'linear-gradient(45deg, rgba(197,160,89,0.1), rgba(74,14,23,0.3), rgba(0,0,0,0))' }}
               />
               <div className="flex justify-between items-center relative z-10">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gallery-gold/30 to-black border border-gallery-gold/40 flex items-center justify-center shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-                      <span className="material-symbols-outlined text-gallery-gold text-[18px]">smart_toy</span>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A0E17] to-[#160D0A] border border-[#C5A059]/60 flex items-center justify-center shadow-[0_0_15px_rgba(197,160,89,0.3)]">
+                      <span className="material-symbols-outlined text-[#C5A059] text-[18px]">account_balance</span>
                     </div>
                     {/* Pulsing online indicator */}
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-matte-black" />
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#C5A059] rounded-full border-2 border-[#160D0A]" />
                     <motion.div 
-                      animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                      animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0, 0.6] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full"
+                      className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#C5A059] rounded-full"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-display-sm text-[15px] text-paper-white tracking-wide leading-tight">Kala Assistant</span>
-                    <span className="font-label-caps text-[9px] text-gallery-gold tracking-[0.2em] uppercase mt-0.5">Always Online</span>
+                    <span className="font-serif text-[15px] text-[#FAF6F0] tracking-wider leading-tight">Curatorial Concierge</span>
+                    <span className="font-mono text-[9px] text-[#C5A059] tracking-[0.25em] uppercase mt-0.5">The Kala Vault Private Desk</span>
                   </div>
                 </div>
-                <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-paper-white/60 hover:text-white hover:bg-white/10 transition-all">
+                <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-[#FAF6F0]/60 hover:text-white hover:bg-white/10 transition-all">
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin scrollbar-thumb-gallery-gold/10 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin scrollbar-thumb-[#C5A059]/20 scrollbar-track-transparent">
               <AnimatePresence initial={false}>
                 {messages.map((msg) => (
                   <motion.div 
@@ -167,8 +167,8 @@ export default function ChatBot() {
                     <div 
                       className={`max-w-[88%] p-4 text-[13px] leading-relaxed shadow-sm relative ${
                         msg.sender === 'user' 
-                          ? 'bg-gradient-to-br from-gallery-gold to-[#b8952b] text-matte-black rounded-2xl rounded-tr-sm font-medium' 
-                          : 'bg-white/5 border border-white/10 text-paper-white/90 rounded-2xl rounded-tl-sm backdrop-blur-md'
+                          ? 'bg-gradient-to-r from-[#4A0E17] to-[#58111A] text-[#FAF6F0] border border-[#C5A059]/30 rounded-2xl rounded-tr-sm font-normal' 
+                          : 'bg-white/5 border border-[#C5A059]/15 text-[#FAF6F0]/90 rounded-2xl rounded-tl-sm backdrop-blur-md'
                       }`}
                     >
                       {msg.text}
@@ -177,7 +177,7 @@ export default function ChatBot() {
                       {msg.media && (
                         <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-none snap-x">
                           {msg.media.map((url, i) => (
-                            <img key={i} src={url} alt="Collection Preview" className="h-24 w-32 object-cover rounded-lg snap-start border border-white/10 flex-shrink-0 shadow-lg" />
+                            <img key={i} src={url} alt="Collection Preview" className="h-24 w-32 object-cover rounded-lg snap-start border border-[#C5A059]/20 flex-shrink-0 shadow-lg" />
                           ))}
                         </div>
                       )}
@@ -195,10 +195,10 @@ export default function ChatBot() {
                           <button
                             key={i}
                             onClick={() => handleAction(act)}
-                            className={`px-3 py-1.5 rounded-lg text-[11px] font-label-caps uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 ${
                               act.actionType === 'navigate' 
-                                ? 'bg-gallery-gold/10 text-gallery-gold border border-gallery-gold/30 hover:bg-gallery-gold hover:text-black'
-                                : 'bg-white/5 text-paper-white/70 border border-white/10 hover:bg-white/15'
+                                ? 'bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059] hover:text-[#160D0A]'
+                                : 'bg-white/5 text-[#FAF6F0]/70 border border-white/10 hover:bg-white/15'
                             }`}
                           >
                             {act.label}
@@ -220,10 +220,10 @@ export default function ChatBot() {
                     exit={{ opacity: 0, scale: 0.9, transformOrigin: 'left' }}
                     className="flex justify-start"
                   >
-                    <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1.5 items-center backdrop-blur-sm">
-                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0 }} className="w-1.5 h-1.5 bg-gallery-gold rounded-full" />
-                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-gallery-gold rounded-full" />
-                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-gallery-gold rounded-full" />
+                    <div className="bg-white/5 border border-[#C5A059]/20 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1.5 items-center backdrop-blur-sm">
+                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0 }} className="w-1.5 h-1.5 bg-[#C5A059] rounded-full" />
+                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-[#C5A059] rounded-full" />
+                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-[#C5A059] rounded-full" />
                     </div>
                   </motion.div>
                 )}
@@ -232,13 +232,13 @@ export default function ChatBot() {
             </div>
 
             {/* Predefined Topics Row */}
-            <div className="px-4 pb-3 pt-2 bg-gradient-to-t from-matte-black via-matte-black to-transparent flex overflow-x-auto gap-2 scrollbar-none snap-x relative z-10">
+            <div className="px-4 pb-3 pt-2 bg-gradient-to-t from-[#160D0A] via-[#160D0A] to-transparent flex overflow-x-auto gap-2 scrollbar-none snap-x relative z-10">
               {PREDEFINED_TOPICS.map(topic => (
                 <button
                   key={topic.value}
                   onClick={() => handleSend(topic.label)}
                   disabled={isTyping}
-                  className="snap-start flex-shrink-0 px-4 py-2 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-label-caps tracking-widest text-paper-white/70 hover:bg-gallery-gold/10 hover:text-gallery-gold hover:border-gallery-gold/30 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed uppercase"
+                  className="snap-start flex-shrink-0 px-3.5 py-1.5 bg-[#241611]/80 backdrop-blur-md border border-[#C5A059]/20 rounded-full text-[10px] font-mono tracking-widest text-[#FAF6F0]/80 hover:bg-[#C5A059]/15 hover:text-[#C5A059] hover:border-[#C5A059]/40 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed uppercase"
                 >
                   {topic.label}
                 </button>
@@ -246,24 +246,24 @@ export default function ChatBot() {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 bg-matte-black/95 border-t border-white/5 flex items-center gap-3 relative z-10">
-              <div className="flex-1 bg-white/5 border border-white/10 rounded-full flex items-center px-4 py-1.5 focus-within:border-gallery-gold/50 focus-within:bg-white/10 transition-colors">
+            <div className="p-4 bg-[#160D0A] border-t border-[#C5A059]/15 flex items-center gap-3 relative z-10">
+              <div className="flex-1 bg-white/5 border border-[#C5A059]/20 rounded-full flex items-center px-4 py-1.5 focus-within:border-[#C5A059]/60 focus-within:bg-white/10 transition-colors">
                 <input 
                   type="text"
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
                   disabled={isTyping}
-                  placeholder="Type your inquiry..."
-                  className="w-full bg-transparent border-none outline-none text-paper-white text-[13px] placeholder:text-paper-white/30 h-8"
+                  placeholder="Type your curatorial inquiry..."
+                  className="w-full bg-transparent border-none outline-none text-[#FAF6F0] text-[13px] placeholder:text-[#FAF6F0]/40 h-8"
                 />
               </div>
               <button 
                 onClick={() => handleSend()}
                 disabled={isTyping || !inputValue.trim()}
-                className="w-11 h-11 flex items-center justify-center bg-gallery-gold text-matte-black rounded-full hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_20px_rgba(212,175,55,0.25)] flex-shrink-0"
+                className="w-10 h-10 flex items-center justify-center bg-gradient-to-r from-[#4A0E17] to-[#58111A] text-[#DFC07D] border border-[#C5A059]/40 rounded-full hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_20px_rgba(74,14,23,0.5)] flex-shrink-0"
               >
-                <span className="material-symbols-outlined text-[18px] ml-1">send</span>
+                <span className="material-symbols-outlined text-[17px]">send</span>
               </button>
             </div>
           </motion.div>
@@ -279,22 +279,22 @@ export default function ChatBot() {
           onClick={() => setIsOpen(true)}
         >
           {/* Ambient glow behind the button */}
-          <div className="absolute inset-0 bg-gallery-gold rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-[#C5A059] rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
           
-          <div className="relative flex items-center gap-3 bg-gradient-to-br from-matte-black to-[#1a1a1a] border border-gallery-gold/30 text-gallery-gold p-1.5 pr-6 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.6)] hover:border-gallery-gold transition-all duration-500">
-            <div className="w-12 h-12 bg-gallery-gold/10 rounded-full flex items-center justify-center relative overflow-hidden">
+          <div className="relative flex items-center gap-3 bg-gradient-to-r from-[#4A0E17] via-[#241611] to-[#160D0A] border border-[#C5A059]/40 text-[#DFC07D] p-1.5 pr-5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.6)] hover:border-[#C5A059] transition-all duration-500">
+            <div className="w-11 h-11 bg-[#C5A059]/15 rounded-full flex items-center justify-center relative overflow-hidden border border-[#C5A059]/30">
               <motion.div 
                 animate={{ rotate: 360 }} 
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(212,175,55,0.4)_360deg)]"
+                className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(197,160,89,0.5)_360deg)]"
               />
-              <div className="absolute inset-[2px] bg-matte-black rounded-full flex items-center justify-center">
-                <span className="material-symbols-outlined text-[22px]">smart_toy</span>
+              <div className="absolute inset-[2px] bg-[#160D0A] rounded-full flex items-center justify-center">
+                <span className="material-symbols-outlined text-[#DFC07D] text-[20px]">account_balance</span>
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-label-caps text-[11px] tracking-widest uppercase text-paper-white whitespace-nowrap">Kala Assistant</span>
-              <span className="font-body-sm text-[10px] text-gallery-gold/70">Online now</span>
+              <span className="font-serif text-[12px] tracking-wider text-[#FAF6F0] whitespace-nowrap">Concierge</span>
+              <span className="font-mono text-[9px] text-[#C5A059]">Private Advisory</span>
             </div>
           </div>
         </motion.div>

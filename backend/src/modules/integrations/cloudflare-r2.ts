@@ -21,7 +21,21 @@ export class CloudflareR2Service {
     return getSignedUrl(r2Client, command, { expiresIn: 900 });
   }
 
+  getPublicAssetUrl(key: string): string {
+    if (!key) return '';
+    if (key.startsWith('http://') || key.startsWith('https://')) return key;
+    if (config.cloudflareR2PublicUrl) {
+      const baseUrl = config.cloudflareR2PublicUrl.replace(/\/$/, '');
+      const cleanKey = key.replace(/^\//, '');
+      return `${baseUrl}/${cleanKey}`;
+    }
+    return '';
+  }
+
   async getSignedAssetUrl(key: string) {
+    const publicUrl = this.getPublicAssetUrl(key);
+    if (publicUrl) return publicUrl;
+
     const command = new GetObjectCommand({
       Bucket: config.cloudflareR2Bucket,
       Key: key,

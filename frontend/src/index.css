@@ -1,85 +1,105 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #fbf9f5;
-  --color-surface: #fbf9f5;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f5f3ef;
-  --color-surface-container: #efeeea;
-  --color-surface-container-high: #eae8e4;
-  --color-surface-container-highest: #e4e2de;
-  --color-surface-variant: #e4e2de;
-  --color-surface-dim: #dbdad6;
-  --color-surface-bright: #fbf9f5;
-  --color-surface-tint: #5f5e5e;
+  /* Rich Multi-Tonal Luxury Color System — Handcrafted Imperial Bordeaux & Gilded Gold */
+  --color-vanilla: #FCFAF6;
+  --color-vanilla-soft: #F7F3EB;
+  --color-oat-linen: #F0E9DC;
+  --color-oat-dark: #E8DFD0;
+  --color-parchment: #FCFAF6;
+  --color-parchment-soft: #F7F3EB;
+  --color-parchment-dark: #EFE6D8;
+  
+  /* Imperial Bordeaux / Wine Velvet Tones */
+  --color-velvet-bordeaux: #4A0E17;
+  --color-bordeaux-rich: #58111A;
+  --color-bordeaux-light: #6E1825;
+  --color-bordeaux-vibrant: #7D1D2B;
+  --color-bordeaux-dark: #2E070D;
+  --color-bordeaux-deep: #1F0408;
+  
+  /* Spruce & Forest Tones */
+  --color-forest-spruce: #1C2D24;
+  --color-spruce-light: #2A4235;
+  --color-spruce-dark: #121F18;
+  
+  /* Dark Walnut & Obsidian Espresso Tones */
+  --color-walnut-frame: #241611;
+  --color-walnut-light: #3D251C;
+  --color-obsidian-espresso: #1E1412;
+  --color-espresso-light: #2A1D1A;
+  --color-espresso-dark: #120B0A;
+  
+  /* Gilded Gold Leaf Tones */
+  --color-brushed-gold: #C5A059;
+  --color-brushed-gold-light: #DFC07D;
+  --color-brushed-gold-pale: #F5E4B8;
+  --color-brushed-gold-dark: #9E7D38;
+  --color-gold-leaf: #D4AF37;
+  
+  --color-terracotta: #8C4A3E;
 
-  --color-outline: #747878;
-  --color-outline-variant: #c4c7c7;
+  /* Semantic Theme Mappings */
+  --color-background: #FCFAF6;
+  --color-surface: #F7F3EB;
+  --color-primary: #4A0E17;
+  --color-on-primary: #FCFAF6;
+  --color-secondary: #C5A059;
+  --color-on-secondary: #1E1412;
+  --color-secondary-container: #F0E9DC;
+  --color-on-secondary-container: #4A0E17;
 
-  --color-primary: #111111;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #1c1b1b;
-  --color-on-primary-container: #858383;
-  --color-inverse-primary: #c8c6c5;
-  --color-primary-fixed: #e5e2e1;
-  --color-primary-fixed-dim: #c8c6c5;
+  --color-pearl: #FCFAF6;
+  --color-charcoal: #1E1412;
+  --color-gold: #C5A059;
+  --color-crimson: #4A0E17;
+  --color-sand: #F0E9DC;
 
-  --color-secondary: #d4af37;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #fed65b;
-  --color-on-secondary-container: #745c00;
-  --color-secondary-fixed: #ffe088;
-  --color-secondary-fixed-dim: #e9c349;
+  --color-[#fbf9f5]: #FCFAF6;
+  --color-paper-white: #FCFAF6;
+  --color-charcoal-text: #1E1412;
+  --color-matte-black: #1E1412;
+  --color-gallery-gold: #C5A059;
+  --color-gallery-gold-dark: #9E7D38;
+  --color-subtle-smoke: #F0E9DC;
 
-  --color-tertiary: #000000;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #1b1c1c;
+  /* Typography Scale */
+  --font-headline-lg: 'Cinzel', 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-headline-md: 'Cinzel', 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-headline-lg-mobile: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-display-sm: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-display-lg: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-display-xl: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-display-lg-mobile: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-quote: 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-hero: 'Cinzel', 'Plus Jakarta Sans', sans-serif;
+  --font-product-title: 'Cinzel', 'Outfit', serif;
 
-  --color-on-surface: #1b1c1a;
-  --color-on-surface-variant: #444748;
-  --color-inverse-surface: #30312e;
-  --color-inverse-on-surface: #f2f0ed;
-
-  --color-error: #ba1a1a;
-  --color-on-error: #ffffff;
-  --color-error-container: #ffdad6;
-  --color-on-error-container: #93000a;
-
-  --color-paper-white: #FAF9F6;
-  --color-charcoal-text: #4D4D4D;
-  --color-matte-black: #1A1A1A;
-  --color-gallery-gold: #D4AF37;
-  --color-subtle-smoke: #F4F4F4;
-
-  --font-headline-lg: 'Playfair Display', serif;
-  --font-headline-md: 'Playfair Display', serif;
-  --font-headline-lg-mobile: 'Playfair Display', serif;
-  --font-display-sm: 'Playfair Display', serif;
-  --font-display-lg: 'Playfair Display', serif;
-  --font-display-xl: 'Playfair Display', serif;
-  --font-display-lg-mobile: 'Playfair Display', serif;
-  --font-quote: 'Playfair Display', serif;
-
-  --font-body-lg: 'Inter', sans-serif;
-  --font-body-md: 'Inter', sans-serif;
-  --font-label-caps: 'Inter', sans-serif;
-  --font-title-lg: 'Inter', sans-serif;
+  --font-body-lg: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-body-md: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-label-caps: 'Outfit', 'Cinzel', sans-serif;
+  --font-title-lg: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-cinzel: 'Cinzel', serif;
+  --font-cormorant: 'Cormorant Garamond', serif;
+  --font-cristal: 'Black Sansa', 'Tenor Sans', 'Philosopher', 'Bodoni Moda', 'Italiana', 'Syne', sans-serif;
+  --font-black-sansa: 'Black Sansa', 'Tenor Sans', 'Philosopher', 'Bodoni Moda', 'Italiana', 'Syne', sans-serif;
+  --font-brand: 'Black Sansa', 'Tenor Sans', 'Philosopher', 'Bodoni Moda', 'Italiana', 'Syne', sans-serif;
 
   --text-headline-lg: 48px;
   --text-headline-lg--line-height: 56px;
   --text-headline-lg--font-weight: 600;
 
-  --text-body-lg: 20px;
+  --text-body-lg: 19px;
   --text-body-lg--line-height: 32px;
   --text-body-lg--font-weight: 400;
 
-  --text-label-caps: 14px;
+  --text-label-caps: 13px;
   --text-label-caps--line-height: 18px;
-  --text-label-caps--letter-spacing: 0.1em;
+  --text-label-caps--letter-spacing: 0.18em;
   --text-label-caps--font-weight: 600;
 
-  --text-body-md: 18px;
-  --text-body-md--line-height: 28px;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 26px;
   --text-body-md--font-weight: 400;
 
   --text-headline-md: 32px;
@@ -113,18 +133,20 @@
   --text-display-lg-mobile--font-weight: 400;
 
   --text-quote: 28px;
-  --text-quote--line-height: 36px;
+  --text-quote--line-height: 38px;
   --text-quote--font-weight: 400;
 
-  --spacing-section-gap: 120px;
-  --spacing-margin-mobile: 20px;
-  --spacing-margin-desktop: 80px;
-  --spacing-gutter: 24px;
+  --spacing-section-gap: 100px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 32px;
+  --spacing-gutter: 20px;
   --spacing-base: 8px;
-  --spacing-container-max: 1440px;
+  --spacing-container-max: 100%;
 }
 
 body {
+  background-color: #FAF6F0;
+  color: #1E1412;
   cursor: default;
 }
 
@@ -137,47 +159,17 @@ body {
   scrollbar-width: none; /* Firefox */
 }
 
+::selection {
+  background: rgba(197, 160, 89, 0.35);
+  color: #4A0E17;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
   vertical-align: middle;
 }
 
-/* Landing Page Interactions */
-.custom-cursor {
-  width: 12px;
-  height: 12px;
-  background: #D4AF37;
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  transition: transform 0.15s ease-out, width 0.3s ease, height 0.3s ease, background-color 0.3s ease, border-radius 0.3s ease;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.custom-cursor.view-mode {
-  width: 100px;
-  height: 100px;
-  background: rgba(212, 175, 55, 0.9);
-  color: #111111;
-  font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.custom-cursor span {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.custom-cursor.view-mode span {
-  opacity: 1;
-}
-
+/* Luxury Nav & Links */
 .nav-link {
   position: relative;
 }
@@ -188,7 +180,7 @@ body {
   left: 0;
   width: 0;
   height: 1px;
-  background: #D4AF37;
+  background: #C5A059;
   transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .nav-link:hover::after {
@@ -205,87 +197,14 @@ body {
   transform: translateY(0);
 }
 
-.watermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-45deg);
-  color: rgba(255, 255, 255, 0.15);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.5em;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 10;
-  white-space: nowrap;
-}
-.gallery-item:hover .watermark {
-  opacity: 1;
-}
-
-.gallery-overlay {
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.input-underline {
-  position: relative;
-}
-.input-underline::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: #D4AF37;
-  transition: width 0.4s ease;
-}
-.input-underline:focus-within::after {
-  width: 100%;
-}
-
-/* Dashboard Interactions */
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-.gold-glow {
-  box-shadow: 0 0 15px rgba(115, 92, 0, 0.1);
-}
-
-.drop-area-pulse {
-  animation: border-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes border-pulse {
-  0%, 100% { border-color: #747878; }
-  50% { border-color: #735c00; }
-}
-
-.sync-pulse {
-  animation: sync-fade 2s infinite;
-}
-
-@keyframes sync-fade {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.pipeline-stage {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
-}
-.pipeline-stage:hover {
-  transform: translateX(4px);
-}
-
-/* Tiled watermark repeating overlay */
+/* Watermark protection overlay */
 .watermark-tiled {
   position: absolute;
-  inset: -50%; /* Extended to cover zoomed scale */
+  inset: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><text fill='rgba(255,255,255,0.18)' font-size='10' font-family='Inter, sans-serif' font-weight='600' letter-spacing='0.15em' x='80' y='80' text-anchor='middle' transform='rotate(-35 80 80)'>© KALAVAULT</text></svg>");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='280' viewBox='0 0 360 280'%3E%3Ctext fill='rgba(255,255,255,0.32)' stroke='rgba(74,14,23,0.12)' stroke-width='0.08' font-size='7.5' font-family='serif' font-weight='300' letter-spacing='0.26em' x='72' y='38' text-anchor='middle' transform='rotate(-22 72 38)'%3E© THE KALA VAULT%3C/text%3E%3Ctext fill='rgba(255,255,255,0.28)' stroke='rgba(74,14,23,0.09)' stroke-width='0.08' font-size='7' font-family='serif' font-weight='300' letter-spacing='0.28em' x='280' y='58' text-anchor='middle' transform='rotate(-34 280 58)'%3E© THE KALA VAULT%3C/text%3E%3Ctext fill='rgba(255,255,255,0.34)' stroke='rgba(74,14,23,0.12)' stroke-width='0.08' font-size='8' font-family='serif' font-weight='300' letter-spacing='0.24em' x='170' y='124' text-anchor='middle' transform='rotate(-18 170 124)'%3E© THE KALA VAULT%3C/text%3E%3Ctext fill='rgba(255,255,255,0.26)' stroke='rgba(74,14,23,0.09)' stroke-width='0.08' font-size='7.5' font-family='serif' font-weight='300' letter-spacing='0.28em' x='335' y='160' text-anchor='middle' transform='rotate(-27 335 160)'%3E© THE KALA VAULT%3C/text%3E%3Ctext fill='rgba(255,255,255,0.30)' stroke='rgba(74,14,23,0.10)' stroke-width='0.08' font-size='7.5' font-family='serif' font-weight='300' letter-spacing='0.25em' x='42' y='205' text-anchor='middle' transform='rotate(-15 42 205)'%3E© THE KALA VAULT%3C/text%3E%3Ctext fill='rgba(255,255,255,0.28)' stroke='rgba(74,14,23,0.09)' stroke-width='0.08' font-size='7' font-family='serif' font-weight='300' letter-spacing='0.26em' x='225' y='218' text-anchor='middle' transform='rotate(-31 225 218)'%3E© THE KALA VAULT%3C/text%3E%3Ctext fill='rgba(255,255,255,0.32)' stroke='rgba(74,14,23,0.12)' stroke-width='0.08' font-size='8' font-family='serif' font-weight='300' letter-spacing='0.22em' x='125' y='265' text-anchor='middle' transform='rotate(-24 125 265)'%3E© THE KALA VAULT%3C/text%3E%3C/svg%3E");
   background-repeat: repeat;
-  z-index: 15;
+  z-index: 20;
   transition: opacity 0.5s ease;
 }
 
@@ -305,8 +224,223 @@ body {
   pointer-events: none;
 }
 
-
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
 
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+/* Luxury Pill Buttons & Multi-Color Tokens */
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 26px;
+  border-radius: 9999px;
+  font-family: 'Outfit', 'Cinzel', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pill-button-primary,
+.pill-button-bordeaux {
+  background: #4A0E17;
+  color: #FAF6F0;
+  border: 1px solid #6E1825;
+  box-shadow: 0 4px 16px rgba(74, 14, 23, 0.35);
+}
+.pill-button-primary:hover,
+.pill-button-bordeaux:hover {
+  background: #6E1825;
+  color: #FAF6F0;
+  border-color: #C5A059;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 28px -4px rgba(74, 14, 23, 0.55), 0 0 0 1px rgba(197, 160, 89, 0.4);
+}
+
+.pill-button-gold {
+  background: linear-gradient(135deg, #DFC07D 0%, #C5A059 50%, #9E7D38 100%);
+  color: #241611;
+  border: 1px solid #DFC07D;
+  box-shadow: 0 4px 16px rgba(197, 160, 89, 0.35);
+}
+.pill-button-gold:hover {
+  background: #4A0E17;
+  color: #FAF6F0;
+  border-color: #C5A059;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 28px -4px rgba(74, 14, 23, 0.5);
+}
+
+.pill-button-espresso {
+  background: #241611;
+  color: #FAF6F0;
+  border: 1px solid #3D251C;
+  box-shadow: 0 4px 14px rgba(36, 22, 17, 0.25);
+}
+.pill-button-espresso:hover {
+  background: #4A0E17;
+  color: #FAF6F0;
+  border-color: #C5A059;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 25px -5px rgba(74, 14, 23, 0.4);
+}
+
+.pill-button-spruce {
+  background: #1C2D24;
+  color: #FAF6F0;
+  border: 1px solid #2A4235;
+  box-shadow: 0 4px 14px rgba(28, 45, 36, 0.25);
+}
+.pill-button-spruce:hover {
+  background: #C5A059;
+  color: #241611;
+  border-color: #C5A059;
+  transform: translateY(-1px);
+}
+
+.pill-button-outline {
+  background: transparent;
+  color: #4A0E17;
+  border: 1px solid rgba(74, 14, 23, 0.3);
+}
+.pill-button-outline:hover {
+  background: #4A0E17;
+  color: #FAF6F0;
+  border-color: #4A0E17;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(74, 14, 23, 0.2);
+}
+
+/* Luxury Glass Cards */
+.glass-nav-pill {
+  background: rgba(250, 246, 240, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  box-shadow: 0 12px 36px rgba(36, 22, 17, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  box-shadow: 0 12px 30px rgba(36, 22, 17, 0.06);
+}
+
+.glass-bordeaux {
+  background: rgba(74, 14, 23, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  box-shadow: 0 16px 40px rgba(46, 7, 13, 0.4);
+}
+
+.glass-spruce {
+  background: rgba(28, 45, 36, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+/* Museum Archival Framing Styles */
+.museum-frame-shadow {
+  box-shadow: 0 20px 48px -12px rgba(36, 22, 17, 0.16), 0 0 0 1px rgba(197, 160, 89, 0.25);
+}
+
+.museum-framed-card {
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  box-shadow: 0 16px 40px -10px rgba(36, 22, 17, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  background: #FAF6F0;
+}
+
+.editorial-gold-line {
+  background: linear-gradient(90deg, transparent 0%, #C5A059 50%, transparent 100%);
+}
+
+.editorial-bordeaux-line {
+  background: linear-gradient(90deg, transparent 0%, #4A0E17 50%, transparent 100%);
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-cormorant {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Gradients */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #F5E4B8 0%, #DFC07D 35%, #C5A059 70%, #9E7D38 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-bordeaux-gradient {
+  background: linear-gradient(135deg, #7D1D2B 0%, #58111A 40%, #4A0E17 75%, #2E070D 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.font-copperplate {
+  font-family: 'Copperplate', 'Copperplate Gothic Bold', 'Copperplate Gothic', 'Castoro Titling', 'Marcellus', 'Cinzel', serif;
+  letter-spacing: 0.22em;
+}
+
+.font-brand,
+.font-black-sansa,
+.font-cristal {
+  font-family: 'Black Sansa', 'Tenor Sans', 'Philosopher', 'Bodoni Moda', 'Italiana', 'Syne', sans-serif;
+  letter-spacing: 0.16em;
+}
+
+.text-copper-gradient {
+  background: linear-gradient(135deg, #E0A96D 0%, #C58940 40%, #A45D25 80%, #7A3E14 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Artistic Corner Flourishes */
+.artistic-corner-frame {
+  position: relative;
+}
+.artistic-corner-frame::before {
+  content: '⌜';
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 13px;
+  color: #C5A059;
+  opacity: 0.7;
+  pointer-events: none;
+  font-family: monospace;
+}
+.artistic-corner-frame::after {
+  content: '⌟';
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 13px;
+  color: #C5A059;
+  opacity: 0.7;
+  pointer-events: none;
+  font-family: monospace;
+}

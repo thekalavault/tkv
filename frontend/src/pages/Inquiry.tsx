@@ -58,144 +58,189 @@ export default function Inquiry() {
   };
 
   return (
-    <div className="bg-paper-white text-primary font-body-lg min-h-screen selection:bg-gallery-gold/30 flex flex-col pt-[100px] md:pt-[140px]">
-      
+    <div className="bg-[#FAF6F0] text-[#1E1412] font-body-md min-h-screen selection:bg-[#C5A059]/30 flex flex-col pt-[100px] md:pt-[130px]">
       <TopNavBar />
 
-      <main className="flex-1 w-full max-w-[800px] mx-auto px-8 md:px-16 pb-32 mb-auto shrink-0 flex flex-col justify-center">
-        
+      <main className="flex-1 w-full max-w-[1560px] mx-auto px-6 md:px-12 lg:px-16 pb-28">
         <AnimatePresence mode="wait">
           {formState === 'success' ? (
             <motion.div 
               key="success"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-20 border border-outline/10 bg-subtle-smoke flex flex-col items-center"
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="max-w-2xl mx-auto text-center py-20 px-8 border border-[#C5A059]/40 bg-[#FAF6F0] flex flex-col items-center mt-10"
             >
-              <div className="w-16 h-16 rounded-full border border-gallery-gold flex items-center justify-center mb-8">
-                 <span className="material-symbols-outlined text-[32px] text-gallery-gold">check</span>
-              </div>
-              <h2 className="font-display-lg text-4xl mb-4 text-primary">Inquiry Received</h2>
-              <p className="font-body-md text-on-surface-variant max-w-md mx-auto leading-relaxed mb-8">
-                Your inquiry has been mapped to contact@thekalavault.com. A Kala Vault curator will review your request and contact you within 24 hours to schedule a private consultation.
+              <span className="text-[10px] uppercase tracking-[0.3em] font-cinzel text-[#4A0E17] mb-3 font-bold">[DOSSIER DISPATCHED]</span>
+              <h2 className="font-cinzel text-4xl md:text-5xl mb-4 text-[#1E1412] tracking-tight font-semibold">Inquiry Received</h2>
+              <p className="text-sm md:text-base text-[#1E1412]/75 max-w-lg mx-auto leading-relaxed mb-10 font-body-md font-light">
+                Your dossier has been routed to our senior curatorial committee. A principal advisor will contact you with custom spatial previews and portfolio availability.
               </p>
-              <Link to="/" className="border border-outline/20 text-primary py-4 px-8 font-label-caps text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-subtle-smoke">
-                 Return to Vault
+              <Link to="/collections" className="bg-[#4A0E17] hover:bg-[#58111A] text-[#FAF6F0] border border-[#C5A059]/40 font-cinzel text-xs uppercase tracking-[0.2em] font-bold py-3.5 px-8 transition-colors">
+                Return to Gallery Archive
               </Link>
             </motion.div>
           ) : (
             <motion.div 
               key="form"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="w-full"
+              transition={{ duration: 0.5 }}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start pt-6"
             >
-              <div className="text-center mb-16">
-                <span className="font-label-caps text-[10px] uppercase tracking-[0.3em] text-gallery-gold mb-6 block">Private Consultation</span>
-                <h1 className="font-display-lg text-4xl md:text-6xl text-primary tracking-tight mb-6">Curate Your Environment</h1>
-                <p className="font-headline-md italic text-on-surface-variant text-xl md:text-2xl max-w-2xl mx-auto">
-                  Connect with our advisory team to discuss leasing portfolios, permanent acquisitions, or bespoke architectural installations.
-                </p>
+              {/* LEFT SEGMENT: Editorial Brief & Advisory Context */}
+              <div className="lg:col-span-4 xl:col-span-4 space-y-8 lg:sticky lg:top-36">
+                <div>
+                  <div className="inline-flex items-center gap-2.5 px-3 py-1 bg-[#F5EFEB] border border-[#C5A059]/40 mb-4">
+                    <span className="w-1.5 h-1.5 bg-[#4A0E17]" />
+                    <span className="font-cinzel text-[10px] uppercase tracking-[0.25em] font-bold text-[#4A0E17]">
+                      CURATORIAL ADVISORY
+                    </span>
+                  </div>
+
+                  <h1 className="font-cinzel text-3xl sm:text-4xl lg:text-[42px] text-[#1E1412] tracking-tight leading-[1.1] mb-4 font-semibold">
+                    Curate Your <br />
+                    <span className="italic font-cormorant font-normal text-[#4A0E17]">
+                      Spatial Atmosphere.
+                    </span>
+                  </h1>
+
+                  <p className="text-sm text-[#1E1412]/75 leading-relaxed font-body-md font-light">
+                    Engage our curatorial advisory for institutional leasing portfolios, museum acquisitions, or bespoke architectural scale installations.
+                  </p>
+                </div>
+
+                {/* Direct Hotline */}
+                <div className="space-y-3 pt-6 border-t border-[#C5A059]/25 text-xs text-[#1E1412]/80 font-sans">
+                  <div>
+                    <span className="font-cinzel text-[10px] uppercase tracking-[0.2em] text-[#C5A059] block font-bold mb-1">
+                      Direct Advisory Hotline
+                    </span>
+                    <a href="tel:+918855828748" className="hover:text-[#4A0E17] font-mono transition-colors font-semibold text-sm">
+                      +91 88558 28748
+                    </a>
+                  </div>
+                  <div>
+                    <span className="font-cinzel text-[10px] uppercase tracking-[0.2em] text-[#C5A059] block font-bold mb-1">
+                      Curatorial Directorate
+                    </span>
+                    <a href="mailto:admin@thekalavault.com" className="hover:text-[#4A0E17] font-mono transition-colors font-semibold text-sm">
+                      admin@thekalavault.com
+                    </a>
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 md:p-12 border border-outline/5 shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="flex flex-col gap-2">
-                    <label className="font-label-caps text-[10px] uppercase tracking-[0.2em] text-primary/60">Full Name</label>
-                    <input 
-                      required 
-                      type="text" 
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="border-b border-outline/20 py-3 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors" 
-                      placeholder="Jane Doe" 
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="font-label-caps text-[10px] uppercase tracking-[0.2em] text-primary/60">Corporate Entity / Organization</label>
-                    <input 
-                      type="text" 
-                      value={entity}
-                      onChange={(e) => setEntity(e.target.value)}
-                      className="border-b border-outline/20 py-3 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors" 
-                      placeholder="Acme Corp" 
-                    />
-                  </div>
-                </div>
+              {/* RIGHT SEGMENT: Form */}
+              <div className="lg:col-span-8 xl:col-span-8 bg-[#FAF6F0] p-8 sm:p-12 border border-[#C5A059]/35">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="font-cinzel text-xs font-bold text-[#1E1412] tracking-wider uppercase block">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="e.g. Vikramaditya Singhania"
+                        className="w-full px-4 py-3 bg-[#F5EFEB] border border-[#C5A059]/30 text-xs text-[#1E1412] placeholder:text-[#1E1412]/40 focus:border-[#4A0E17] outline-none transition-colors"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="flex flex-col gap-2">
-                    <label className="font-label-caps text-[10px] uppercase tracking-[0.2em] text-primary/60">Professional Email</label>
-                    <input 
-                      required 
-                      type="email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="border-b border-outline/20 py-3 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors" 
-                      placeholder="jane@acme.com" 
-                    />
+                    <div className="space-y-2">
+                      <label className="font-cinzel text-xs font-bold text-[#1E1412] tracking-wider uppercase block">
+                        Organization / Estate
+                      </label>
+                      <input
+                        type="text"
+                        value={entity}
+                        onChange={(e) => setEntity(e.target.value)}
+                        placeholder="e.g. Taj Group or Private Residence"
+                        className="w-full px-4 py-3 bg-[#F5EFEB] border border-[#C5A059]/30 text-xs text-[#1E1412] placeholder:text-[#1E1412]/40 focus:border-[#4A0E17] outline-none transition-colors"
+                      />
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="font-label-caps text-[10px] uppercase tracking-[0.2em] text-primary/60">Phone Number (Optional)</label>
-                    <input 
-                      type="tel" 
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="border-b border-outline/20 py-3 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors" 
-                      placeholder="+91 98765 43210" 
-                    />
-                  </div>
-                </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="font-label-caps text-[10px] uppercase tracking-[0.2em] text-primary/60">Inquiry Type</label>
-                  <div className="relative">
-                    <select 
-                      required 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="font-cinzel text-xs font-bold text-[#1E1412] tracking-wider uppercase block">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="e.g. vikram@singhania.com"
+                        className="w-full px-4 py-3 bg-[#F5EFEB] border border-[#C5A059]/30 text-xs text-[#1E1412] placeholder:text-[#1E1412]/40 focus:border-[#4A0E17] outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="font-cinzel text-xs font-bold text-[#1E1412] tracking-wider uppercase block">
+                        Contact Phone *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="w-full px-4 py-3 bg-[#F5EFEB] border border-[#C5A059]/30 text-xs text-[#1E1412] placeholder:text-[#1E1412]/40 focus:border-[#4A0E17] outline-none transition-colors font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="font-cinzel text-xs font-bold text-[#1E1412] tracking-wider uppercase block">
+                      Program Focus
+                    </label>
+                    <select
                       value={interest}
                       onChange={(e) => setInterest(e.target.value)}
-                      className="w-full border-b border-outline/20 py-3 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors appearance-none cursor-pointer"
+                      className="w-full px-4 py-3 bg-[#F5EFEB] border border-[#C5A059]/30 text-xs text-[#1E1412] focus:border-[#4A0E17] outline-none font-cinzel font-semibold cursor-pointer"
                     >
-                      <option value="" disabled>Select an area of interest</option>
-                      <option value="corporate-leasing">Corporate Portfolio Leasing (Subscriptions)</option>
-                      <option value="direct-acquisition">Direct Acquisition of Artwork</option>
-                      <option value="architectural-scale">Architectural Scale Commission</option>
-                      <option value="general">General Advisory</option>
+                      <option value="">Select Curatorial Scope</option>
+                      <option value="corporate-leasing">Corporate Headquarters Leasing (20+ works)</option>
+                      <option value="residential-curation">Private Estate &amp; Villa Curation</option>
+                      <option value="hospitality-rotations">Luxury Hotel &amp; Resort Rotations</option>
+                      <option value="direct-acquisition">Permanent Museum Piece Acquisition</option>
+                      <option value="bespoke-commission">Architectural Scale Commission</option>
                     </select>
-                    <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-primary/50 text-[20px]">expand_more</span>
                   </div>
-                </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="font-label-caps text-[10px] uppercase tracking-[0.2em] text-primary/60">Message / Context</label>
-                  <textarea 
-                    required 
-                    rows={4} 
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="border border-outline/20 p-4 bg-transparent font-body-md text-primary outline-none focus:border-gallery-gold transition-colors resize-none mt-2" 
-                    placeholder="Tell us about your space, aesthetic preferences, or specific pieces of interest..."
-                  ></textarea>
-                </div>
+                  <div className="space-y-2">
+                    <label className="font-cinzel text-xs font-bold text-[#1E1412] tracking-wider uppercase block">
+                      Curatorial Brief / Specific Requirements
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Describe your space dimensions, lighting conditions, preferred styles (Monochrome, Abstract, Contemporary), or specific artwork titles..."
+                      className="w-full px-4 py-3 bg-[#F5EFEB] border border-[#C5A059]/30 text-xs text-[#1E1412] placeholder:text-[#1E1412]/40 focus:border-[#4A0E17] outline-none transition-colors resize-none leading-relaxed"
+                    />
+                  </div>
 
-                <div className="pt-4 flex justify-end">
-                  <button 
-                    type="submit" 
-                    disabled={formState === 'submitting'}
-                    className="bg-primary text-paper-white py-4 px-10 font-label-caps text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-black/80 rounded-sm shadow-xl flex items-center gap-3 disabled:opacity-70 disabled:cursor-wait"
-                  >
-                     {formState === 'submitting' ? 'Submitting...' : 'Submit Inquiry'}
-                  </button>
-                </div>
-              </form>
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={formState === 'submitting'}
+                      className="bg-[#4A0E17] hover:bg-[#58111A] text-[#FAF6F0] border border-[#C5A059]/40 text-xs w-full py-4 uppercase tracking-widest font-cinzel font-bold cursor-pointer transition-colors"
+                    >
+                      {formState === 'submitting' ? 'DISPATCHING DOSSIER...' : 'SUBMIT CURATORIAL INQUIRY'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
       </main>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

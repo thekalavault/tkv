@@ -1,21 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import KalaVaultLogo from './KalaVaultLogo';
+import { TkvMonogramSvg } from './KalaVaultLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 
-const navLinks = [
-  { name: 'Collections', path: '/collections' },
-  { name: 'Subscriptions', path: '/subscriptions' },
-  { name: 'Manifesto', path: '/manifesto' },
-  { name: 'Services', path: '/services' },
-];
-
 export default function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [logoImgError, setLogoImgError] = useState(false);
+
   const location = useLocation();
   const { user: currentUser, dbUser } = useAuth();
   const { items: cartItems } = useCart();
@@ -23,19 +20,30 @@ export default function TopNavBar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > 15) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
 
-  // Close menu on route change
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Lock body scroll when menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -47,195 +55,202 @@ export default function TopNavBar() {
     };
   }, [isMenuOpen]);
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.error('Error attempting to enable fullscreen:', err);
-      });
-    } else {
-      document.exitFullscreen().catch((err) => {
-        console.error('Error attempting to exit fullscreen:', err);
-      });
-    }
-  };
-
   const isActive = (path: string) => location.pathname === path;
-  
-  const isHeroDark = !isScrolled && location.pathname === '/';
-  
-  const linkColorClass = isHeroDark ? 'text-white hover:text-gallery-gold drop-shadow-sm' : 'text-primary hover:text-gallery-gold drop-shadow-sm';
+
+  const navLinks = [
+    { name: 'Collections', path: '/collections' },
+    { name: 'Services', path: '/services' },
+    { name: 'Subscriptions', path: '/subscriptions' },
+    { name: 'Manifesto', path: '/manifesto' },
+  ];
 
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 px-4 md:px-8 transition-all duration-500 ${isScrolled ? 'bg-paper-white/95 backdrop-blur-md py-2 border-b border-transparent shadow-sm' : (isHeroDark ? 'bg-black/10 backdrop-blur-sm py-3 border-b border-transparent' : 'bg-paper-white/50 backdrop-blur-[10px] py-3 border-b border-transparent')}`}>
-        <div className="flex items-center justify-between w-full">
-          {/* Left Logo */}
-          <div className="flex justify-start text-left">
-            <Link to="/" className="flex items-center justify-start transition-transform duration-300 hover:scale-[1.02]">
-              <KalaVaultLogo 
-                variant="alternate" 
-                theme={isHeroDark ? 'white' : 'gold'} 
-                className="scale-90 md:scale-100 origin-left"
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        } ${
+          isScrolled 
+            ? 'py-2 px-4 md:px-8' 
+            : 'py-2.5 md:py-3.5 px-4 md:px-8'
+        }`}
+      >
+        <div 
+          className={`max-w-[1360px] mx-auto rounded-full transition-all duration-400 ${
+            isScrolled 
+              ? 'bg-[#FCFAF6]/98 backdrop-blur-2xl border border-[#C5A059]/40 shadow-[0_10px_35px_rgba(30,16,12,0.08)] px-5 md:px-7 py-2' 
+              : 'bg-[#FCFAF6]/92 backdrop-blur-xl border border-[#C5A059]/30 shadow-[0_4px_24px_rgba(30,16,12,0.04)] px-6 md:px-8 py-2.5'
+          } flex items-center justify-between gap-4`}
+        >
+          
+          {/* Left Side: Brand Logo & Title */}
+          <Link 
+            to="/" 
+            className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 cursor-pointer select-none"
+          >
+            {/* Custom Logo with authentic brand image */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.25 }}
+              className="shrink-0 flex items-center justify-center"
+            >
+              <img 
+                src="/assets/logo.jpeg" 
+                alt="The Kala Vault Logo"
+                className="h-9 sm:h-10 w-9 sm:w-10 rounded-md object-cover border border-[#C5A059]/40 shadow-xs transition-transform duration-300" 
               />
-            </Link>
+            </motion.div>
+
+            {/* Brand Title */}
+            <div className="flex items-center text-left justify-center">
+              <span className="font-brand text-[20px] sm:text-[22px] md:text-[24px] font-bold tracking-[0.14em] uppercase text-[#1E1412] group-hover:text-[#7B2431] transition-colors leading-none">
+                THE KALA VAULT
+              </span>
+            </div>
+          </Link>
+
+          {/* Right Side: Navigation Links & Actions */}
+          <div className="hidden lg:flex items-center gap-2.5 xl:gap-4 justify-end shrink-0">
+            
+            {/* Nav Links */}
+            {navLinks.map((link) => {
+              const active = isActive(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`font-cinzel text-[11.5px] xl:text-[12px] font-bold tracking-[0.16em] uppercase px-4 py-1.5 rounded-full transition-all duration-300 whitespace-nowrap ${
+                    active
+                      ? 'bg-[#7B2431] text-[#FAF6F0] shadow-sm border border-[#DFC07D]/40'
+                      : 'text-[#1E1412]/80 hover:text-[#7B2431] hover:bg-[#7B2431]/08'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+
+            {/* User Actions or Sign In Button */}
+            {currentUser ? (
+              <div className="flex items-center gap-2.5 shrink-0 ml-1">
+                {/* Profile */}
+                <Link
+                  to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"}
+                  title="Account Dashboard"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#7B2431] bg-[#FAF6F0] border border-[#C5A059]/35 hover:bg-[#7B2431] hover:text-[#FAF6F0] hover:border-[#7B2431] transition-all duration-300 shadow-2xs"
+                >
+                  <span className="material-symbols-outlined text-[16px]">person</span>
+                </Link>
+                
+                {/* Favorites */}
+                <Link 
+                  to="/favorites" 
+                  title="Saved Favorites"
+                  className="relative w-8 h-8 rounded-full flex items-center justify-center text-[#7B2431] bg-[#FAF6F0] border border-[#C5A059]/35 hover:bg-[#7B2431] hover:text-[#FAF6F0] hover:border-[#7B2431] transition-all duration-300 shadow-2xs"
+                >
+                  <span className="material-symbols-outlined text-[16px]">favorite</span>
+                  {favorites.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-[#7B2431] text-[#FAF6F0] text-[9px] font-bold min-w-[15px] h-[15px] flex items-center justify-center rounded-full px-1 shadow-xs border border-[#DFC07D]/60">
+                      {favorites.length}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Bag */}
+                <Link 
+                  to="/cart" 
+                  className="flex items-center gap-1.5 bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] px-3.5 py-1.5 rounded-full border border-[#DFC07D]/40 transition-all duration-300 shadow-xs font-cinzel text-[11px] uppercase font-bold tracking-wider whitespace-nowrap"
+                >
+                  <span className="material-symbols-outlined text-[15px] text-[#DFC07D]">shopping_bag</span>
+                  <span>BAG</span>
+                  <span className="bg-black/25 text-[#DFC07D] px-1.5 py-0.2 rounded-full text-[10px] font-mono">
+                    {cartItems.length}
+                  </span>
+                </Link>
+              </div>
+            ) : (
+              <Link
+                to="/signin"
+                className="font-cinzel text-[11.5px] xl:text-[12px] font-bold tracking-[0.18em] uppercase px-6 py-2 rounded-full bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] border border-[#DFC07D]/40 shadow-xs active:scale-95 transition-all duration-300 whitespace-nowrap shrink-0 ml-1 inline-flex items-center justify-center text-center leading-none"
+              >
+                SIGN IN
+              </Link>
+            )}
           </div>
 
-          {/* Right Links & Button / Mobile Menu Button */}
-          <div className="flex items-center justify-end">
-            <div className="hidden md:flex gap-8 items-center justify-end">
-               {navLinks.map((link) => (
+          {/* Mobile Menu Toggle Button */}
+          <div className="lg:hidden flex items-center">
+            <button 
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Toggle navigation menu"
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-[#7B2431]/10 border border-[#C5A059]/35 text-[#7B2431] hover:bg-[#7B2431] hover:text-[#FAF6F0] transition-all duration-300"
+            >
+              <span className="material-symbols-outlined text-lg">menu</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[100] bg-[#FCFAF6]/98 backdrop-blur-2xl flex flex-col px-6 py-8 text-[#1E1412]"
+          >
+            <div className="flex justify-between items-center mb-10 pb-4 border-b border-[#C5A059]/30">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3">
+                <TkvMonogramSvg size={28} theme="gold" />
+                <div className="flex items-center text-left">
+                  <span className="font-brand text-lg sm:text-xl font-bold tracking-[0.14em] uppercase text-[#1E1412]">
+                    THE KALA VAULT
+                  </span>
+                </div>
+              </Link>
+              <button 
+                onClick={() => setIsMenuOpen(false)}
+                className="w-10 h-10 rounded-full bg-[#7B2431]/10 border border-[#C5A059]/30 flex items-center justify-center text-[#7B2431] hover:bg-[#7B2431] hover:text-[#FAF6F0] transition-all duration-300"
+              >
+                <span className="material-symbols-outlined text-2xl">close</span>
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 items-center justify-center flex-1">
+              {navLinks.map((link) => (
                 <Link 
                   key={link.path}
-                  className={`font-label-caps text-[13px] font-semibold tracking-[0.15em] uppercase transition-colors duration-300 ${
-                    isActive(link.path) 
-                      ? 'text-gallery-gold border-b border-gallery-gold pb-0.5' 
-                      : linkColorClass
-                  }`} 
                   to={link.path}
+                  className={`font-cinzel text-lg uppercase tracking-[0.18em] font-bold px-8 py-3 rounded-full transition-all duration-300 w-full max-w-xs text-center ${
+                    isActive(link.path) 
+                      ? 'bg-[#7B2431] text-[#FAF6F0] border border-[#DFC07D]/40 shadow-sm' 
+                      : 'text-[#1E1412]/80 hover:text-[#7B2431] hover:bg-[#7B2431]/08'
+                  }`}
                 >
                   {link.name}
                 </Link>
               ))}
-              {currentUser ? (
-                <>
-                  <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
-                    <Link to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"} title="Account Dashboard" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
-                      <span className="material-symbols-outlined text-[20px]">person</span>
-                    </Link>
-                    <Link to="/favorites" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
-                      <span className="material-symbols-outlined text-[20px]">favorite</span>
-                      {favorites.length > 0 && (
-                        <span className="absolute -top-1 -right-2 bg-gallery-gold text-paper-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                          {favorites.length}
-                        </span>
-                      )}
-                    </Link>
-                    <Link to="/cart" className={`relative transition-colors duration-300 hover:text-gallery-gold ${linkColorClass}`}>
-                      <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
-                      {cartItems.length > 0 && (
-                        <span className="absolute -top-1 -right-2 bg-gallery-gold text-paper-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                          {cartItems.length}
-                        </span>
-                      )}
-                    </Link>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link to="/signin" className="font-label-caps text-[10px] font-bold uppercase tracking-[0.2em] text-paper-white bg-gallery-gold px-6 py-2.5 hover:bg-primary hover:text-paper-white transition-all duration-500 whitespace-nowrap shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+              
+              <div className="mt-8 flex flex-col gap-3 w-full max-w-xs">
+                {currentUser ? (
+                  <Link 
+                    to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"} 
+                    className="font-cinzel text-[13px] font-bold uppercase tracking-[0.18em] text-[#FAF6F0] bg-[#7B2431] hover:bg-[#8F2C3C] border border-[#DFC07D]/40 px-8 py-3.5 rounded-full text-center shadow-md transition-all duration-300"
+                  >
+                    ACCOUNT DASHBOARD
+                  </Link>
+                ) : (
+                  <Link 
+                    to="/signin" 
+                    className="font-cinzel text-[13px] font-bold uppercase tracking-[0.18em] text-[#FAF6F0] bg-[#7B2431] hover:bg-[#8F2C3C] border border-[#DFC07D]/40 px-8 py-3.5 rounded-full text-center shadow-md transition-all duration-300"
+                  >
                     SIGN IN
                   </Link>
-                </>
-              )}
+                )}
+              </div>
             </div>
-            
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button 
-                onClick={() => setIsMenuOpen(true)}
-                className={`material-symbols-outlined scale-110 ${isHeroDark ? 'text-white drop-shadow-md' : 'text-primary'}`}
-              >
-                menu
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Full Screen Glassmorphism Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[100] bg-paper-white/90 backdrop-blur-xl flex flex-col px-margin-mobile py-6"
-          >
-            {/* Mobile Menu Header */}
-            <div className="flex justify-between items-center mb-16">
-               <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center">
-                  <KalaVaultLogo variant="alternate" theme="gold" />
-               </Link>
-               <button 
-                  onClick={() => setIsMenuOpen(false)}
-                  className="material-symbols-outlined text-primary scale-110 hover:rotate-90 transition-transform duration-500"
-               >
-                  close
-               </button>
-            </div>
-
-            {/* Mobile Nav Links */}
-            <div className="flex flex-col gap-6 items-center justify-center flex-1">
-              {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.path}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 + 0.2, duration: 0.5, ease: "easeOut" }}
-                >
-                  <Link 
-                    to={link.path}
-                    className={`font-display-md text-3xl uppercase tracking-widest ${
-                      isActive(link.path) ? 'text-gallery-gold' : 'text-primary'
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </motion.div>
-              ))}
-              
-              <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: navLinks.length * 0.1 + 0.2, duration: 0.5, ease: "easeOut" }}
-                  className="mt-6 flex flex-col gap-4 w-full max-w-[280px]"
-                >
-                 {currentUser ? (
-                   <>
-                     <Link 
-                       to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"} 
-                       className="font-label-caps text-[14px] font-bold uppercase tracking-[0.2em] text-paper-white bg-primary px-10 py-4 hover:bg-gallery-gold transition-colors block text-center"
-                     >
-                       ACCOUNT
-                     </Link>
-                   </>
-                 ) : (
-                   <Link 
-                      to="/signin" 
-                      className="font-label-caps text-[12px] font-bold uppercase tracking-[0.2em] text-paper-white bg-primary px-10 py-4 hover:bg-gallery-gold transition-colors block text-center"
-                    >
-                      SIGN IN PORTAL
-                   </Link>
-                 )}
-              </motion.div>
-            </div>
-            
-            {/* Mobile Menu Footer */}
-            <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                className="mt-auto flex justify-between items-center w-full border-t border-gallery-gold/20 pt-6"
-            >
-                <div className="flex gap-6">
-                    <a className="material-symbols-outlined text-primary text-[20px]" href="#">public</a>
-                    <a className="material-symbols-outlined text-primary text-[20px]" href="#">share</a>
-                </div>
-                <span className="font-label-caps text-[9px] text-tertiary-fixed-dim uppercase tracking-widest">© 2026</span>
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -35,9 +35,12 @@ export class ArtworkService {
     const mappedItems = await Promise.all(items.map(async (artwork: any) => {
       if (artwork.images) {
         artwork.images = await Promise.all(artwork.images.map(async (img: any) => {
-          if (img.fileKey.startsWith('http')) {
-            return img;
-          }
+          if (!img.fileKey) return img;
+          if (img.fileKey.startsWith('http')) return img;
+
+          const publicUrl = r2Service.getPublicAssetUrl(img.fileKey);
+          if (publicUrl) return { ...img, fileKey: publicUrl };
+
           if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
             return { ...img, fileKey: `/uploads/${img.fileKey}` };
           }
@@ -62,9 +65,12 @@ export class ArtworkService {
     }
     if (artwork.images) {
       artwork.images = await Promise.all(artwork.images.map(async (img: any) => {
-        if (img.fileKey.startsWith('http')) {
-          return img;
-        }
+        if (!img.fileKey) return img;
+        if (img.fileKey.startsWith('http')) return img;
+
+        const publicUrl = r2Service.getPublicAssetUrl(img.fileKey);
+        if (publicUrl) return { ...img, fileKey: publicUrl };
+
         if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
           return { ...img, fileKey: `/uploads/${img.fileKey}` };
         }
@@ -89,7 +95,12 @@ export class ArtworkService {
     return Promise.all(items.map(async (artwork: any) => {
       if (artwork.images) {
         artwork.images = await Promise.all(artwork.images.map(async (img: any) => {
+          if (!img.fileKey) return img;
           if (img.fileKey.startsWith('http')) return img;
+
+          const publicUrl = r2Service.getPublicAssetUrl(img.fileKey);
+          if (publicUrl) return { ...img, fileKey: publicUrl };
+
           if (!config.cloudflareR2AccountId || config.cloudflareR2AccountId === 'placeholder') {
             return { ...img, fileKey: `/uploads/${img.fileKey}` };
           }

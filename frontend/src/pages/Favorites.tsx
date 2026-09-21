@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useCart } from '../contexts/CartContext';
 import TopNavBar from '../components/TopNavBar';
+import Footer from '../components/Footer';
 import { fetchArtworkById, getArtworkImagePath, Artwork } from '../services/artworkService';
 import { CollectionArtwork } from '../lib/collectionsData';
 import ArtworkCard from '../components/ArtworkCard';
@@ -40,15 +41,21 @@ export default function Favorites() {
   }, [favorites]);
 
   return (
-    <div className="bg-paper-white text-primary min-h-screen flex flex-col font-body-md overflow-x-hidden selection:bg-gallery-gold/30">
+    <div className="bg-[#FBF9F4] text-[#221E1B] min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-[#C5A059]/30 pt-[100px] md:pt-[130px]">
       <TopNavBar />
-      <main className="flex-1 mt-24 max-w-[1600px] w-full mx-auto px-6 md:px-12 py-16">
+      
+      <main className="flex-1 max-w-[1500px] w-full mx-auto px-6 md:px-12 py-12 md:py-16">
         <div>
-          <section className="flex justify-between items-end mb-10 border-b border-gallery-gold/20 pb-4">
-            <div className="space-y-2">
-              <span className="font-label-caps text-[10px] tracking-widest text-gallery-gold uppercase block">CURATED</span>
-              <h3 className="font-display-md text-4xl tracking-tight text-primary">Your Favorites</h3>
+          <section className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 border-b border-[#221E1B]/10 pb-6 gap-6">
+            <div className="space-y-3">
+              <span className="text-[10px] tracking-[0.35em] font-mono text-[#C5A059] uppercase block font-bold">
+                Private Collection Archive
+              </span>
+              <h1 className="font-serif text-3xl md:text-5xl tracking-tight text-[#221E1B] font-normal">
+                Curated Saved Works
+              </h1>
             </div>
+
             {favoriteArtworks.length > 0 && (
               <button 
                 onClick={() => {
@@ -63,34 +70,44 @@ export default function Favorites() {
                   });
                   navigate('/cart');
                 }}
-                className="bg-primary text-white font-label-caps text-[11px] tracking-widest uppercase px-6 py-3 hover:bg-gallery-gold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+                className="pill-button pill-button-gold shadow-lg cursor-pointer text-xs"
               >
-                <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
-                Add All to Cart
+                <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
+                Transfer All to Portfolio Cart
               </button>
             )}
           </section>
           
           {loading ? (
-             <div className="flex justify-center p-12">
-               <div className="w-8 h-8 border-2 border-gallery-gold/30 border-t-gallery-gold rounded-full animate-spin" />
+             <div className="flex justify-center py-24">
+               <div className="w-10 h-10 border-2 border-[#C5A059]/30 border-t-[#C5A059] rounded-full animate-spin" />
              </div>
           ) : favorites.length === 0 ? (
-            <div className="bg-subtle-smoke p-12 border border-gallery-gold/20 text-center">
-              <p className="font-body-md text-primary/60 mb-6">You have not saved any artworks yet.</p>
-              <Link to="/collections" className="px-8 py-3 bg-primary text-white font-label-caps text-[11px] tracking-widest uppercase hover:bg-gallery-gold transition-colors inline-block">
+            <div className="bg-white/80 backdrop-blur-xl p-16 md:p-24 rounded-3xl border border-[#221E1B]/10 text-center shadow-sm max-w-2xl mx-auto">
+              <div className="w-16 h-16 rounded-full border border-[#221E1B]/10 bg-[#EDE7DE]/60 flex items-center justify-center mx-auto mb-6 text-[#221E1B]/40">
+                <span className="material-symbols-outlined text-[30px]">favorite_border</span>
+              </div>
+              <h2 className="font-serif text-2xl md:text-3xl text-[#221E1B] mb-3 font-normal">
+                No Masterworks Saved Yet
+              </h2>
+              <p className="text-sm text-[#221E1B]/60 mb-8 max-w-md mx-auto">
+                Bookmark artworks as you explore our curatorial suites to compare dimensions and request private preview viewings.
+              </p>
+              <Link to="/collections" className="pill-button pill-button-espresso text-xs">
                 Explore Collections
+                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
               {favoriteArtworks.map((artwork, idx) => (
                 <div key={artwork.id} className="relative group">
                   <button 
                     onClick={(e) => { e.stopPropagation(); removeFavorite(artwork.id); }}
-                    className="absolute top-4 right-4 z-40 bg-white/80 p-2 rounded-full text-red-500 hover:bg-red-50 transition-colors shadow-sm cursor-pointer opacity-0 group-hover:opacity-100"
+                    className="absolute top-4 right-4 z-40 bg-white/95 backdrop-blur-md p-2.5 rounded-full text-[#8C4A3E] hover:bg-[#8C4A3E] hover:text-white transition-all shadow-md cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                    title="Remove from Saved"
                   >
-                    <span className="material-symbols-outlined text-[18px]">heart_broken</span>
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                   <ArtworkCard artwork={artwork} index={idx} />
                 </div>
@@ -99,9 +116,8 @@ export default function Favorites() {
           )}
         </div>
       </main>
-      <footer className="w-full px-12 py-12 flex flex-col items-center justify-center bg-paper-white border-t border-gallery-gold/20 mt-auto">
-        <p className="font-label-caps text-[9px] tracking-widest uppercase text-primary/40">© 2026 The Kala Vault. All Rights Reserved.</p>
-      </footer>
+
+      <Footer />
     </div>
   );
 }

@@ -20,7 +20,7 @@ const DEFAULT_OPTIONS: WatermarkOptions = {
   color: '#FFFFFF',
 };
 
-// Global in-memory cache for processed watermarked images
+// Global in-memory and persistent localStorage cache for processed watermarked images
 const watermarkCache = new Map<string, string>();
 
 export async function addWatermarkToImage(
@@ -28,10 +28,22 @@ export async function addWatermarkToImage(
   options: WatermarkOptions = {}
 ): Promise<string> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  const cacheKey = `${imageSrc}_${JSON.stringify(opts)}`;
+  const cacheKey = `wm_${imageSrc}_${opts.position}`;
   
+  // 1. Check in-memory RAM cache
   if (watermarkCache.has(cacheKey)) {
     return watermarkCache.get(cacheKey)!;
+  }
+
+  // 2. Check persistent localStorage cache
+  try {
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+      watermarkCache.set(cacheKey, cachedData);
+      return cachedData;
+    }
+  } catch (e) {
+    // Ignore localStorage quota errors
   }
 
   return new Promise((resolve, reject) => {
@@ -46,7 +58,7 @@ export async function addWatermarkToImage(
         const ctx = canvas.getContext('2d');
 
         if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
+          resolve(imageSrc);
           return;
         }
 
@@ -87,16 +99,21 @@ export async function addWatermarkToImage(
         ctx.fillText(opts.text || '© KALAVAULT', x, y);
 
         // Convert canvas to data URL
-        const watermarkedUrl = canvas.toDataURL('image/jpeg', 0.95);
+        const watermarkedUrl = canvas.toDataURL('image/jpeg', 0.85);
         watermarkCache.set(cacheKey, watermarkedUrl);
+        try {
+          localStorage.setItem(cacheKey, watermarkedUrl);
+        } catch (e) {
+          // Ignore quota exceeded
+        }
         resolve(watermarkedUrl);
       } catch (error) {
-        reject(error);
+        resolve(imageSrc);
       }
     };
 
     img.onerror = () => {
-      reject(new Error(`Failed to load image: ${imageSrc}`));
+      resolve(imageSrc);
     };
 
     img.src = imageSrc;

@@ -1,22 +1,20 @@
-export function SkeletonArtworkCard({ className = "" }: { className?: string }) {
+export function SkeletonArtworkCard({ className = "" }: { className?: string; key?: string | number }) {
   return (
-    <div className={`relative mb-6 md:mb-8 rounded-[1px] overflow-hidden bg-subtle-smoke/50 border border-outline/5 ${className}`}>
-      {/* Aspect Ratio Box (Approximate average) */}
-      <div className="w-full aspect-[3/4] bg-stone-200/50 animate-pulse relative overflow-hidden">
-        {/* Shimmer gradient */}
-        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shimmer_1.5s_infinite]" />
+    <div className={`flex flex-col items-center justify-between text-center w-full p-2 sm:p-3 ${className}`}>
+      {/* Frameless Dynamic Image Skeleton */}
+      <div className="w-full flex items-center justify-center">
+        <div className="w-[220px] sm:w-[250px] md:w-[270px] h-[280px] sm:h-[320px] md:h-[360px] bg-stone-300/40 animate-pulse relative overflow-hidden rounded-[3px] shadow-[0_10px_30px_rgba(30,23,20,0.06)]">
+          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shimmer_1.5s_infinite]" />
+        </div>
       </div>
-      <div className="p-4 bg-paper-white border-t border-outline/5 space-y-3">
-        {/* Title skeleton */}
-        <div className="w-3/4 h-5 bg-stone-200/50 rounded-sm animate-pulse" />
-        {/* Artist skeleton */}
-        <div className="w-1/2 h-3 bg-stone-200/50 rounded-sm animate-pulse" />
-        
-        <div className="flex justify-between items-center pt-3 border-t border-outline/5 mt-3">
-          {/* Tag skeleton */}
-          <div className="w-16 h-4 bg-stone-200/50 rounded-sm animate-pulse" />
-          {/* Price skeleton */}
-          <div className="w-20 h-4 bg-stone-200/50 rounded-sm animate-pulse" />
+
+      {/* Typography Skeleton */}
+      <div className="mt-4 flex flex-col items-center justify-center space-y-2 w-full px-2">
+        <div className="w-36 h-4 bg-stone-300/50 rounded-sm animate-pulse" />
+        <div className="w-24 h-3.5 bg-stone-300/40 rounded-sm animate-pulse" />
+        <div className="pt-1.5 flex flex-col items-center space-y-1">
+          <div className="w-20 h-2 bg-[#C5A059]/30 rounded-sm animate-pulse" />
+          <div className="w-24 h-3 bg-stone-300/50 rounded-sm animate-pulse" />
         </div>
       </div>
     </div>
