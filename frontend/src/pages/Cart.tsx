@@ -1,10 +1,54 @@
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
+import { initiateRazorpayCheckout } from '../services/paymentService';
+import { PaymentSuccessModal } from '../components/PaymentSuccessModal';
+import RobustArtworkImage from '../components/RobustArtworkImage';
 
 export default function Cart() {
   const { items: cartItems, total: cartTotal, removeFromCart, clearCart } = useCart();
+  const { user } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successDetails, setSuccessDetails] = useState<{
+    paymentId: string;
+    orderId: string;
+    amount: number;
+    receipt?: string;
+  } | null>(null);
+
+  const handleProceedToAcquisition = async () => {
+    if (cartItems.length === 0 || cartTotal <= 0) return;
+
+    setIsProcessing(true);
+    setErrorMessage(null);
+
+    await initiateRazorpayCheckout({
+      amount: cartTotal,
+      description: `Acquisition of ${cartItems.length} curated artwork(s) - The Kala Vault`,
+      notes: {
+        itemCount: String(cartItems.length),
+        itemNames: cartItems.map(i => i.name).slice(0, 3).join(', '),
+      },
+      customerName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : undefined,
+      customerEmail: user?.email,
+      onSuccess: async (paymentData) => {
+        setIsProcessing(false);
+        setSuccessDetails(paymentData);
+        await clearCart();
+      },
+      onError: (err) => {
+        setIsProcessing(false);
+        setErrorMessage(err);
+      },
+      onDismiss: () => {
+        setIsProcessing(false);
+      },
+    });
+  };
 
   return (
     <div className="bg-[#FAF6F0] text-[#1E1412] min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-[#C5A059]/30 pt-[100px] md:pt-[130px]">
@@ -27,6 +71,21 @@ export default function Cart() {
               </p>
             )}
           </section>
+
+          {errorMessage && (
+            <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-red-600">error</span>
+                <span>{errorMessage}</span>
+              </div>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="text-xs font-cinzel uppercase tracking-wider text-red-600 font-bold hover:underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
 
           {cartItems.length === 0 ? (
             <div className="bg-[#FAF6F0] p-16 md:p-24 rounded-3xl border border-[#C5A059]/30 text-center shadow-sm max-w-2xl mx-auto">
@@ -54,8 +113,9 @@ export default function Cart() {
                       <div className="flex items-center gap-5">
                         {item.imageUrl && (
                           <div className="w-24 h-24 rounded-2xl bg-[#241611] overflow-hidden border border-[#3D251C] shrink-0 relative shadow-inner p-1">
-                            <img 
-                              src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${item.imageUrl.startsWith('/') ? '' : '/uploads/'}${item.imageUrl}`} 
+                            <RobustArtworkImage 
+                              src={item.imageUrl}
+                              seed={item.artworkId}
                               alt={item.name} 
                               className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-105" 
                             />
@@ -121,15 +181,14 @@ export default function Cart() {
                 </div>
 
                 <button 
-                  onClick={() => {
-                    alert('Redirecting to Razorpay secure acquisition gateway...');
-                    window.open('https://razorpay.com', '_blank');
-                    clearCart();
-                  }}
-                  className="w-full pill-button pill-button-bordeaux justify-center shadow-xl text-xs tracking-[0.2em] uppercase py-4 mb-4"
+                  onClick={handleProceedToAcquisition}
+                  disabled={isProcessing}
+                  className="w-full pill-button pill-button-bordeaux justify-center shadow-xl text-xs tracking-[0.2em] uppercase py-4 mb-4 disabled:opacity-60 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-[#DFC07D]">verified_user</span>
-                  Proceed to Secure Acquisition
+                  <span className="material-symbols-outlined text-[18px] text-[#DFC07D]">
+                    {isProcessing ? 'hourglass_top' : 'verified_user'}
+                  </span>
+                  {isProcessing ? 'Initializing Escrow Gateway...' : 'Proceed to Secure Acquisition'}
                 </button>
 
                 <p className="text-[11px] font-sans text-[#1E1412]/50 text-center flex items-center justify-center gap-1.5 font-medium">
@@ -143,6 +202,14 @@ export default function Cart() {
       </main>
 
       <Footer />
+
+      {/* Success Modal */}
+      <PaymentSuccessModal
+        isOpen={Boolean(successDetails)}
+        onClose={() => setSuccessDetails(null)}
+        details={successDetails}
+      />
     </div>
   );
 }
+

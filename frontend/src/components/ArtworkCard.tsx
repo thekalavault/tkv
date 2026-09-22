@@ -1,10 +1,11 @@
-import { useState, memo } from 'react';
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { CollectionArtwork } from '../lib/collectionsData';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getArtworkDetailById } from '../services/artworkDetailService';
+import RobustArtworkImage from './RobustArtworkImage';
 
 interface ArtworkCardProps {
   artwork: CollectionArtwork;
@@ -21,7 +22,6 @@ const ArtworkCard = memo(function ArtworkCard({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const getStartingPrice = () => {
     const orig = artwork.originalArtwork;
@@ -73,23 +73,20 @@ const ArtworkCard = memo(function ArtworkCard({
     >
       {/* Artwork in Thin Luxury Wooden Frame Finish */}
       <div className="w-full flex-1 flex items-center justify-center p-2 min-h-[280px] sm:min-h-[320px] md:min-h-[360px] relative">
-        {!imageLoaded && (
-          <div className="absolute inset-4 bg-[#EFE8DD]/50 animate-pulse" />
-        )}
-
+        
         {/* Thin Gallery Wooden Frame */}
         <div className="relative group/art inline-flex items-center justify-center p-[3px] bg-gradient-to-b from-[#3E2419] via-[#2A160F] to-[#1E0E08] border-[4px] sm:border-[5px] border-[#341B12] shadow-[0_12px_28px_rgba(26,13,8,0.28)] group-hover:shadow-[0_18px_38px_rgba(26,13,8,0.38)] group-hover:border-[#422317] transition-all duration-300">
           
           {/* Subtle Inner Gold Hairline Bevel */}
           <div className="relative p-[1px] bg-gradient-to-tr from-[#9E7D38]/60 via-[#DFC07D]/80 to-[#9E7D38]/60 shadow-inner overflow-hidden">
-            <div className="bg-[#120704] flex items-center justify-center overflow-hidden">
-              <img
-                className={`max-h-[290px] sm:max-h-[330px] md:max-h-[370px] w-auto max-w-full object-contain block mx-auto transition-transform duration-300 group-hover:scale-[1.01] no-drag ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                alt={artwork.name}
+            <div className="bg-[#120704] flex items-center justify-center overflow-hidden min-w-[180px] min-h-[220px]">
+              <RobustArtworkImage
                 src={artwork.localPath}
+                seed={artwork.id}
+                alt={artwork.name}
                 loading="lazy"
                 decoding="async"
-                onLoad={() => setImageLoaded(true)}
+                className="max-h-[290px] sm:max-h-[330px] md:max-h-[370px] w-auto max-w-full object-contain block mx-auto transition-transform duration-300 group-hover:scale-[1.01] no-drag"
                 onDragStart={(e) => e.preventDefault()}
                 onContextMenu={(e) => e.preventDefault()}
               />

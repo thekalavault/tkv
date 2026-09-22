@@ -4,6 +4,7 @@ import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import { buildCollectionsFromData, CollectionArtwork, Collection } from '../lib/collectionsData';
 import ArtworkCard from '../components/ArtworkCard';
+import RobustArtworkImage from '../components/RobustArtworkImage';
 import { fetchArtworks } from '../services/artworkService';
 import { SkeletonArtworkCard } from '../components/SkeletonCard';
 import { useNavigate } from 'react-router-dom';
@@ -71,8 +72,9 @@ function HeroCarousel({ artworks }: { artworks: CollectionArtwork[] }) {
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 w-full h-full"
           >
-            <img 
+            <RobustArtworkImage 
               src={current.localPath} 
+              seed={current.id}
               alt={current.name} 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
             />

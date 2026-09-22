@@ -1,6 +1,6 @@
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useEffect } from 'react';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
 import WhiteGloveProtocolSection from '../components/WhiteGloveProtocolSection';
@@ -10,11 +10,10 @@ import {
   Layers, 
   Award, 
   Compass, 
-  Eye, 
-  Box, 
-  Calendar,
   Sparkles,
-  RefreshCw
+  ShieldCheck,
+  Building2,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function Services() {
@@ -22,36 +21,41 @@ export default function Services() {
     window.scrollTo(0, 0);
   }, []);
 
-  const curatorialSteps = [
+  const protocolStages = [
     {
-      step: '01',
-      title: 'Cartography & Spatial Mapping',
-      desc: 'Precision 3D spatial scan, lux exposure analysis across light cycles, and wall elevation studies.',
-      image: '/assets/protocol_01_cartography.jpg'
+      numeral: 'I',
+      category: 'Spatial Mapping',
+      title: 'Spatial & Lux Cartography',
+      desc: 'Forensic 3D spatial scan, wall elevation sightline analysis, and photometric lux exposure audit.',
+      image: '/assets/protocol_01_spatial_mapping.jpg'
     },
     {
-      step: '02',
-      title: 'Accession & Provenance',
-      desc: 'Curated accession dossier unsealing private institutional works with cryptographic authenticity.',
-      image: '/assets/protocol_02_accession.jpg'
+      numeral: 'II',
+      category: 'Vault Accession',
+      title: 'Vault Accession & Provenance',
+      desc: 'Curated accession portfolio unsealing private institutional masterworks with lifetime authenticity.',
+      image: '/assets/protocol_02_vault_accession.jpg'
     },
     {
-      step: '03',
-      title: 'Conservation & Framing',
-      desc: 'Tru-Vue 99.8% UV-protective museum glass, 8-ply acid-free matboards, and custom hardwood profiles.',
-      image: '/assets/protocol_03_conservation.jpg'
+      numeral: 'III',
+      category: 'Conservation',
+      title: 'Archival Conservation & Framing',
+      desc: 'Tru-Vue 99.8% UV-protective museum glass, 8-ply acid-free cotton mats, and bespoke hardwood profiles.',
+      image: '/assets/protocol_03_archival_conservation.jpg'
     },
     {
-      step: '04',
-      title: 'Laser Installation',
-      desc: 'Off-hours white-glove mounting with heavy-duty subterranean cleats and spot luminaire calibration.',
-      image: '/assets/protocol_04_installation.jpg'
+      numeral: 'IV',
+      category: 'Installation',
+      title: 'Laser-Calibrated Mounting',
+      desc: 'Off-hours white-glove deployment with heavy-duty seismic French cleats and true spot luminaire calibration.',
+      image: '/assets/protocol_04_laser_installation.jpg'
     },
     {
-      step: '05',
-      title: 'Quarterly Rotation',
-      desc: 'Dynamic seasonal refreshes every 90 to 180 days with continuous on-site conservation care.',
-      image: '/assets/protocol_05_rotation.jpg'
+      numeral: 'V',
+      category: 'Rotations & Care',
+      title: 'Dynamic Rotations & Vault Care',
+      desc: 'Scheduled seasonal collection refreshes every 90 to 180 days with regular on-site conservator reports.',
+      image: '/assets/protocol_05_dynamic_rotations.jpg'
     }
   ];
 
@@ -59,365 +63,264 @@ export default function Services() {
     <div className="bg-[#FAF6F0] text-[#1E1412] font-sans selection:bg-[#C5A059]/30 min-h-screen flex flex-col">
       <TopNavBar />
 
-      <main className="pt-28 md:pt-32 pb-24 flex-grow">
+      <main className="pt-28 md:pt-36 pb-24 flex-grow select-none">
         
-        {/* Header Intro */}
-        <section className="px-6 md:px-12 max-w-[1440px] mx-auto mb-16 md:mb-20 text-center">
+        {/* ─────────────────────────────────────────────────────────────────────────────
+            HEADER INTRO (PURE EDITORIAL LUXURY)
+            ───────────────────────────────────────────────────────────────────────────── */}
+        <section className="px-6 md:px-12 max-w-[1480px] mx-auto mb-20 md:mb-24 text-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="max-w-3xl mx-auto"
           >
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="h-px w-8 bg-[#C5A059]" />
-              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.28em] text-[#7B2431] font-bold">
-                OUR SERVICES
+            <div className="inline-flex items-center gap-3 mb-3">
+              <span className="h-[1px] w-8 bg-[#C5A059]" />
+              <span className="font-cinzel text-[11px] uppercase tracking-[0.35em] text-[#4A0E17] font-semibold">
+                CURATORIAL ADVISORY & SERVICES
               </span>
-              <div className="h-px w-8 bg-[#C5A059]" />
+              <span className="h-[1px] w-8 bg-[#C5A059]" />
             </div>
 
-            <h1 className="font-brand text-4xl sm:text-5xl md:text-6xl font-bold text-[#1E1412] tracking-tight mb-5 leading-[1.12]">
+            <h1 className="font-cinzel text-4xl sm:text-5xl md:text-6xl font-semibold text-[#1E1412] tracking-tight mb-5 leading-[1.12]">
               A World of Art, <br />
-              <span className="text-[#7B2431] italic font-cormorant font-normal">Tailored to You.</span>
+              <span className="text-[#4A0E17] italic font-cormorant font-normal">Curated for Your Space.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-[#1E1412]/75 max-w-2xl mx-auto leading-relaxed font-light">
-              Transform your hospitality or corporate environment into a living gallery with museum-grade acquisitions, dynamic seasonal rotations, and spatial advisory.
+            <p className="font-cormorant text-lg sm:text-xl text-[#1E1412]/80 max-w-2xl mx-auto leading-relaxed font-normal">
+              Transform your hospitality, enterprise, or private residential interiors into an authoritative living gallery through permanent acquisitions, rotational leasing, and spatial architecture.
             </p>
           </motion.div>
         </section>
 
         {/* ─────────────────────────────────────────────────────────────────────────────
-            1. THREE CORE PILLARS (Modern Magazine Spreads with Interactive Process Animations)
+            1. THREE CORE CURATORIAL SERVICES (GRAND EDITORIAL SPREAD)
             ───────────────────────────────────────────────────────────────────────────── */}
-        <section className="px-6 md:px-12 max-w-[1440px] mx-auto mb-28 space-y-24 md:space-y-32">
+        <section className="px-6 md:px-12 max-w-[1480px] mx-auto mb-28 space-y-24 md:space-y-32">
           
-          {/* Service 01: Direct Buying (Permanent Masterwork Acquisition) */}
+          {/* Service 01: Direct Masterwork Acquisition */}
           <motion.div 
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center"
           >
-            {/* Visual with Holographic Provenance Animation */}
+            {/* Visual Frame */}
             <div className="lg:col-span-7">
-              <div className="relative rounded-3xl overflow-hidden bg-[#160E0B] border-2 border-[#C5A059]/40 shadow-[0_20px_60px_rgba(0,0,0,0.18)] group">
+              <div className="relative rounded-3xl overflow-hidden bg-[#160E0B] border border-[#C5A059]/40 shadow-[0_20px_50px_rgba(74,14,23,0.08)] group">
                 <img
-                  src="/assets/curator_white_glove.jpg"
+                  src="/assets/protocol_02_vault_accession.jpg"
                   alt="Direct Buying and Verified Provenance Masterworks"
-                  className="w-full aspect-[16/11] object-cover transition-transform duration-700 group-hover:scale-105 brightness-[0.96] contrast-[1.04]"
+                  className="w-full aspect-[16/11] object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 
-                {/* Floating Interactive Holographic Provenance HUD */}
-                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-[#160D0A]/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-[#DFC07D]/40 text-[#DFC07D] shadow-xl flex items-center gap-3">
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                    className="w-8 h-8 rounded-full border border-dashed border-[#DFC07D] flex items-center justify-center shrink-0"
-                  >
-                    <Award className="w-4 h-4 text-[#DFC07D]" />
-                  </motion.div>
-                  <div>
-                    <span className="font-cinzel text-[10px] font-bold uppercase tracking-wider block text-white">
-                      Verified Provenance
-                    </span>
-                    <span className="text-[9px] font-mono text-[#DFC07D]/90 block">
-                      Forensic Certificate • Lifetime Custody
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bottom Floating Spec Bar */}
-                <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#160D0A]/92 backdrop-blur-lg p-3.5 sm:p-4 rounded-2xl border border-[#DFC07D]/30 shadow-2xl flex items-center justify-between text-white">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#DFC07D] animate-ping" />
-                    <div>
-                      <span className="font-cinzel text-[11px] font-bold uppercase tracking-wider block text-[#DFC07D]">
-                        Private Estate Accession
-                      </span>
-                      <span className="text-[10px] text-white/70 font-light">
-                        100% Guaranteed Physical & Legal Authenticity
-                      </span>
-                    </div>
-                  </div>
-                  <span className="hidden sm:inline-block font-mono text-[10.5px] bg-white/10 px-2.5 py-1 rounded-md text-[#DFC07D] border border-white/10">
-                    MUSEUM GRADE
+                {/* Subtle Provenance Stamp */}
+                <div className="absolute top-5 left-5 bg-[#FAF6F0]/90 backdrop-blur-md px-4 py-2 rounded-full border border-[#C5A059]/40 shadow-md flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#4A0E17]" />
+                  <span className="font-cinzel text-[10px] font-bold uppercase tracking-wider text-[#4A0E17]">
+                    Lifetime Provenance Guarantee
                   </span>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 px-2 text-[11px] font-mono text-[#1E1412]/50">
-                <span>PERMANENT HERITAGE ACQUISITION</span>
-                <span>AUTHENTICITY GUARANTEED</span>
               </div>
             </div>
 
             {/* Text & Deliverables */}
             <div className="lg:col-span-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7B2431]/10 border border-[#7B2431]/20 text-[#7B2431] mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7B2431]" />
-                <span className="font-cinzel text-[10.5px] uppercase tracking-[0.24em] font-bold">
-                  PERMANENT ACQUISITION
-                </span>
-              </div>
+              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.25em] text-[#C5A059] font-bold block mb-2">
+                PERMANENT ACCESSION
+              </span>
 
-              <h2 className="font-cinzel text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#1E1412] tracking-tight mb-4 leading-[1.15]">
-                Direct Buying
+              <h2 className="font-cinzel text-3xl sm:text-4xl font-semibold text-[#1E1412] tracking-tight mb-3 leading-tight">
+                Direct Masterwork Acquisition
               </h2>
 
-              <p className="text-sm sm:text-base text-[#1E1412]/80 font-light leading-relaxed mb-6">
-                Build an enduring legacy with museum-grade original masterworks. Unseal private collections and acclaimed contemporary creators with comprehensive physical provenance dossiers and institutional valuations.
+              <p className="font-cormorant italic text-lg text-[#4A0E17] font-normal mb-4">
+                Curating enduring legacy collections for institutional and private portfolios.
               </p>
 
-              <div className="space-y-3 mb-8 border-y border-[#C5A059]/25 py-5">
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/60 border border-[#C5A059]/20 hover:border-[#7B2431]/40 transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-[#7B2431]/10 flex items-center justify-center text-[#7B2431] shrink-0 mt-0.5">
-                    <Award className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-cinzel text-xs font-bold text-[#1E1412]">Archival Provenance Dossier</h4>
-                    <p className="text-xs text-[#1E1412]/65 font-light">Full verifiable chain of custody, artist certificates, and condition audit reports.</p>
-                  </div>
-                </div>
+              <p className="font-cormorant text-[16px] text-[#1E1412]/85 leading-relaxed font-normal mb-6">
+                Build a permanent collection of museum-grade original masterworks. We facilitate direct accession from private estates, certified contemporary masters, and secondary market registries accompanied by complete provenance dossiers.
+              </p>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/60 border border-[#C5A059]/20 hover:border-[#7B2431]/40 transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-[#7B2431]/10 flex items-center justify-center text-[#7B2431] shrink-0 mt-0.5">
-                    <Box className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-cinzel text-xs font-bold text-[#1E1412]">Secondary Market Access</h4>
-                    <p className="text-xs text-[#1E1412]/65 font-light">Private brokering of rare secondary market originals and institutional releases.</p>
-                  </div>
+              <div className="space-y-2.5 mb-8 border-t border-[#C5A059]/25 pt-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    Forensic chain-of-custody documentation &amp; condition audit reports
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    Private brokerage of secondary market masterworks &amp; limited editions
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    White-glove courier delivery with insured museum-grade escrow transit
+                  </span>
                 </div>
               </div>
 
               <Link
-                to="/inquire?service=direct-buying"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] font-cinzel text-xs uppercase tracking-[0.18em] font-bold shadow-md hover:shadow-lg transition-all group"
+                to="/collections"
+                className="pill-button pill-button-bordeaux text-xs py-3.5 px-6 shadow-md"
               >
-                <span>Inquire Masterworks</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span>Browse Curated Vault</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#DFC07D]" />
               </Link>
             </div>
           </motion.div>
 
-          {/* Service 02: Smart Subscriptions (Rotational Living Gallery) */}
+          {/* Service 02: Rotational Living Gallery Subscriptions */}
           <motion.div 
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center"
           >
             {/* Text & Deliverables */}
             <div className="lg:col-span-5 order-2 lg:order-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7B2431]/10 border border-[#7B2431]/20 text-[#7B2431] mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7B2431]" />
-                <span className="font-cinzel text-[10.5px] uppercase tracking-[0.24em] text-[#7B2431] font-bold">
-                  ROTATIONAL LEASING
-                </span>
-              </div>
+              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.25em] text-[#C5A059] font-bold block mb-2">
+                ROTATIONAL LEASING
+              </span>
 
-              <h2 className="font-cinzel text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#1E1412] tracking-tight mb-4 leading-[1.15]">
-                Smart Subscriptions
+              <h2 className="font-cinzel text-3xl sm:text-4xl font-semibold text-[#1E1412] tracking-tight mb-3 leading-tight">
+                Living Gallery Subscriptions
               </h2>
 
-              <p className="text-sm sm:text-base text-[#1E1412]/80 font-light leading-relaxed mb-6">
-                Keep your architectural walls perpetually vibrant with tailored art rotations. Experience seasonal gallery refreshes with 100% OPEX tax flexibility and built-in rent-to-own equity credits.
+              <p className="font-cormorant italic text-lg text-[#4A0E17] font-normal mb-4">
+                Dynamic seasonal collection rotations with zero operational friction.
               </p>
 
-              <div className="space-y-3 mb-8 border-y border-[#C5A059]/25 py-5">
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/60 border border-[#C5A059]/20 hover:border-[#7B2431]/40 transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-[#7B2431]/10 flex items-center justify-center text-[#7B2431] shrink-0 mt-0.5">
-                    <Clock className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-cinzel text-xs font-bold text-[#1E1412]">90–180 Day Seasonal Refreshes</h4>
-                    <p className="text-xs text-[#1E1412]/65 font-light">Regular curated swaps to ensure recurring clients and guests experience a dynamic space.</p>
-                  </div>
-                </div>
+              <p className="font-cormorant text-[16px] text-[#1E1412]/85 leading-relaxed font-normal mb-6">
+                Keep your architectural walls perpetually vibrant. Our subscription suites provide regular 90 to 180-day art rotations, comprehensive on-site maintenance, 100% OPEX tax deductibility, and built-in rent-to-own equity credits.
+              </p>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/60 border border-[#C5A059]/20 hover:border-[#7B2431]/40 transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-[#7B2431]/10 flex items-center justify-center text-[#7B2431] shrink-0 mt-0.5">
-                    <Layers className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-cinzel text-xs font-bold text-[#1E1412]">Rent-to-Own Equity Accumulation</h4>
-                    <p className="text-xs text-[#1E1412]/65 font-light">Apply 100% of rental payments directly toward permanent acquisition of your favorite works.</p>
-                  </div>
+              <div className="space-y-2.5 mb-8 border-t border-[#C5A059]/25 pt-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    Scheduled 90–180 day seasonal gallery rotations tailored to your calendar
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    100% of rental payments credited toward rent-to-own permanent equity
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    Full concierge damage protection, transit insurance &amp; routine care
+                  </span>
                 </div>
               </div>
 
               <Link
                 to="/subscriptions"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] font-cinzel text-xs uppercase tracking-[0.18em] font-bold shadow-md hover:shadow-lg transition-all group"
+                className="pill-button pill-button-bordeaux text-xs py-3.5 px-6 shadow-md"
               >
-                <span>Explore Subscription Plans</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span>Explore Subscription Suites</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#DFC07D]" />
               </Link>
             </div>
 
-            {/* Visual with Animated 4-Season Rotation HUD */}
+            {/* Visual Frame */}
             <div className="lg:col-span-7 order-1 lg:order-2">
-              <div className="relative rounded-3xl overflow-hidden bg-[#160E0B] border-2 border-[#C5A059]/40 shadow-[0_20px_60px_rgba(0,0,0,0.18)] group">
+              <div className="relative rounded-3xl overflow-hidden bg-[#160E0B] border border-[#C5A059]/40 shadow-[0_20px_50px_rgba(74,14,23,0.08)] group">
                 <img
-                  src="/assets/dining_bistro_art.jpg"
-                  alt="Smart Subscriptions and Rotational Art Installation in Luxury Hospitality"
-                  className="w-full aspect-[16/11] object-cover transition-transform duration-700 group-hover:scale-105 brightness-[0.96] contrast-[1.04]"
+                  src="/assets/protocol_05_dynamic_rotations.jpg"
+                  alt="Rotational Art Subscriptions in Luxury Penthouse Lounge"
+                  className="w-full aspect-[16/11] object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Interactive Dynamic 4-Season Cycle Indicator */}
-                <div className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-[#160D0A]/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-[#DFC07D]/40 text-[#DFC07D] shadow-xl">
-                  <div className="flex items-center gap-2 mb-1">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#DFC07D]" style={{ animationDuration: '6s' }} />
-                    <span className="font-cinzel text-[10px] font-bold uppercase tracking-wider text-white">
-                      Seasonal Cadence
-                    </span>
-                  </div>
-                  <span className="text-[9.5px] font-mono text-[#DFC07D]">
-                    Every 90 Days • Complete Rotation
+                <div className="absolute top-5 right-5 bg-[#FAF6F0]/90 backdrop-blur-md px-4 py-2 rounded-full border border-[#C5A059]/40 shadow-md flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#4A0E17]" />
+                  <span className="font-cinzel text-[10px] font-bold uppercase tracking-wider text-[#4A0E17]">
+                    90–180 Day Cadence
                   </span>
                 </div>
-
-                {/* Animated Rotational Seasonal Pill Track */}
-                <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#160D0A]/92 backdrop-blur-lg p-3 sm:p-4 rounded-2xl border border-[#DFC07D]/30 shadow-2xl text-white">
-                  <div className="flex items-center justify-between text-[10px] font-cinzel font-bold tracking-wider text-[#DFC07D] mb-2">
-                    <span>LIVING GALLERY CYCLE</span>
-                    <span className="text-white/70 font-mono">100% OPEX FLEXIBILITY</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
-                    <div className="py-1 px-1.5 rounded-lg bg-[#DFC07D]/20 border border-[#DFC07D]/40 text-[9px] sm:text-[10px] font-mono text-[#DFC07D] font-bold">
-                      Q1 Spring
-                    </div>
-                    <div className="py-1 px-1.5 rounded-lg bg-white/10 text-[9px] sm:text-[10px] font-mono text-white/80">
-                      Q2 Summer
-                    </div>
-                    <div className="py-1 px-1.5 rounded-lg bg-white/10 text-[9px] sm:text-[10px] font-mono text-white/80">
-                      Q3 Autumn
-                    </div>
-                    <div className="py-1 px-1.5 rounded-lg bg-white/10 text-[9px] sm:text-[10px] font-mono text-white/80">
-                      Q4 Winter
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 px-2 text-[11px] font-mono text-[#1E1412]/50">
-                <span>ROTATIONAL ART INSTALLATION</span>
-                <span>ZERO CAPEX • 100% OPEX</span>
               </div>
             </div>
           </motion.div>
 
-          {/* Service 03: Expert Curation (3D Spatial Architecture & Lux Balancing) */}
+          {/* Service 03: Architectural & Spatial Curation */}
           <motion.div 
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center"
           >
-            {/* Visual with 3D Spatial Laser Sightline Scanner HUD */}
+            {/* Visual Frame */}
             <div className="lg:col-span-7">
-              <div className="relative rounded-3xl overflow-hidden bg-[#160E0B] border-2 border-[#C5A059]/40 shadow-[0_20px_60px_rgba(0,0,0,0.18)] group">
+              <div className="relative rounded-3xl overflow-hidden bg-[#160E0B] border border-[#C5A059]/40 shadow-[0_20px_50px_rgba(74,14,23,0.08)] group">
                 <img
-                  src="/assets/corporate_boardroom_art.jpg"
+                  src="/assets/protocol_01_spatial_mapping.jpg"
                   alt="Expert Curation and Executive Boardroom Spatial Planning"
-                  className="w-full aspect-[16/11] object-cover transition-transform duration-700 group-hover:scale-105 brightness-[0.96] contrast-[1.04]"
+                  className="w-full aspect-[16/11] object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Animated Laser Crosshair Scanning Overlay */}
-                <motion.div 
-                  animate={{ y: [0, 90, 0] }}
-                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                  className="absolute left-8 right-8 top-12 h-[1.5px] bg-gradient-to-r from-transparent via-[#DFC07D] to-transparent shadow-[0_0_12px_#DFC07D] pointer-events-none"
-                />
-
-                {/* Floating Spatial Dimensions Badge */}
-                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-[#160D0A]/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-[#DFC07D]/40 text-[#DFC07D] shadow-xl flex items-center gap-2.5">
-                  <Compass className="w-4 h-4 text-[#DFC07D]" />
-                  <div>
-                    <span className="font-cinzel text-[10px] font-bold uppercase tracking-wider block text-white">
-                      3D Spatial Sightlines
-                    </span>
-                    <span className="text-[9px] font-mono text-[#DFC07D]/90 block">
-                      ±0.5mm Laser Calibration • Lux Audit
-                    </span>
-                  </div>
+                <div className="absolute top-5 left-5 bg-[#FAF6F0]/90 backdrop-blur-md px-4 py-2 rounded-full border border-[#C5A059]/40 shadow-md flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-[#4A0E17]" />
+                  <span className="font-cinzel text-[10px] font-bold uppercase tracking-wider text-[#4A0E17]">
+                    ±0.5mm Laser Calibration
+                  </span>
                 </div>
-
-                {/* Bottom Architectural Matrix Bar */}
-                <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#160D0A]/92 backdrop-blur-lg p-3 sm:p-4 rounded-2xl border border-[#DFC07D]/30 shadow-2xl flex items-center justify-between text-white">
-                  <div className="grid grid-cols-3 gap-3 w-full text-center">
-                    <div className="border-r border-white/15 pr-2">
-                      <span className="text-[9px] font-mono text-white/60 block uppercase">Mounting Accuracy</span>
-                      <span className="font-cinzel text-xs font-bold text-[#DFC07D]">±0.5mm Laser</span>
-                    </div>
-                    <div className="border-r border-white/15 pr-2">
-                      <span className="text-[9px] font-mono text-white/60 block uppercase">True Light Index</span>
-                      <span className="font-cinzel text-xs font-bold text-[#DFC07D]">3000K Lux</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-mono text-white/60 block uppercase">Anchor Rating</span>
-                      <span className="font-cinzel text-xs font-bold text-[#DFC07D]">150kg Seismic</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 px-2 text-[11px] font-mono text-[#1E1412]/50">
-                <span>3D WALL ELEVATION & SIGHTLINE STUDIES</span>
-                <span>ARCHITECTURAL CURATORIAL ADVISORY</span>
               </div>
             </div>
 
             {/* Text & Deliverables */}
             <div className="lg:col-span-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7B2431]/10 border border-[#7B2431]/20 text-[#7B2431] mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7B2431]" />
-                <span className="font-cinzel text-[10.5px] uppercase tracking-[0.24em] text-[#7B2431] font-bold">
-                  SPATIAL ARCHITECTURE
-                </span>
-              </div>
+              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.25em] text-[#C5A059] font-bold block mb-2">
+                SPATIAL ARCHITECTURE
+              </span>
 
-              <h2 className="font-cinzel text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#1E1412] tracking-tight mb-4 leading-[1.15]">
-                Expert Curation
+              <h2 className="font-cinzel text-3xl sm:text-4xl font-semibold text-[#1E1412] tracking-tight mb-3 leading-tight">
+                Architectural Curation
               </h2>
 
-              <p className="text-sm sm:text-base text-[#1E1412]/80 font-light leading-relaxed mb-6">
-                Our institutional consultants design the perfect visual harmony for your architectural layout, calculating natural lighting angles, ceiling elevations, and brand identity alignment.
+              <p className="font-cormorant italic text-lg text-[#4A0E17] font-normal mb-4">
+                Precision spatial audits harmonizing art with architectural sightlines.
               </p>
 
-              <div className="space-y-3 mb-8 border-y border-[#C5A059]/25 py-5">
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/60 border border-[#C5A059]/20 hover:border-[#7B2431]/40 transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-[#7B2431]/10 flex items-center justify-center text-[#7B2431] shrink-0 mt-0.5">
-                    <Compass className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-cinzel text-xs font-bold text-[#1E1412]">High-Fidelity 3D Wall Renderings</h4>
-                    <p className="text-xs text-[#1E1412]/65 font-light">Pre-visualize exact scale, frame profiles, and shadow fall in your true interior lighting.</p>
-                  </div>
-                </div>
+              <p className="font-cormorant text-[16px] text-[#1E1412]/85 leading-relaxed font-normal mb-6">
+                Our architectural art consultants evaluate room volume, daylight angles, ceiling sightlines, and interior finishes to curate a bespoke collection narrative that amplifies your spatial prestige.
+              </p>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-white/60 border border-[#C5A059]/20 hover:border-[#7B2431]/40 transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-[#7B2431]/10 flex items-center justify-center text-[#7B2431] shrink-0 mt-0.5">
-                    <Eye className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-cinzel text-xs font-bold text-[#1E1412]">Custom Curatorial Narratives</h4>
-                    <p className="text-xs text-[#1E1412]/65 font-light">Art collections curated to articulate your corporate vision, prestige, and cultural heritage.</p>
-                  </div>
+              <div className="space-y-2.5 mb-8 border-t border-[#C5A059]/25 pt-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    High-fidelity 3D spatial simulation &amp; natural lux light audit
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    Custom curatorial narrative reflecting corporate heritage &amp; design identity
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-[#C5A059] font-cinzel font-bold text-xs select-none mt-0.5">—</span>
+                  <span className="font-cormorant text-[15px] text-[#1E1412]/85 italic font-normal">
+                    Turnkey mounting specifications for certified off-hours installation
+                  </span>
                 </div>
               </div>
 
               <Link
                 to="/inquire?service=curation"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] font-cinzel text-xs uppercase tracking-[0.18em] font-bold shadow-md hover:shadow-lg transition-all group"
+                className="pill-button pill-button-bordeaux text-xs py-3.5 px-6 shadow-md"
               >
-                <span>Request Spatial Curation Brief</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span>Request Spatial Brief</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#DFC07D]" />
               </Link>
             </div>
           </motion.div>
@@ -425,61 +328,62 @@ export default function Services() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────────────────────
-            2. THE 4-STAGE CURATORIAL PROTOCOL JOURNEY
+            2. THE 5-STAGE PROTOCOL JOURNEY (SIMULTANEOUS LUXURY CARDS IN REGAL RED)
             ───────────────────────────────────────────────────────────────────────────── */}
-        <section className="px-6 md:px-12 max-w-[1500px] mx-auto mb-28">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="font-cinzel text-[10.5px] uppercase tracking-[0.28em] text-[#7B2431] font-bold block mb-1">
-              THE CURATORIAL PROTOCOL
-            </span>
-            <h2 className="font-cinzel text-3xl sm:text-4xl text-[#1E1412] font-bold tracking-tight">
-              From Space Audit to Living Gallery
-            </h2>
-            <p className="text-xs sm:text-sm text-[#1E1412]/70 mt-2 font-light">
-              Our seamless turnkey onboarding engineered to eliminate operational friction and deliver immediate spatial prestige.
-            </p>
-          </div>
+        <section className="px-4 sm:px-6 md:px-12 max-w-[1500px] mx-auto mb-20 md:mb-24 select-none">
+          <div className="bg-gradient-to-b from-[#38080E] via-[#4A0E17] to-[#2B050A] rounded-3xl p-6 sm:p-10 md:p-12 border border-[#DFC07D]/35 shadow-[0_20px_50px_rgba(74,14,23,0.25)] relative overflow-hidden">
+            
+            {/* Subtle Watermark */}
+            <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full border border-[#DFC07D]/10 pointer-events-none" />
+            
+            <div className="text-center max-w-2xl mx-auto mb-10 relative z-10">
+              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.28em] text-[#DFC07D] font-bold block mb-1">
+                THE CURATORIAL PROTOCOL
+              </span>
+              <h2 className="font-cinzel text-2xl sm:text-3xl md:text-4xl text-white font-semibold tracking-tight">
+                From Spatial Audit to Living Gallery
+              </h2>
+              <p className="font-cormorant italic text-base sm:text-lg text-[#FAF6F0]/85 mt-2 font-normal">
+                A forensic, white-glove onboarding engineered to eliminate operational friction and deliver immediate spatial prestige.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 relative">
-            {curatorialSteps.map((step, idx) => {
-              return (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 relative z-10">
+              {protocolStages.map((stage) => (
                 <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.08, duration: 0.5 }}
+                  key={stage.numeral}
                   whileHover={{ y: -5 }}
-                  className="bg-[#FCFAF6] rounded-2xl overflow-hidden border border-[#C5A059]/35 flex flex-col justify-between shadow-2xs hover:border-[#7B2431] hover:shadow-lg transition-all duration-300 group"
+                  className="bg-[#5E121D]/80 hover:bg-[#6D1623] rounded-2xl overflow-hidden border border-[#DFC07D]/25 p-4 sm:p-5 flex flex-col justify-between shadow-md hover:border-[#DFC07D]/80 hover:shadow-xl transition-all duration-300 group"
                 >
                   <div>
-                    {/* Archival Illustration Header */}
-                    <div className="aspect-[16/10] w-full overflow-hidden relative bg-[#1E1412]">
+                    <div className="aspect-[4/3] w-full rounded-xl overflow-hidden relative bg-[#1E0407] mb-3.5 border border-[#DFC07D]/25 shadow-inner">
                       <img 
-                        src={step.image} 
-                        alt={step.title}
+                        src={stage.image} 
+                        alt={stage.title}
                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
+                      <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-[#38080E]/90 backdrop-blur-sm border border-[#DFC07D]/50 flex items-center justify-center">
+                        <span className="font-cormorant italic font-bold text-xs text-[#DFC07D]">
+                          {stage.numeral}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="p-4 sm:p-5">
-                      <h3 className="font-cinzel text-sm sm:text-base font-bold text-[#1E1412] mb-2 group-hover:text-[#7B2431] transition-colors leading-snug">
-                        {step.title}
-                      </h3>
-                      
-                      <p className="text-[11.5px] sm:text-xs text-[#1E1412]/75 leading-relaxed font-light">
-                        {step.desc}
-                      </p>
-                    </div>
-                  </div>
+                    <span className="font-cinzel text-[9.5px] uppercase tracking-wider text-[#DFC07D] font-bold block mb-1">
+                      {stage.category}
+                    </span>
 
-                  <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-[#C5A059]/20 flex items-center justify-between text-[10px] font-cinzel font-bold text-[#7B2431] tracking-wider uppercase">
-                    <span>Explore Stage</span>
-                    <span className="text-[#C5A059] group-hover:translate-x-1 transition-transform">→</span>
+                    <h3 className="font-cinzel text-[14.5px] sm:text-[15px] font-semibold text-white group-hover:text-[#DFC07D] transition-colors leading-snug mb-2">
+                      {stage.title}
+                    </h3>
+                    
+                    <p className="font-cormorant text-[13.5px] text-[#FAF6F0]/85 leading-relaxed font-normal">
+                      {stage.desc}
+                    </p>
                   </div>
                 </motion.div>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </section>
 
@@ -489,75 +393,76 @@ export default function Services() {
         <WhiteGloveProtocolSection />
 
         {/* ─────────────────────────────────────────────────────────────────────────────
-            4. THE CURATION REFRESH CADENCES
+            4. SUBSCRIPTION CADENCE & ROTATION CYCLES
             ───────────────────────────────────────────────────────────────────────────── */}
-        <section className="px-6 md:px-12 max-w-[1500px] mx-auto mb-16">
+        <section className="px-6 md:px-12 max-w-[1480px] mx-auto mb-16">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="font-cinzel text-[10.5px] uppercase tracking-[0.28em] text-[#7B2431] font-bold block mb-1">
-              SUBSCRIPTION CADENCE
+            <span className="font-cinzel text-[10.5px] uppercase tracking-[0.28em] text-[#4A0E17] font-bold block mb-1">
+              ROTATIONAL LIFECYCLES
             </span>
-            <h2 className="font-cinzel text-3xl sm:text-4xl text-[#1E1412] font-bold tracking-tight">
-              Art That Stays Fresh
+            <h2 className="font-cinzel text-3xl sm:text-4xl text-[#1E1412] font-semibold tracking-tight">
+              Curated Rotational Cadences
             </h2>
-            <p className="text-xs sm:text-sm text-[#1E1412]/70 mt-2 font-light">
+            <p className="font-cormorant italic text-base sm:text-lg text-[#1E1412]/75 mt-2 font-normal">
               Maintain an engaging, perpetually evolving corporate atmosphere tailored to your business calendar.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#FCFAF6] rounded-2xl p-8 border border-[#C5A059]/35 shadow-xs hover:border-[#7B2431] transition-all">
+            <div className="bg-[#FCFAF6] rounded-3xl p-8 border border-[#C5A059]/35 shadow-xs hover:border-[#4A0E17] transition-all">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-xs font-bold text-[#7B2431] bg-[#7B2431]/10 px-3 py-1 rounded-md">
-                  90 DAYS
+                <span className="font-cinzel text-xs font-bold text-[#4A0E17] bg-[#4A0E17]/10 px-3 py-1 rounded-md">
+                  QUARTERLY • 90 DAYS
                 </span>
-                <Clock className="w-5 h-5 text-[#7B2431]" />
+                <Clock className="w-5 h-5 text-[#4A0E17]" />
               </div>
-              <h3 className="font-cinzel text-xl font-bold text-[#1E1412] mb-2">
-                Seasonal Energy
+              <h3 className="font-cinzel text-xl font-semibold text-[#1E1412] mb-2">
+                Seasonal Dynamic Energy
               </h3>
-              <p className="text-xs text-[#1E1412]/75 leading-relaxed font-light">
-                Quarterly art rotations that refresh your space with the rhythm of the seasons, giving guests a new gallery experience on every return visit.
+              <p className="font-cormorant text-base text-[#1E1412]/80 leading-relaxed font-normal">
+                Quarterly art rotations that refresh your space with the rhythm of the seasons, giving guests and executives a new gallery experience on every return visit.
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-[#7B2431] via-[#5C1622] to-[#420B15] text-white rounded-2xl p-8 border-2 border-[#DFC07D] shadow-md scale-[1.02]">
+            <div className="bg-[#FCFAF6] rounded-3xl p-8 border-2 border-[#4A0E17] shadow-md relative">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-xs font-bold text-[#DFC07D] bg-white/10 px-3 py-1 rounded-md">
-                  6 MONTHS • INSTITUTIONAL
+                <span className="font-cinzel text-xs font-bold text-[#4A0E17] bg-[#4A0E17]/15 px-3 py-1 rounded-md">
+                  BI-ANNUAL • 180 DAYS
                 </span>
-                <Layers className="w-5 h-5 text-[#DFC07D]" />
+                <Layers className="w-5 h-5 text-[#4A0E17]" />
               </div>
-              <h3 className="font-cinzel text-xl font-bold text-white mb-2">
-                Balanced Change
+              <h3 className="font-cinzel text-xl font-semibold text-[#1E1412] mb-2">
+                Institutional Balance
               </h3>
-              <p className="text-xs text-white/85 leading-relaxed font-light">
-                Half-yearly refresh options for a measured, thoughtful evolution of your collection and brand narrative.
+              <p className="font-cormorant text-base text-[#1E1412]/80 leading-relaxed font-normal">
+                Half-yearly refresh options for a measured, thoughtful evolution of your corporate collection, boardrooms, and spatial brand narrative.
               </p>
             </div>
 
-            <div className="bg-[#FCFAF6] rounded-2xl p-8 border border-[#C5A059]/35 shadow-xs hover:border-[#7B2431] transition-all">
+            <div className="bg-[#FCFAF6] rounded-3xl p-8 border border-[#C5A059]/35 shadow-xs hover:border-[#4A0E17] transition-all">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-xs font-bold text-[#7B2431] bg-[#7B2431]/10 px-3 py-1 rounded-md">
-                  ANNUAL
+                <span className="font-cinzel text-xs font-bold text-[#4A0E17] bg-[#4A0E17]/10 px-3 py-1 rounded-md">
+                  ANNUAL • BESPOKE
                 </span>
-                <Sparkles className="w-5 h-5 text-[#7B2431]" />
+                <Sparkles className="w-5 h-5 text-[#4A0E17]" />
               </div>
-              <h3 className="font-cinzel text-xl font-bold text-[#1E1412] mb-2">
-                Annual Updates
+              <h3 className="font-cinzel text-xl font-semibold text-[#1E1412] mb-2">
+                Milestone Curation
               </h3>
-              <p className="text-xs text-[#1E1412]/75 leading-relaxed font-light">
-                Yearly curation themes that align with your brand's evolving narrative, corporate milestones, and interior redesigns.
+              <p className="font-cormorant text-base text-[#1E1412]/80 leading-relaxed font-normal">
+                Yearly curation themes that align with corporate milestones, annual general summits, architecture redesigns, and new headquarters openings.
               </p>
             </div>
           </div>
 
-          <div className="mt-12 text-center">
+          {/* Consultation CTA */}
+          <div className="mt-14 text-center">
             <Link
               to="/inquire"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#7B2431] hover:bg-[#8F2C3C] text-white font-cinzel text-xs uppercase tracking-[0.2em] font-bold shadow-md hover:shadow-lg transition-all"
+              className="pill-button pill-button-bordeaux text-xs py-4 px-8 shadow-lg inline-flex items-center gap-2.5"
             >
               <span>Schedule Curatorial Consultation</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-[#DFC07D]" />
             </Link>
           </div>
         </section>

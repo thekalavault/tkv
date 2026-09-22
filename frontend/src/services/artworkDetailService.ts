@@ -1,6 +1,6 @@
 import { CollectionArtwork, determineTierFromValue } from '../lib/collectionsData';
 import { PRICING_TIERS } from '../lib/rentalPricing';
-import { fetchArtworkById, getArtworkImagePath, getInstantArtworkById, LOCAL_ARTWORKS, Artwork } from './artworkService';
+import { fetchArtworkById, getArtworkImagePath, getArtworkImages, getInstantArtworkById, LOCAL_ARTWORKS, Artwork, ArtworkImageView } from './artworkService';
 
 export interface ArtworkDetailedInfo extends CollectionArtwork {
   artist?: string;
@@ -13,6 +13,7 @@ export interface ArtworkDetailedInfo extends CollectionArtwork {
   monthlyRent?: string;
   replacementValue?: number;
   relatedArtworks?: CollectionArtwork[];
+  galleryImages?: ArtworkImageView[];
 }
 
 const _detailCache = new Map<string, ArtworkDetailedInfo>();
@@ -24,6 +25,7 @@ export function buildArtworkDetailedInfo(artwork: Artwork, relatedArtworks: Coll
   const artworkValue = artwork.replacementValue || 15000;
   const baseMonthlyRent = artwork.rentalPriceCents ? artwork.rentalPriceCents : Math.round(artworkValue * 0.02);
   const tier = determineTierFromValue(artworkValue);
+  const galleryImages = getArtworkImages(artwork);
 
   const pricing = {
     tier: tier,
@@ -40,10 +42,13 @@ export function buildArtworkDetailedInfo(artwork: Artwork, relatedArtworks: Coll
     id: artwork.id,
     name: artwork.title,
     size: artwork.dimensions || 'Variable',
-    fileName: artwork.images?.[0]?.fileKey || '',
-    localPath: getArtworkImagePath(artwork),
+    fileName: galleryImages[0]?.fileKey || artwork.images?.[0]?.fileKey || '',
+    localPath: galleryImages[0]?.fileKey || getArtworkImagePath(artwork),
     tier: tier,
-    originalArtwork: artwork,
+    originalArtwork: {
+      ...artwork,
+      images: galleryImages
+    },
   };
 
   // If no related artworks provided, supply local related ones immediately
@@ -71,6 +76,7 @@ export function buildArtworkDetailedInfo(artwork: Artwork, relatedArtworks: Coll
     monthlyRent: `₹${pricing.monthlyRent.toLocaleString('en-IN')}/month`,
     replacementValue: artworkValue,
     relatedArtworks: fallbackRelated,
+    galleryImages,
   };
 }
 
@@ -206,3 +212,44 @@ export async function getAdjacentArtworks(currentId: string): Promise<{ prev: Co
     next: toCollection(items[nextIndex]),
   };
 }
+
+const RECENTLY_VIEWED_KEY = 'kb_recently_viewed_artwork_ids_v2';
+
+export function recordArtworkView(artworkId: string): void {
+  if (typeof window === 'undefined' || !artworkId) return;
+  try {
+    const raw = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    const ids: string[] = raw ? JSON.parse(raw) : [];
+    const updated = [artworkId, ...ids.filter(id => id !== artworkId)].slice(0, 12);
+    localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+export function getRecentlyViewedArtworks(currentId?: string): CollectionArtwork[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    if (!raw) return [];
+    const ids: string[] = JSON.parse(raw);
+    const filteredIds = ids.filter(id => id !== currentId);
+    
+    return filteredIds
+      .map(id => {
+        const art = getInstantArtworkById(id);
+        if (!art) return null;
+        return {
+          id: art.id,
+          name: art.title,
+          size: art.dimensions || 'Variable',
+          fileName: art.images?.[0]?.fileKey || '',
+          localPath: getArtworkImagePath(art),
+          tier: determineTierFromValue(art.replacementValue || 15000),
+          originalArtwork: art
+        } as CollectionArtwork;
+      })
+      .filter(Boolean) as CollectionArtwork[];
+  } catch {
+    return [];
+  }
+}
+

@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { auth } from '../../lib/firebase';
 import { fetchArtworks } from '../../services/artworkService';
 import ArtworkCard from '../../components/ArtworkCard';
+import RobustArtworkImage from '../../components/RobustArtworkImage';
 import { SkeletonArtworkCard } from '../../components/SkeletonCard';
 import { CollectionArtwork } from '../../lib/collectionsData';
 
@@ -257,12 +258,12 @@ export default function CustomerDashboard() {
 
                       return (
                         <div key={art.id} className="flex flex-col md:flex-row gap-8 bg-subtle-smoke p-0 border border-gallery-gold/20 hover:border-gallery-gold/50 transition-colors group shadow-sm">
-                          <div className="w-full md:w-64 aspect-[4/3] md:aspect-square relative overflow-hidden group/img shrink-0 bg-stone-200 animate-pulse">
-                            <img 
-                              alt={art.title} 
-                              className={`w-full h-full object-cover grayscale group-hover/img:grayscale-0 transition-all duration-1000 ${loadedImages[art.id] ? 'opacity-100' : 'opacity-0'}`} 
+                          <div className="w-full md:w-64 aspect-[4/3] md:aspect-square relative overflow-hidden group/img shrink-0 bg-stone-200">
+                            <RobustArtworkImage 
                               src={imageUrl} 
-                              onLoad={() => setLoadedImages(prev => ({...prev, [art.id]: true}))}
+                              seed={art.id}
+                              alt={art.title} 
+                              className="w-full h-full object-cover grayscale group-hover/img:grayscale-0 transition-all duration-700" 
                             />
                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none"></div>
                           </div>

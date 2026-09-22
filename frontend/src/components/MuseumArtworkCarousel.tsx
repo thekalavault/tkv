@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { Artwork, getArtworkImagePath, LOCAL_ARTWORKS } from '../services/artworkService';
+import RobustArtworkImage from './RobustArtworkImage';
 
 interface MuseumArtworkCarouselProps {
   artworks?: Artwork[];
@@ -126,8 +127,9 @@ export default function MuseumArtworkCarousel({ artworks = [], loading = false }
                     
                     {/* The Pure Painting Canvas Displayed in Original Format with Object-Contain (NO CROPPING OR SQUISHING) */}
                     <div className="relative overflow-hidden bg-[#120704] flex items-center justify-center min-w-[200px] sm:min-w-[230px] min-h-[260px] sm:min-h-[300px] max-h-[320px] sm:max-h-[360px]">
-                      <img
+                      <RobustArtworkImage
                         src={imageUrl}
+                        seed={art.id}
                         alt={art.title}
                         loading="lazy"
                         className="max-h-[290px] sm:max-h-[330px] w-auto max-w-[250px] sm:max-w-[290px] object-contain block mx-auto transition-transform duration-500 ease-out"

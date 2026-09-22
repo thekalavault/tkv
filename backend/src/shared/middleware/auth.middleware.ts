@@ -136,3 +136,17 @@ export function roleGuard(requiredRoles: string[]) {
     next();
   };
 }
+
+export async function optionalAuthGuard(req: AuthRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return next();
+  }
+  try {
+    await authGuard(req, res, next);
+  } catch (err) {
+    // Continue as guest if token is invalid or expired
+    next();
+  }
+}
+

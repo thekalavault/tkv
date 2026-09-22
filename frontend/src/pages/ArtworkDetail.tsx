@@ -4,10 +4,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
-import { getArtworkDetailById, getArtworkDetailByIdSync, getAdjacentArtworks } from '../services/artworkDetailService';
+import { getArtworkDetailById, getArtworkDetailByIdSync, getAdjacentArtworks, recordArtworkView, getRecentlyViewedArtworks } from '../services/artworkDetailService';
+import { getArtworkImages, sanitizeArtworkImageUrl, FALLBACK_PAINTINGS } from '../services/artworkService';
+import { CollectionArtwork } from '../lib/collectionsData';
 import ArtworkCard from '../components/ArtworkCard';
+import RobustArtworkImage from '../components/RobustArtworkImage';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { initiateRazorpayCheckout } from '../services/paymentService';
+import { PaymentSuccessModal } from '../components/PaymentSuccessModal';
 
 const ENVS = [
   {
@@ -76,6 +81,13 @@ export default function ArtworkDetail() {
   const [artScale] = useState(1.0);
   const [purchaseMode, setPurchaseMode] = useState<'monthly' | 'full'>('monthly');
   const [selectedMonths, setSelectedMonths] = useState<3 | 6 | 9 | 12>(3);
+  const [isPaying, setIsPaying] = useState(false);
+  const [successDetails, setSuccessDetails] = useState<{
+    paymentId: string;
+    orderId: string;
+    amount: number;
+    receipt?: string;
+  } | null>(null);
 
   const { addToCart } = useCart();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
@@ -83,6 +95,22 @@ export default function ArtworkDetail() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const [isZoomed, setIsZoomed] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<CollectionArtwork[]>([]);
+  const [recommendationTab, setRecommendationTab] = useState<'viewed' | 'curated'>('viewed');
+
+  useEffect(() => {
+    if (id) {
+      recordArtworkView(id);
+      const viewed = getRecentlyViewedArtworks(id);
+      setRecentlyViewed(viewed);
+      if (viewed.length > 0) {
+        setRecommendationTab('viewed');
+      } else {
+        setRecommendationTab('curated');
+      }
+      setActiveImageIndex(0);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (isImmersive) {
@@ -118,15 +146,32 @@ export default function ArtworkDetail() {
       });
       navigate('/cart');
     } else if (actionType === 'full') {
-      addToCart({
+      const price = artwork.replacementValue || 0;
+      setIsPaying(true);
+      initiateRazorpayCheckout({
+        amount: price,
+        description: `Direct Acquisition: ${artwork.name} by ${artwork.artist || 'The Kala Vault'}`,
         artworkId: artwork.id,
-        name: artwork.name,
-        price: artwork.replacementValue || 0,
-        type: 'full',
-        imageUrl: artwork.localPath
+        notes: {
+          artworkId: artwork.id,
+          artworkName: artwork.name,
+          artist: artwork.artist || '',
+          type: 'full_acquisition',
+        },
+        customerName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : undefined,
+        customerEmail: user?.email,
+        onSuccess: (paymentData) => {
+          setIsPaying(false);
+          setSuccessDetails(paymentData);
+        },
+        onError: (err) => {
+          setIsPaying(false);
+          alert(err || 'Payment failed.');
+        },
+        onDismiss: () => {
+          setIsPaying(false);
+        },
       });
-      alert('Redirecting to secure payment checkout...');
-      window.open('https://razorpay.com', '_blank');
     } else if (actionType === 'info') {
       navigate(`/inquire?artwork=${encodeURIComponent(artwork?.name || '')}&artist=${encodeURIComponent(artwork?.artist || '')}`);
     }
@@ -244,6 +289,13 @@ export default function ArtworkDetail() {
     ((artwork.replacementValue || 15000) * 0.012)
   );
 
+  const galleryViews = (artwork.galleryImages && artwork.galleryImages.length > 0)
+    ? artwork.galleryImages
+    : getArtworkImages(artwork.originalArtwork || (artwork as any));
+
+  const currentView = galleryViews[activeImageIndex] || galleryViews[0];
+  const activeImageUrl = sanitizeArtworkImageUrl(currentView?.fileKey, artwork.id);
+
   return (
     <div className="bg-[#FAF6F0] text-[#1E1412] min-h-screen flex flex-col pt-20 md:pt-24 selection:bg-[#C5A059]/30">
       <TopNavBar />
@@ -285,14 +337,12 @@ export default function ArtworkDetail() {
                 >
                   <div className="relative inline-flex items-center justify-center p-[4px] bg-gradient-to-b from-[#3E2419] via-[#2A160F] to-[#1E0E08] border-[6px] sm:border-[8px] border-[#341B12] shadow-[0_24px_60px_rgba(26,13,8,0.35)] transition-all duration-300">
                     <div className="relative p-[1.5px] bg-gradient-to-tr from-[#9E7D38]/70 via-[#DFC07D]/90 to-[#9E7D38]/70 overflow-hidden">
-                      <div className="relative overflow-hidden flex items-center justify-center bg-[#120704]">
-                        <img
-                          src={artwork?.originalArtwork?.images?.length ? 
-                            (artwork.originalArtwork.images[activeImageIndex].fileKey.startsWith('http') 
-                              ? artwork.originalArtwork.images[activeImageIndex].fileKey 
-                              : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${artwork.originalArtwork.images[activeImageIndex].fileKey.startsWith('/') ? '' : '/uploads/'}${artwork.originalArtwork.images[activeImageIndex].fileKey}`)
-                            : artwork.localPath}
-                          alt={artwork.name}
+                      <div className="relative overflow-hidden flex items-center justify-center bg-[#120704] min-w-[200px] min-h-[260px]">
+                        <RobustArtworkImage
+                          src={activeImageUrl}
+                          fallbackUrls={currentView?.fallbackUrls}
+                          seed={`${artwork.id}-${activeImageIndex}`}
+                          alt={`${artwork.name} - ${currentView?.label || 'Perspective'}`}
                           loading="eager"
                           decoding="async"
                           className="max-h-[54vh] max-w-full w-auto h-auto block object-contain transition-transform duration-300 ease-out no-drag relative z-10 will-change-transform"
@@ -312,25 +362,42 @@ export default function ArtworkDetail() {
                   </div>
                 </div>
                 
-                {/* Multi-Angle Thumbnails */}
-                {artwork?.originalArtwork?.images && artwork.originalArtwork.images.length > 1 && (
-                  <div className="flex gap-3 mt-6 overflow-x-auto py-1 px-4 max-w-full justify-center">
-                    {artwork.originalArtwork.images.map((img, idx) => {
-                      const imgUrl = img.fileKey.startsWith('http') ? img.fileKey : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${img.fileKey.startsWith('/') ? '' : '/uploads/'}${img.fileKey}`;
+                {/* Multi-Angle Thumbnails with View Indicator */}
+                <div className="flex flex-col items-center gap-2 mt-5 w-full">
+                  <div className="flex items-center gap-2 text-[10px] font-cinzel text-[#4A0E17] uppercase tracking-[0.2em] font-semibold">
+                    <span>✦ VIEW 0{activeImageIndex + 1} / 0{galleryViews.length}:</span>
+                    <span className="text-[#1E1412] font-bold">{currentView?.label || 'MUSEUM PERSPECTIVE'}</span>
+                  </div>
+
+                  <div className="flex gap-2.5 sm:gap-3 overflow-x-auto py-1 px-4 max-w-full justify-center">
+                    {galleryViews.map((img, idx) => {
+                      const isSelected = activeImageIndex === idx;
                       return (
                         <button
-                          key={img.id}
+                          key={img.id || idx}
                           onClick={() => setActiveImageIndex(idx)}
-                          className={`relative w-14 h-14 shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                            activeImageIndex === idx ? 'border-[#C5A059] scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
+                          className={`relative group/thumb rounded-lg overflow-hidden border-2 transition-all duration-300 cursor-pointer p-0.5 ${
+                            isSelected 
+                              ? 'border-[#4A0E17] ring-2 ring-[#C5A059]/80 scale-105 shadow-md bg-white' 
+                              : 'border-[#C5A059]/30 opacity-70 hover:opacity-100 hover:border-[#C5A059] bg-[#FAF6F0]'
                           }`}
+                          title={img.label}
                         >
-                          <img src={imgUrl} alt={`${artwork.name} - view ${idx + 1}`} className="w-full h-full object-cover" />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-[#1E0E08]">
+                            <RobustArtworkImage
+                              src={img.fileKey}
+                              fallbackUrls={img.fallbackUrls}
+                              seed={`${artwork.id}-${idx}`}
+                              alt={img.label}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         </button>
                       );
                     })}
                   </div>
-                )}
+                </div>
+
               </div>
             ) : (
               <div id="insitu-container" className="relative w-full h-full aspect-[16/10] overflow-hidden rounded-3xl border border-[#C5A059]/30 shadow-2xl bg-white" onContextMenu={(e) => e.preventDefault()}>
@@ -355,8 +422,9 @@ export default function ArtworkDetail() {
                   onTouchStart={handleStartDrag}
                   className={`shadow-[0_30px_60px_rgba(36,22,17,0.4)] border border-white/20 select-none active:scale-[1.01] ${isDragging ? '' : 'transition-all duration-300'}`}
                 >
-                  <img
+                  <RobustArtworkImage
                     src={artwork.localPath}
+                    seed={artwork.id}
                     alt={artwork.name}
                     className="w-full h-auto object-cover pointer-events-none"
                   />
@@ -601,17 +669,48 @@ export default function ArtworkDetail() {
             )}
           </div>
 
-          {/* Related Artworks */}
-          {artwork.relatedArtworks && artwork.relatedArtworks.length > 0 && (
-            <div className="border-t border-[#C5A059]/20 pt-6 mt-2">
-              <h2 className="font-cinzel text-2xl mb-6 text-[#1E1412] font-semibold">Related Vault Pieces</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {artwork.relatedArtworks.slice(0, 2).map((related, idx) => (
-                  <ArtworkCard key={related.id} artwork={related} index={idx} />
-                ))}
+          {/* Recommendations & Previously Viewed Section */}
+          <div className="border-t border-[#C5A059]/25 pt-6 mt-4">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-4">
+                {recentlyViewed.length > 0 && (
+                  <button
+                    onClick={() => setRecommendationTab('viewed')}
+                    className={`font-cinzel text-xs sm:text-[13px] font-bold uppercase tracking-wider pb-1.5 transition-all cursor-pointer border-b-2 flex items-center gap-1.5 ${
+                      recommendationTab === 'viewed'
+                        ? 'border-[#4A0E17] text-[#4A0E17]'
+                        : 'border-transparent text-[#1E1412]/50 hover:text-[#1E1412]'
+                    }`}
+                  >
+                    <span>Previously Viewed</span>
+                    <span className="text-[10px] bg-[#4A0E17]/10 text-[#4A0E17] px-2 py-0.5 rounded-full font-bold">
+                      {recentlyViewed.length}
+                    </span>
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => setRecommendationTab('curated')}
+                  className={`font-cinzel text-xs sm:text-[13px] font-bold uppercase tracking-wider pb-1.5 transition-all cursor-pointer border-b-2 ${
+                    recommendationTab === 'curated' || recentlyViewed.length === 0
+                      ? 'border-[#4A0E17] text-[#4A0E17]'
+                      : 'border-transparent text-[#1E1412]/50 hover:text-[#1E1412]'
+                  }`}
+                >
+                  Curator's Recommendations
+                </button>
               </div>
             </div>
-          )}
+
+            <div className="grid grid-cols-2 gap-4">
+              {(recommendationTab === 'viewed' && recentlyViewed.length > 0
+                ? recentlyViewed
+                : (artwork.relatedArtworks || [])
+              ).slice(0, 4).map((related, idx) => (
+                <ArtworkCard key={related.id} artwork={related} index={idx} />
+              ))}
+            </div>
+          </div>
 
           {/* Adjacent Artwork Navigation */}
           {(adjacent.prev || adjacent.next) && (
@@ -638,6 +737,13 @@ export default function ArtworkDetail() {
       </main>
 
       <Footer />
+
+      {/* Success Modal */}
+      <PaymentSuccessModal
+        isOpen={Boolean(successDetails)}
+        onClose={() => setSuccessDetails(null)}
+        details={successDetails}
+      />
     </div>
   );
 }

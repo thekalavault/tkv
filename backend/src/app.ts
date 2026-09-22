@@ -19,6 +19,7 @@ import { crmRouter } from './modules/crm/crm.routes';
 import cartRoutes from './modules/cart/cart.routes';
 import favoritesRoutes from './modules/favorites/favorites.routes';
 import imagesRoutes from './modules/images/images.routes';
+import paymentRouter from './modules/payments/payment.routes';
 
 const app = express();
 
@@ -111,6 +112,7 @@ app.use('/api/v1/crm', crmRouter);
 app.use('/api/v1/cart', cartRoutes);
 app.use('/api/v1/favorites', favoritesRoutes);
 app.use('/api/v1/images', imagesRoutes);
+app.use('/api/v1/payments', paymentRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {

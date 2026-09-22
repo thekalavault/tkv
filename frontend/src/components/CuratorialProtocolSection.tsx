@@ -1,277 +1,166 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link } from 'react-router-dom';
-import { 
-  ChevronRight, 
-  ChevronLeft, 
-  ArrowRight, 
-  Compass, 
-  ShieldCheck, 
-  Sparkles, 
-  Hammer, 
-  RefreshCw,
-  CheckCircle2,
-  Pause,
-  Play
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
 
-interface ProtocolStage {
+interface ProtocolPillar {
   id: string;
-  shortName: string;
+  numeral: string;
   category: string;
   title: string;
-  lead: string;
-  keyPoints: string[];
-  metrics: { label: string; value: string }[];
+  subtitle: string;
+  description: string;
+  points: string[];
   img: string;
-  iconType: 'compass' | 'shield' | 'sparkles' | 'hammer' | 'refresh';
+  badge: string;
 }
 
-const PROTOCOL_STAGES: ProtocolStage[] = [
+const PROTOCOL_PILLARS: ProtocolPillar[] = [
   {
     id: 'cartography',
-    shortName: 'Spatial Mapping',
-    category: 'Spatial & Lux Mapping',
-    title: 'Precision 3D Spatial & Lux Analysis',
-    lead: 'Precision architectural spatial audit analyzing ceiling elevations, wall sightlines, and ambient lux exposure across morning and evening light cycles.',
-    keyPoints: [
-      'Volumetric 3D spatial scan with ±0.5mm mounting precision',
-      'Spectral lux analysis protecting delicate pigments from UV glare',
-      'Curatorial sightline strategy connecting atriums, boardrooms & salons'
+    numeral: 'I',
+    category: 'Spatial Mapping',
+    title: 'Spatial & Lux Cartography',
+    subtitle: 'Volumetric audit & diurnal light analysis',
+    description: 'Before installation, our curatorial architects conduct a forensic spatial scan of your interior geometry—evaluating ceiling heights, wall sightlines, and ambient lux exposure across morning and evening light cycles to ensure optimal ocular harmony.',
+    points: [
+      'Diurnal spectral lux & photometric UV preservation audit',
+      'Sightline choreography connecting foyers, salons & executive suites',
+      'Sub-millimeter laser-calibrated spatial balance mapping'
     ],
-    metrics: [
-      { label: 'Spatial Precision', value: '±0.5mm Laser' },
-      { label: 'Light Audit', value: 'Spectral Lux' },
-      { label: 'Turnaround', value: '24 Hours' }
-    ],
-    img: '/assets/spatial_transformation_bg.jpg',
-    iconType: 'compass'
+    img: '/assets/protocol_01_spatial_mapping.jpg',
+    badge: '3D Laser Survey'
   },
   {
     id: 'accession',
-    shortName: 'Vault Accession',
-    category: 'Vault Accession & Provenance',
-    title: 'Curated Access to Institutional Masterworks',
-    lead: 'Unsealing private institutional vaults and certified contemporary artist studios to curate a bespoke collection tailored to your spatial prestige.',
-    keyPoints: [
-      'Forensic chain-of-custody documentation and lifetime authenticity',
-      'Bespoke accession dossier with high-res artist plates',
-      '100% OPEX tax-deductible leasing and rent-to-own equity'
+    numeral: 'II',
+    category: 'Vault Accession',
+    title: 'Vault Accession & Provenance',
+    subtitle: 'Institutional curation & masterwork registry',
+    description: 'Unsealing private institutional reserves and authenticated master studios to curate a bespoke accession portfolio tailored specifically to your architectural aesthetic, corporate identity, and spatial prestige.',
+    points: [
+      'Forensic chain-of-custody documentation with lifetime authenticity',
+      'Bespoke leatherbound accession dossier with artist monographs',
+      '100% OPEX tax-deductible curatorial leasing with rent-to-own equity'
     ],
-    metrics: [
-      { label: 'Authenticity', value: '100% Lifetime' },
-      { label: 'Private Catalog', value: '44+ Masterworks' },
-      { label: 'Tax Advisory', value: '100% OPEX' }
-    ],
-    img: '/assets/curator_white_glove.jpg',
-    iconType: 'shield'
+    img: '/assets/protocol_02_vault_accession.jpg',
+    badge: 'Lifetime Provenance'
   },
   {
     id: 'conservation',
-    shortName: 'Conservation',
-    category: 'Museum Conservation & Framing',
-    title: 'Archival Conservation & Tru-Vue Glazing',
-    lead: 'Every accession is preserved with 99.8% UV-blocking Tru-Vue museum glass, 8-ply acid-free cotton mats, and hand-rubbed sustainable hardwood frames.',
-    keyPoints: [
-      'Tru-Vue 99.8% UV-protective crystal clear anti-reflective glass',
-      'Hermetic microclimate vapor seals against humidity fluctuations',
-      'Hand-finished teak, charred ash, and 24K gold-accent profiles'
+    numeral: 'III',
+    category: 'Archival Conservation',
+    title: 'Conservation & Tru-Vue Glazing',
+    subtitle: 'Museum preservation & bespoke joinery',
+    description: 'Every masterwork is preserved with 99.8% UV-protective Tru-Vue museum glass, 8-ply acid-free 100% cotton rag matting, and hand-finished solid hardwood profiles tailored to your interiors.',
+    points: [
+      'Tru-Vue anti-reflective museum glass eliminating glare & fading',
+      'Hermetically sealed microclimate vapor barrier against humidity',
+      'Hand-finished walnut, charred ash & 24K gold-leaf profiles'
     ],
-    metrics: [
-      { label: 'UV Rejection', value: '99.8% Tru-Vue' },
-      { label: 'Matting', value: 'Acid-Free Rag' },
-      { label: 'Standard', value: 'ISO-9706' }
-    ],
-    img: '/assets/keyhole_magnifier_art.jpg',
-    iconType: 'sparkles'
+    img: '/assets/protocol_03_archival_conservation.jpg',
+    badge: '99.8% UV Glazing'
   },
   {
     id: 'installation',
-    shortName: 'Laser Mounting',
-    category: 'Laser-Calibrated Mounting',
-    title: 'Zero-Disruption White-Glove Mounting',
-    lead: 'Executed outside standard operational hours by certified art handlers using dual-axis laser leveling and 150kg subterranean anti-theft cleats.',
-    keyPoints: [
-      'Concealed heavy-duty French cleats with 150kg seismic capacity',
-      'Directional 3000K museum spot luminaire calibration',
-      'Overnight turnkey handover with official condition reports'
+    numeral: 'IV',
+    category: 'Laser Installation',
+    title: 'Laser-Calibrated Mounting',
+    subtitle: 'Off-hours white-glove deployment',
+    description: 'Executed quietly outside operational business hours by certified museum art handlers using dual-axis laser leveling and concealed heavy-duty architectural mounting hardware.',
+    points: [
+      'Concealed seismic French cleat systems with 150kg load rating',
+      'Photometric museum spotlight calibration matching 3000K warmth',
+      'Turnkey overnight execution ensuring zero business disruption'
     ],
-    metrics: [
-      { label: 'Mounting Anchor', value: '150kg Cleats' },
-      { label: 'Alignment', value: '< 0.5mm Laser' },
-      { label: 'Execution', value: 'Off-Hours Zero' }
-    ],
-    img: '/assets/corporate_boardroom_art.jpg',
-    iconType: 'hammer'
+    img: '/assets/protocol_04_laser_installation.jpg',
+    badge: '150kg Anti-Theft Cleats'
   },
   {
     id: 'rotation',
-    shortName: 'Quarterly Refresh',
-    category: 'Living Gallery Rotation',
-    title: 'Dynamic Rotations & Continuous Care',
-    lead: 'Curated collection rotations every 90 to 180 days with regular on-site inspections, microclimate checks, and digital client vault management.',
-    keyPoints: [
-      'Quarterly seasonal swaps keeping public environments perpetually fresh',
-      'Continuous on-site conservation care, dusting, and frame maintenance',
-      'Private digital client portal tracking provenance history & rotation schedules'
+    numeral: 'V',
+    category: 'Dynamic Rotations',
+    title: 'Dynamic Rotations & Care',
+    subtitle: 'Perpetual gallery evolution & conservation',
+    description: 'Maintain continuous visual vitality with scheduled collection rotations every 90 to 180 days, accompanied by regular on-site condition reports and digital cataloging.',
+    points: [
+      'Scheduled seasonal collection refreshes for perpetual novelty',
+      'Regular on-site condition inspections & archival surface care',
+      'Private collector portal with complete provenance & appraisal records'
     ],
-    metrics: [
-      { label: 'Refresh Cadence', value: '90–180 Days' },
-      { label: 'Audit Matrix', value: '48-Point Check' },
-      { label: 'Client Portal', value: '24/7 Access' }
-    ],
-    img: '/assets/dining_bistro_art.jpg',
-    iconType: 'refresh'
+    img: '/assets/protocol_05_dynamic_rotations.jpg',
+    badge: 'Quarterly Refresh'
   }
 ];
 
-const AUTOPLAY_INTERVAL = 5000; // 5 seconds per step
-
-function AnimatedStageIcon({ type, isActive }: { type: ProtocolStage['iconType']; isActive: boolean }) {
-  if (type === 'compass') {
-    return (
-      <motion.div
-        animate={isActive ? { rotate: [-24, 24, -12, 12, 0] } : { rotate: 0 }}
-        transition={isActive ? { repeat: Infinity, duration: 2.8, ease: 'easeInOut' } : { duration: 0.3 }}
-        className="inline-flex items-center justify-center"
-      >
-        <Compass className={`w-4 h-4 ${isActive ? 'text-[#DFC07D]' : 'text-[#7B2431]/80'}`} />
-      </motion.div>
-    );
-  }
-  if (type === 'shield') {
-    return (
-      <motion.div
-        animate={isActive ? { scale: [1, 1.18, 1], filter: ['drop-shadow(0 0 0px #DFC07D)', 'drop-shadow(0 0 4px #DFC07D)', 'drop-shadow(0 0 0px #DFC07D)'] } : { scale: 1 }}
-        transition={isActive ? { repeat: Infinity, duration: 2.2, ease: 'easeInOut' } : { duration: 0.3 }}
-        className="inline-flex items-center justify-center"
-      >
-        <ShieldCheck className={`w-4 h-4 ${isActive ? 'text-[#DFC07D]' : 'text-[#7B2431]/80'}`} />
-      </motion.div>
-    );
-  }
-  if (type === 'sparkles') {
-    return (
-      <motion.div
-        animate={isActive ? { rotate: [0, 15, -15, 0], scale: [0.95, 1.2, 0.95] } : { rotate: 0, scale: 1 }}
-        transition={isActive ? { repeat: Infinity, duration: 2.4, ease: 'easeInOut' } : { duration: 0.3 }}
-        className="inline-flex items-center justify-center"
-      >
-        <Sparkles className={`w-4 h-4 ${isActive ? 'text-[#DFC07D]' : 'text-[#7B2431]/80'}`} />
-      </motion.div>
-    );
-  }
-  if (type === 'hammer') {
-    return (
-      <motion.div
-        animate={isActive ? { rotate: [0, -22, 6, 0] } : { rotate: 0 }}
-        transition={isActive ? { repeat: Infinity, duration: 1.8, ease: 'easeInOut' } : { duration: 0.3 }}
-        className="inline-flex items-center justify-center"
-      >
-        <Hammer className={`w-4 h-4 ${isActive ? 'text-[#DFC07D]' : 'text-[#7B2431]/80'}`} />
-      </motion.div>
-    );
-  }
-  // Refresh
-  return (
-    <motion.div
-      animate={isActive ? { rotate: 360 } : { rotate: 0 }}
-      transition={isActive ? { repeat: Infinity, duration: 3, ease: 'linear' } : { duration: 0.3 }}
-      className="inline-flex items-center justify-center"
-    >
-      <RefreshCw className={`w-4 h-4 ${isActive ? 'text-[#DFC07D]' : 'text-[#7B2431]/80'}`} />
-    </motion.div>
-  );
-}
-
 export default function CuratorialProtocolSection() {
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0); // Default to Spatial Mapping
   const [isPaused, setIsPaused] = useState(false);
-  const stage = PROTOCOL_STAGES[activeIdx];
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const current = PROTOCOL_PILLARS[activeIdx];
 
-  // Auto-advance to next step every 5 seconds (paused when hovered)
+  // Subtle auto-rotation when user is not interacting
   useEffect(() => {
-    if (isPaused) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-
-    timerRef.current = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % PROTOCOL_STAGES.length);
-    }, AUTOPLAY_INTERVAL);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPaused, activeIdx]);
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % PROTOCOL_PILLARS.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
   const handleNext = () => {
-    setActiveIdx((prev) => (prev + 1) % PROTOCOL_STAGES.length);
+    setActiveIdx((prev) => (prev + 1) % PROTOCOL_PILLARS.length);
   };
 
   const handlePrev = () => {
-    setActiveIdx((prev) => (prev - 1 + PROTOCOL_STAGES.length) % PROTOCOL_STAGES.length);
+    setActiveIdx((prev) => (prev - 1 + PROTOCOL_PILLARS.length) % PROTOCOL_PILLARS.length);
   };
 
   return (
     <section 
-      className="bg-[#FAF6F0] text-[#1E1412] py-16 md:py-22 px-4 sm:px-8 md:px-12 border-t border-[#C5A059]/25 relative overflow-hidden select-none"
+      className="bg-gradient-to-b from-[#38080E] via-[#4A0E17] to-[#2B050A] text-[#FAF6F0] py-14 md:py-20 px-4 sm:px-8 md:px-12 border-t border-[#C5A059]/30 select-none relative overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      
-      <div className="max-w-[1440px] mx-auto relative z-10">
+      {/* Subtle Classical Background Watermark Ornament */}
+      <div className="absolute -right-32 -top-32 w-[550px] h-[550px] rounded-full border border-[#DFC07D]/10 pointer-events-none opacity-30 flex items-center justify-center">
+        <div className="w-[420px] h-[420px] rounded-full border border-dashed border-[#DFC07D]/15" />
+      </div>
+
+      <div className="max-w-[1480px] mx-auto relative z-10">
         
-        {/* Header with Auto-play indicator */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-5 border-b border-[#C5A059]/30">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#7B2431]" />
-              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.28em] text-[#7B2431] font-bold">
-                CURATORIAL PROTOCOL
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-[#DFC07D]/25">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-3 mb-1.5">
+              <span className="h-[1px] w-8 bg-[#DFC07D]" />
+              <span className="font-cinzel text-[10.5px] uppercase tracking-[0.35em] text-[#DFC07D] font-semibold">
+                White-Glove Methodology
               </span>
+              <span className="h-[1px] w-8 bg-[#DFC07D]" />
             </div>
-            <h2 className="font-cinzel text-3xl sm:text-4xl md:text-5xl text-[#1E1412] font-bold tracking-tight">
-              Curatorial <span className="font-cormorant italic font-normal text-[#7B2431]">Protocol</span>
+            
+            <h2 className="font-cinzel text-2xl sm:text-3xl md:text-4xl text-white font-semibold tracking-tight leading-tight">
+              The Five Pillars of <span className="font-cormorant italic font-normal text-[#DFC07D]">Curatorial Protocol</span>
             </h2>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* 5s Auto-play status pill */}
-            <button
-              onClick={() => setIsPaused(!isPaused)}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FCFAF6] border border-[#C5A059]/35 text-[#1E1412]/80 hover:text-[#7B2431] hover:border-[#7B2431] text-[11px] font-mono transition-all cursor-pointer shadow-2xs"
-              title={isPaused ? "Resume auto-play" : "Pause auto-play (5s)"}
-            >
-              {isPaused ? (
-                <>
-                  <Play className="w-3 h-3 text-[#7B2431]" />
-                  <span>Paused</span>
-                </>
-              ) : (
-                <>
-                  <span className="w-2 h-2 rounded-full bg-[#7B2431] animate-ping" />
-                  <span>Auto-advancing (5s)</span>
-                </>
-              )}
-            </button>
+          <div className="flex items-center gap-4">
+            <p className="hidden lg:block text-xs sm:text-sm text-[#FAF6F0]/80 max-w-xs text-right font-cormorant italic text-base">
+              Executed exclusively by certified museum conservators and art handlers.
+            </p>
 
-            {/* Navigation Arrow Controls */}
+            {/* Navigation Buttons */}
             <div className="flex items-center gap-2">
               <button
-                type="button"
                 onClick={handlePrev}
-                className="w-8 h-8 rounded-full border border-[#C5A059]/40 hover:border-[#7B2431] hover:bg-[#7B2431] hover:text-white flex items-center justify-center text-[#1E1412] transition-all duration-300 cursor-pointer"
-                title="Previous Stage"
+                className="w-9 h-9 rounded-full border border-[#DFC07D]/40 hover:border-[#DFC07D] bg-[#5E121D] hover:bg-[#DFC07D] text-[#FAF6F0] hover:text-[#241611] flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
+                title="Previous Pillar"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
-                type="button"
                 onClick={handleNext}
-                className="w-8 h-8 rounded-full border border-[#C5A059]/40 hover:border-[#7B2431] hover:bg-[#7B2431] hover:text-white flex items-center justify-center text-[#1E1412] transition-all duration-300 cursor-pointer"
-                title="Next Stage"
+                className="w-9 h-9 rounded-full border border-[#DFC07D]/40 hover:border-[#DFC07D] bg-[#5E121D] hover:bg-[#DFC07D] text-[#FAF6F0] hover:text-[#241611] flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
+                title="Next Pillar"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -279,151 +168,133 @@ export default function CuratorialProtocolSection() {
           </div>
         </div>
 
-        {/* Minimal Horizontal Node Bar with Animated Symbols and 5s Progress Bar */}
-        <div className="mb-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5 relative">
-            {PROTOCOL_STAGES.map((s, idx) => {
-              const isActive = activeIdx === idx;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setActiveIdx(idx)}
-                  className={`relative px-3 py-3.5 sm:py-4 rounded-xl transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center border overflow-hidden group ${
-                    isActive
-                      ? 'bg-[#1E1412] text-white border-[#DFC07D] shadow-lg scale-[1.01]'
-                      : 'bg-[#FCFAF6] text-[#1E1412] border-[#C5A059]/30 hover:border-[#7B2431] hover:bg-white shadow-2xs'
-                  }`}
-                >
-                  {/* Animated Stage Icon */}
-                  <div className="mb-2">
-                    <AnimatedStageIcon type={s.iconType} isActive={isActive} />
-                  </div>
+        {/* ─────────────────────────────────────────────────────────────────────────────
+            TOP INTERACTIVE PILLAR SELECTOR TABS WITH ANIMATED GOLD INDICATOR
+            ───────────────────────────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-6">
+          {PROTOCOL_PILLARS.map((pillar, idx) => {
+            const isActive = activeIdx === idx;
+            return (
+              <button
+                key={pillar.id}
+                onClick={() => setActiveIdx(idx)}
+                className={`relative px-3.5 py-3 rounded-xl text-left border transition-all duration-300 cursor-pointer overflow-hidden group ${
+                  isActive
+                    ? 'bg-[#5E121D] border-[#DFC07D] shadow-[0_8px_25px_rgba(0,0,0,0.35)]'
+                    : 'bg-[#3A070D]/70 border-[#DFC07D]/20 hover:border-[#DFC07D]/50 hover:bg-[#5E121D]/50'
+                }`}
+              >
+                {/* Active Gold Top Highlight Bar */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activePillarTabRed"
+                    className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#DFC07D] via-[#FFF3D6] to-[#C5A059]"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
+                )}
 
-                  {/* Clean Stage Label (NO NUMBER BADGES) */}
-                  <span className={`font-cinzel text-[11px] sm:text-xs font-bold uppercase tracking-wider truncate max-w-full ${
-                    isActive ? 'text-[#DFC07D]' : 'text-[#1E1412]'
-                  }`}>
-                    {s.shortName}
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`font-cormorant italic font-bold text-xs ${isActive ? 'text-[#DFC07D]' : 'text-[#DFC07D]/70'}`}>
+                    {pillar.numeral}
                   </span>
+                  <span className="font-cinzel text-[9px] uppercase tracking-wider text-[#FAF6F0]/60 font-semibold">
+                    {pillar.category}
+                  </span>
+                </div>
 
-                  {/* 5-Second Linear Progress Bar on Active Node */}
-                  {isActive && !isPaused && (
-                    <motion.div
-                      key={`progress-${activeIdx}`}
-                      initial={{ width: '0%' }}
-                      animate={{ width: '100%' }}
-                      transition={{ duration: 5, ease: 'linear' }}
-                      className="absolute bottom-0 left-0 h-[3px] bg-[#DFC07D]"
-                    />
-                  )}
-                  {isActive && isPaused && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#DFC07D]" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                <div className={`font-cinzel text-xs sm:text-[12.5px] font-semibold tracking-wide truncate ${isActive ? 'text-white' : 'text-[#FAF6F0]/90 group-hover:text-white'}`}>
+                  {pillar.title}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Clean Editorial Showcase Card (Image is 100% clean, no text or overlay boxes) */}
-        <div className="bg-[#FCFAF6] rounded-3xl border border-[#C5A059]/35 shadow-xl overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[440px]">
+        {/* ─────────────────────────────────────────────────────────────────────────────
+            MAIN ANIMATED STAGE SHOWCASE (EDITORIAL MONOGRAPH & FLOATING MUSEUM FRAME)
+            ───────────────────────────────────────────────────────────────────────────── */}
+        <div className="bg-[#38080E]/90 rounded-3xl border border-[#DFC07D]/35 shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-6 sm:p-8 md:p-9 overflow-hidden relative backdrop-blur-sm">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
-            {/* Left Visual Column: 100% Clean Authentic Photography */}
-            <div className="lg:col-span-5 relative min-h-[280px] sm:min-h-[340px] lg:min-h-full bg-[#140D0A] overflow-hidden">
+            {/* Left Column (7 cols): Editorial Prose with Smooth AnimatePresence */}
+            <div className="lg:col-span-7 flex flex-col justify-between">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={stage.img}
-                  initial={{ opacity: 0, scale: 1.04 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className="absolute inset-0"
+                  key={current.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className="space-y-4"
                 >
-                  <img 
-                    src={stage.img} 
-                    alt={stage.category}
-                    className="w-full h-full object-cover brightness-[0.92] contrast-[1.04] transition-transform duration-700 hover:scale-105" 
-                  />
-                  {/* Subtle Framing Glow */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
+                  {/* Roman Numeral & Category */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-full bg-[#5E121D] border border-[#DFC07D]/50 flex items-center justify-center font-cormorant italic font-bold text-sm text-[#DFC07D] shadow-xs">
+                      {current.numeral}
+                    </span>
+                    <span className="font-cinzel text-xs uppercase tracking-[0.25em] text-[#DFC07D] font-bold">
+                      {current.category}
+                    </span>
+                    <span className="h-px w-10 bg-[#DFC07D]/30" />
+                    <span className="font-cormorant italic text-xs text-[#FAF6F0]/70 font-semibold">
+                      {current.badge}
+                    </span>
+                  </div>
+
+                  {/* Title & Italic Subtitle */}
+                  <div>
+                    <h3 className="font-cinzel text-2xl sm:text-3xl font-bold text-white leading-tight mb-1">
+                      {current.title}
+                    </h3>
+                    <p className="font-cormorant italic text-base sm:text-lg text-[#DFC07D] font-normal">
+                      {current.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Curatorial Prose (Pure Cormorant Garamond Serif) */}
+                  <p className="font-cormorant text-[16px] sm:text-[17.5px] text-[#FAF6F0]/90 leading-relaxed font-normal">
+                    {current.description}
+                  </p>
+
+                  {/* Curatorial Benchmarks */}
+                  <div className="pt-3.5 border-t border-[#DFC07D]/20 space-y-2">
+                    {current.points.map((point, pIdx) => (
+                      <div key={pIdx} className="flex items-start gap-2.5">
+                        <span className="text-[#DFC07D] font-cinzel font-bold text-xs select-none shrink-0 mt-0.5">—</span>
+                        <span className="font-cormorant text-[15px] sm:text-[16px] text-[#FAF6F0]/95 leading-snug italic font-normal">
+                          {point}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Right Information Column */}
-            <div className="lg:col-span-7 p-6 sm:p-8 md:p-9 flex flex-col justify-between bg-[#FCFAF6] border-t lg:border-t-0 lg:border-l border-[#C5A059]/25">
-              
-              <div>
-                {/* Category Pill with Animated Icon */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7B2431]/10 border border-[#7B2431]/20 text-[#7B2431] font-cinzel text-[10.5px] font-bold uppercase tracking-[0.2em] mb-3">
-                  <AnimatedStageIcon type={stage.iconType} isActive={true} />
-                  <span>{stage.category}</span>
-                </div>
-
-                <h3 className="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold text-[#1E1412] tracking-tight mb-2.5 leading-snug">
-                  {stage.title}
-                </h3>
-                
-                <p className="text-xs sm:text-sm text-[#1E1412]/80 font-light leading-relaxed mb-5">
-                  {stage.lead}
-                </p>
-
-                {/* 3 Crisp Deliverable Highlights */}
-                <div className="space-y-2 mb-6">
-                  {stage.keyPoints.map((point, pIdx) => (
-                    <div key={pIdx} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[#FAF6F0] border border-[#C5A059]/25">
-                      <CheckCircle2 className="w-4 h-4 text-[#7B2431] shrink-0 mt-0.5" />
-                      <span className="text-xs text-[#1E1412]/85 font-light leading-relaxed">
-                        {point}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Metrics Bar */}
-                <div className="grid grid-cols-3 gap-2 p-3 bg-[#FAF6F0] rounded-xl border border-[#C5A059]/30">
-                  {stage.metrics.map((m, idx) => (
-                    <div key={idx} className="border-r border-[#C5A059]/25 last:border-r-0 pr-1 text-center">
-                      <p className="text-[9px] font-mono text-[#1E1412]/60 uppercase tracking-wider">{m.label}</p>
-                      <p className="text-xs font-bold font-cinzel text-[#7B2431] truncate mt-0.5">{m.value}</p>
-                    </div>
-                  ))}
-                </div>
+            {/* Right Column (5 cols): Pure High-Resolution Photography */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative aspect-[4/3.4] rounded-2xl overflow-hidden bg-[#1E0407] border border-[#DFC07D]/30 shadow-[0_15px_45px_rgba(0,0,0,0.5)] group">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={current.img}
+                    src={current.img}
+                    alt={current.title}
+                    initial={{ opacity: 0, scale: 1.04 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </AnimatePresence>
               </div>
-
-              {/* Action Link */}
-              <div className="pt-4 mt-6 border-t border-[#C5A059]/20 flex items-center justify-between">
-                <Link
-                  to="/services"
-                  className="font-cinzel text-xs uppercase tracking-[0.18em] font-bold text-[#7B2431] hover:text-[#58111A] flex items-center gap-2 group transition-colors"
-                >
-                  <span>Explore Full Protocol Framework</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-
-                <div className="flex gap-1.5">
-                  {PROTOCOL_STAGES.map((_, dotIdx) => (
-                    <button
-                      key={dotIdx}
-                      onClick={() => setActiveIdx(dotIdx)}
-                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                        activeIdx === dotIdx ? 'w-6 bg-[#7B2431]' : 'w-2 bg-[#C5A059]/40 hover:bg-[#7B2431]/50'
-                      }`}
-                      aria-label={`Go to stage ${dotIdx + 1}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
             </div>
 
           </div>
+
         </div>
 
       </div>
-
     </section>
   );
 }
