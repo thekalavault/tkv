@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
-import { buildCollectionsFromData, CollectionArtwork, Collection } from '../lib/collectionsData';
+import { buildCollectionsFromData, CollectionArtwork, Collection, mixArtworksByArtist } from '../lib/collectionsData';
 import ArtworkCard from '../components/ArtworkCard';
 import RobustArtworkImage from '../components/RobustArtworkImage';
-import { fetchArtworks } from '../services/artworkService';
+import { fetchArtworks, LOCAL_ARTWORKS } from '../services/artworkService';
 import { SkeletonArtworkCard } from '../components/SkeletonCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,15 +33,21 @@ function HeroCarousel({ artworks }: { artworks: CollectionArtwork[] }) {
     setRotateY(0);
   };
 
-  useEffect(() => {
-    if (!artworks || artworks.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % Math.min(artworks.length, 6));
-    }, 5000);
-    return () => clearInterval(interval);
+  // Interleave artists in carousel so adjacent slides always showcase different artists
+  const items = useMemo(() => {
+    if (!artworks || artworks.length === 0) return [];
+    return mixArtworksByArtist(artworks).slice(0, 9);
   }, [artworks]);
 
-  if (!artworks || artworks.length === 0) {
+  useEffect(() => {
+    if (!items || items.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % items.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [items.length]);
+
+  if (!artworks || artworks.length === 0 || items.length === 0) {
     return (
       <div className="w-full h-[420px] md:h-[500px] bg-stone-200/20 animate-pulse rounded-xl border border-outline/5 relative overflow-hidden">
         <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shimmer_1.5s_infinite]" />
@@ -49,8 +55,7 @@ function HeroCarousel({ artworks }: { artworks: CollectionArtwork[] }) {
     );
   }
 
-  const items = artworks.slice(0, 6);
-  const current = items[currentIndex] || artworks[0];
+  const current = items[currentIndex] || items[0] || artworks[0];
 
   return (
     <div className="w-full h-[400px] md:h-[500px]" style={{ perspective: '1200px' }}>
@@ -70,14 +75,30 @@ function HeroCarousel({ artworks }: { artworks: CollectionArtwork[] }) {
             animate={{ opacity: 1, rotateY: 0, scale: 1, filter: 'blur(0px)', z: 0 }}
             exit={{ opacity: 0, rotateY: -10, scale: 0.95, filter: 'blur(8px)', z: -100 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden"
           >
-            <RobustArtworkImage 
-              src={current.localPath} 
-              seed={current.id}
-              alt={current.name} 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-            />
+            {/* Atmospheric Ambient Velvet Background */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+              <RobustArtworkImage 
+                src={current.localPath} 
+                seed={current.id}
+                alt="" 
+                className="w-full h-full object-cover filter blur-3xl scale-125 opacity-35 pointer-events-none" 
+              />
+              <div className="absolute inset-0 bg-[#0E0705]/65" />
+            </div>
+
+            {/* Museum Exhibition Centered Presentation — Beautifully Fitted Without Cropping */}
+            <div className="relative z-10 w-full h-full p-6 sm:p-10 md:p-12 pb-28 sm:pb-32 flex items-center justify-center pointer-events-none">
+              <div className="relative max-w-full max-h-full inline-flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.85)] border-2 sm:border-[3px] border-[#DFC07D]/50 rounded-lg overflow-hidden bg-[#180E0A]">
+                <RobustArtworkImage 
+                  src={current.localPath} 
+                  seed={current.id}
+                  alt={current.name} 
+                  className="max-h-[220px] sm:max-h-[270px] md:max-h-[320px] max-w-full w-auto h-auto object-contain transition-transform duration-700 group-hover:scale-[1.03]" 
+                />
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
         
@@ -103,7 +124,7 @@ function HeroCarousel({ artworks }: { artworks: CollectionArtwork[] }) {
             {current.name}
           </motion.h2>
           <p className="font-cormorant italic text-base sm:text-lg text-[#DFC07D]/90 mb-6">
-            {(current as any).artist || (current as any).originalArtwork?.artist || 'Unknown Artist'}
+            {(current as any).artist || (current as any).originalArtwork?.artist || 'Original Masterwork'}
           </p>
           
           {/* Navigation Dots */}
@@ -146,49 +167,61 @@ export default function Collections() {
 
   // Stale-While-Revalidate Caching for Collections Catalog
   const [allArtworks, setAllArtworks] = useState<CollectionArtwork[]>(() => {
-    const cached = localStorage.getItem('kb_cached_artworks_v3') || localStorage.getItem('kb_cached_artworks');
-    if (cached) {
-      try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kb_cached_artworks_v8');
+      localStorage.removeItem('kb_cached_artworks_v7');
+      localStorage.removeItem('kb_cached_artworks_v6');
+      localStorage.removeItem('kb_cached_artworks_v5');
+      localStorage.removeItem('kb_cached_artworks_v4');
+      localStorage.removeItem('kb_cached_artworks_v3');
+      localStorage.removeItem('kb_cached_artworks');
+    }
+    try {
+      const cached = localStorage.getItem('kb_cached_artworks_v9');
+      if (cached) {
         const parsed = JSON.parse(cached);
         const items = parsed.items || (Array.isArray(parsed) ? parsed : []);
-        if (items.length) {
+        if (items.length >= 70) {
           const built = buildCollectionsFromData(items);
           return built.allArtworks;
         }
-      } catch (e) {
-        console.error(e);
       }
+    } catch (e) {
+      console.error(e);
     }
-    return [];
+    // Instant zero-flicker baseline with all 103 artworks
+    const built = buildCollectionsFromData(LOCAL_ARTWORKS);
+    return built.allArtworks;
   });
 
   const [collections, setCollections] = useState<Collection[]>(() => {
-    const cached = localStorage.getItem('kb_cached_artworks_v3') || localStorage.getItem('kb_cached_artworks');
-    if (cached) {
-      try {
+    try {
+      const cached = localStorage.getItem('kb_cached_artworks_v9');
+      if (cached) {
         const parsed = JSON.parse(cached);
         const items = parsed.items || (Array.isArray(parsed) ? parsed : []);
-        if (items.length) {
+        if (items.length >= 70) {
           const built = buildCollectionsFromData(items);
           return built.collections;
         }
-      } catch (e) {
-        console.error(e);
       }
+    } catch (e) {
+      console.error(e);
     }
-    return [];
+    const built = buildCollectionsFromData(LOCAL_ARTWORKS);
+    return built.collections;
   });
 
-  const [loading, setLoading] = useState(() => allArtworks.length === 0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     
     async function loadData() {
       try {
-        const data = await fetchArtworks(1, 50);
-        if (data && data.items && data.items.length > 0) {
-          localStorage.setItem('kb_cached_artworks_v3', JSON.stringify(data));
+        const data = await fetchArtworks(1, 500);
+        if (data && data.items && data.items.length >= 70) {
+          localStorage.setItem('kb_cached_artworks_v9', JSON.stringify(data));
           const built = buildCollectionsFromData(data.items);
           setAllArtworks(built.allArtworks);
           setCollections(built.collections);
@@ -206,11 +239,20 @@ export default function Collections() {
   // Dynamically extract unique artists
   const availableArtists = useMemo(() => {
     const set = new Set<string>();
+    let hasCuratedWorks = false;
     allArtworks.forEach(art => {
-      const name = (art as any).artist || art.originalArtwork?.artist;
-      if (name && name.trim()) set.add(name.trim());
+      const name = art.artist || (art as any).artist || art.originalArtwork?.artist;
+      if (name && name.trim() && name !== 'Unknown' && name !== 'Unknown Artist' && name !== 'Museum Archival Edition' && name !== 'Original Masterwork') {
+        set.add(name.trim());
+      } else {
+        hasCuratedWorks = true;
+      }
     });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
+    const list = Array.from(set).sort((a, b) => a.localeCompare(b));
+    if (hasCuratedWorks) {
+      list.push('Curated Vault Selection');
+    }
+    return list;
   }, [allArtworks]);
 
   // Comprehensive Filtering and Sorting logic
@@ -237,10 +279,17 @@ export default function Collections() {
 
     // 3. Artist Filter
     if (selectedArtist !== 'all') {
-      list = list.filter(a => {
-        const artist = (a as any).artist || a.originalArtwork?.artist || '';
-        return artist.toLowerCase() === selectedArtist.toLowerCase();
-      });
+      if (selectedArtist === 'Curated Vault Selection') {
+        list = list.filter(a => {
+          const artist = (a as any).artist || a.originalArtwork?.artist || '';
+          return !artist || artist === 'Unknown' || artist === 'Unknown Artist' || artist === 'Museum Archival Edition' || artist === 'Original Masterwork';
+        });
+      } else {
+        list = list.filter(a => {
+          const artist = (a as any).artist || a.originalArtwork?.artist || '';
+          return artist.toLowerCase() === selectedArtist.toLowerCase();
+        });
+      }
     }
 
     // 4. Money / Valuation Range Filter
@@ -255,8 +304,10 @@ export default function Collections() {
       });
     }
 
-    // 5. Sorting
-    if (sortBy === 'val_high') {
+    // 5. Sorting & Curated Mix
+    if (sortBy === 'curated' && selectedArtist === 'all') {
+      list = mixArtworksByArtist(list);
+    } else if (sortBy === 'val_high') {
       list.sort((a, b) => (b.originalArtwork?.replacementValue || 0) - (a.originalArtwork?.replacementValue || 0));
     } else if (sortBy === 'val_low') {
       list.sort((a, b) => (a.originalArtwork?.replacementValue || 0) - (b.originalArtwork?.replacementValue || 0));
@@ -329,14 +380,15 @@ export default function Collections() {
               </motion.p>
             </div>
 
-            <div className="pt-2 flex flex-wrap items-center gap-6 text-xs text-[#1E1412]/70 font-cinzel font-bold">
-              <span className="flex items-center gap-2">
+            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-[#1E1412]/80 font-cinzel font-bold">
+              <span className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#C5A059]/40 shadow-xs rounded-sm">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#4A0E17] animate-pulse" />
-                <span className="text-[#1E1412]">{allArtworks.length} Certified Works</span>
+                <span className="text-[#1E1412] font-mono text-sm font-extrabold">{allArtworks.length}</span>
+                <span className="tracking-widest text-[10.5px] uppercase text-[#4A0E17]">Artworks in Catalog</span>
               </span>
-              <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#1C2D24]" />
-                White-Glove Delivery
+              <span className="flex items-center gap-2 text-[#1E1412]/70">
+                <span className="w-2 h-2 rounded-full bg-[#1C2D24]" />
+                White-Glove Delivery &amp; Installation
               </span>
             </div>
           </div>
@@ -348,7 +400,7 @@ export default function Collections() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="lg:col-span-7"
           >
-            <HeroCarousel artworks={allArtworks.filter(a => (a.originalArtwork?.replacementValue || 0) >= 35000)} />
+            <HeroCarousel artworks={allArtworks} />
           </motion.div>
         </div>
 
@@ -469,8 +521,8 @@ export default function Collections() {
 
             {/* Results count & Clear button */}
             <div className="flex items-center gap-3">
-              <span className="text-[11.5px] font-sans text-[#1E1412]/60 font-medium">
-                Showing <strong className="text-[#1E1412] font-bold">{displayedArtworks.length}</strong> of {allArtworks.length} pieces
+              <span className="text-[12px] font-sans text-[#1E1412]/75 font-medium bg-white px-3.5 py-1.5 border border-[#C5A059]/35 rounded-full shadow-xs">
+                Catalog: <strong className="text-[#4A0E17] font-bold font-mono text-[13px]">{displayedArtworks.length}</strong> of <strong className="text-[#1E1412] font-mono">{allArtworks.length}</strong> artworks
               </span>
               {hasActiveFilters && (
                 <button
@@ -478,7 +530,7 @@ export default function Collections() {
                   className="text-[11px] uppercase tracking-wider font-cinzel font-bold text-[#4A0E17] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                  Reset
+                  Reset Filters
                 </button>
               )}
             </div>

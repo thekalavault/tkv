@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const createArtworkSchema = z.object({
-  sku: z.string().min(1),
+  sku: z.string().optional(),
   title: z.string().min(1),
   description: z.string().min(1),
   artist: z.string().optional(),

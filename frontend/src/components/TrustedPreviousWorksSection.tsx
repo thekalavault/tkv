@@ -6,6 +6,7 @@ const SECTORS_DATA = [
   {
     id: 1,
     title: "Hotels & Hospitality",
+    projectTag: "Grand Foyers & Suites",
     description: "Create memorable experiences for every guest with monumental foyer masterworks and intimate, rotating salon suite collections.",
     features: ["Grand Foyer Centerpieces", "Presidential Suite Framing", "Quarterly Rotation Policy"],
     image: "/assets/artistic_hotel_foyer.jpg"
@@ -13,6 +14,7 @@ const SECTORS_DATA = [
   {
     id: 2,
     title: "Corporates & Workspaces",
+    projectTag: "Executive Boardrooms",
     description: "Foster team creativity, workplace focus, and authoritative brand expression through curated boardroom art collections.",
     features: ["Executive Boardroom Trios", "Acoustic Wall Dressing", "100% Tax Deductible OPEX"],
     image: "/assets/artistic_boardroom.jpg"
@@ -20,13 +22,15 @@ const SECTORS_DATA = [
   {
     id: 3,
     title: "Cafés & Fine Dining",
-    description: "Atmospheric wall styling and contemporary collections that keep discerning diners coming back and lingering longer.",
-    features: ["Intimate Gallery Walls", "Custom Warm Luminaire Match", "Dynamic Seasonal Curation"],
+    projectTag: "Dining Salons & Bistros",
+    description: "Transform dining spaces into cultural destinations with evocative salon artwork that sparks memorable conversations.",
+    features: ["Dining Salon Ambient Lighting", "Collector Conversation Starters", "Atmospheric Salon Matching"],
     image: "/assets/artistic_cafe_dining.jpg"
   },
   {
     id: 4,
     title: "Builders & Model Residences",
+    projectTag: "Penthouses & Estates",
     description: "Elevate premier model residences and architectural penthouses with bespoke staging that accelerates collector acquisitions.",
     features: ["Double-Height Wall Staging", "Architectural Scale Works", "Rapid Turnkey Installation"],
     image: "/assets/artistic_showflat_penthouse.jpg"
@@ -86,9 +90,15 @@ export default function TrustedPreviousWorksSection() {
                   <img 
                     src={sector.image} 
                     alt={sector.title}
+                    loading="eager"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute top-3 left-3 bg-[#4A0E17]/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-[#C5A059]/40">
+                    <span className="font-cinzel text-[9.5px] uppercase tracking-wider text-[#FAF6F0] font-semibold">
+                      {sector.projectTag}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Body Content */}

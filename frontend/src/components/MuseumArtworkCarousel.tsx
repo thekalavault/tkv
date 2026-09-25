@@ -131,7 +131,8 @@ export default function MuseumArtworkCarousel({ artworks = [], loading = false }
                         src={imageUrl}
                         seed={art.id}
                         alt={art.title}
-                        loading="lazy"
+                        loading={idx < 8 ? 'eager' : 'lazy'}
+                        decoding="async"
                         className="max-h-[290px] sm:max-h-[330px] w-auto max-w-[250px] sm:max-w-[290px] object-contain block mx-auto transition-transform duration-500 ease-out"
                         style={{
                           transform: isHovered ? 'scale(1.02)' : 'scale(1)'

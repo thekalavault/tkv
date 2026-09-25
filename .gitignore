@@ -33,3 +33,14 @@ desktop.ini
 *.njsproj
 *.sln
 *.sw?
+
+# Raw Source Client PDFs
+*.pdf
+
+# Intermediate Scratch Dumps & One-off Migration Scripts
+backend/extracted_artworks/
+backend/artworks-*.json
+backend/test-*.ts
+backend/test-*.js
+backend/check-*.ts
+backend/scripts/

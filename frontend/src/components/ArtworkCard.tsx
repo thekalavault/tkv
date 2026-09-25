@@ -93,6 +93,14 @@ const ArtworkCard = memo(function ArtworkCard({
             </div>
           </div>
 
+          {/* Multi-Piece Suite Collection Badge */}
+          {((artwork.originalArtwork?.images?.length || 0) >= 3 || (artwork.name || '').toLowerCase().includes('series') || (artwork.name || '').toLowerCase().includes('diptych')) && (
+            <div className="absolute top-2 left-2 z-30 px-2 py-0.5 bg-[#4A0E17]/95 backdrop-blur-md border border-[#DFC07D]/80 rounded-md text-[8.5px] font-cinzel font-bold text-[#DFC07D] tracking-wider shadow-sm uppercase flex items-center gap-1">
+              <span>✦</span>
+              <span>{(artwork.originalArtwork?.images?.length || 0) >= 3 ? `${artwork.originalArtwork?.images?.length}-Piece Suite` : 'Complete Series'}</span>
+            </div>
+          )}
+
           {/* Favorite Button */}
           <button
             onClick={(e) => {

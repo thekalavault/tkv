@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchArtworks } from '../../../services/artworkService';
+import { fetchArtworks, getArtworkImagePath, sanitizeArtworkImageUrl, invalidateArtworkCache, Artwork } from '../../../services/artworkService';
+import RobustArtworkImage from '../../../components/RobustArtworkImage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -26,6 +27,24 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
   const [replacementValue, setReplacementValue] = useState<number | ''>('');
   const [editingArtworkId, setEditingArtworkId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [previewArtwork, setPreviewArtwork] = useState<Artwork | null>(null);
+  const [activePreviewImageIndex, setActivePreviewImageIndex] = useState(0);
+
+  // Close preview modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (previewArtwork) setPreviewArtwork(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [previewArtwork]);
+
+  // Reset active image when selected preview artwork changes
+  useEffect(() => {
+    setActivePreviewImageIndex(0);
+  }, [previewArtwork]);
 
   // Duration Pricing
   const [price3Months, setPrice3Months] = useState<number | ''>('');
@@ -40,7 +59,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
 
   const { data, isLoading: artworksLoading } = useQuery({
     queryKey: ['admin-artworks'],
-    queryFn: () => fetchArtworks(1, 50),
+    queryFn: () => fetchArtworks(1, 500),
     enabled: !!currentUser
   });
 
@@ -152,7 +171,8 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       resetForm();
       setIsModalOpen(false);
       
-      // Invalidate queries so admin panel and frontend refetch immediately
+      // Invalidate frontend cache and TanStack queries so entire website updates immediately
+      invalidateArtworkCache();
       queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
       
       // Clear message after 3 seconds
@@ -187,20 +207,25 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
   };
 
   const generateNextSku = (currentArtworks: any[]) => {
-    let maxNumber = 0;
-    currentArtworks.forEach(art => {
-      if (art.sku && typeof art.sku === 'string') {
-        const match = art.sku.match(/^TKV-(\d+)$/i);
-        if (match) {
-          const num = parseInt(match[1], 10);
-          if (num > maxNumber) {
-            maxNumber = num;
+    const totalCount = Array.isArray(currentArtworks) ? currentArtworks.length : 0;
+    let maxNumber = totalCount;
+
+    if (Array.isArray(currentArtworks)) {
+      currentArtworks.forEach(art => {
+        if (art.sku && typeof art.sku === 'string') {
+          const match = art.sku.match(/(\d+)/);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxNumber && num < 100000) {
+              maxNumber = num;
+            }
           }
         }
-      }
-    });
-    const nextNumber = maxNumber + 1;
-    return `TKV-${String(nextNumber).padStart(3, '0')}`;
+      });
+    }
+
+    const nextNumber = Math.max(totalCount + 1, maxNumber + 1);
+    return `TKV-${String(nextNumber).padStart(4, '0')}`;
   };
 
   const resetForm = () => {
@@ -317,6 +342,7 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
 
       setSuccessMessage('Artwork deleted successfully!');
       
+      invalidateArtworkCache();
       queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
     } catch (err: any) {
       setError(err.message || 'Error occurred while deleting artwork.');
@@ -379,8 +405,12 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       <section>
         <div className="flex justify-between items-end mb-8 border-b border-gallery-gold/20 pb-4">
           <div>
-            <h3 className="font-label-caps text-[10px] text-gallery-gold tracking-[0.3em] uppercase mb-2">OPERATIONAL FLOW</h3>
-            <h4 className="font-display-md text-4xl tracking-tight text-primary">Artwork Tracking</h4>
+            <h4 className="font-display-md text-3xl sm:text-4xl tracking-tight text-primary flex flex-wrap items-baseline gap-3">
+              Artwork Tracking
+              <span className="text-sm sm:text-base font-cinzel text-gallery-gold font-bold px-2.5 py-0.5 bg-gallery-gold/10 border border-gallery-gold/30 rounded-xs">
+                {artworks.length} Masterworks in Inventory
+              </span>
+            </h4>
           </div>
           <button 
             onClick={() => { 
@@ -419,18 +449,38 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                 </tr>
               ) : (
                 artworks.map((art) => {
-                  const imageUrl = art.images && art.images[0] 
-                    ? (art.images[0].fileKey.startsWith('http') ? art.images[0].fileKey : `${API_BASE_URL}${art.images[0].fileKey.startsWith('/') ? '' : '/uploads/'}${art.images[0].fileKey}`)
-                    : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&q=80&w=200';
+                  const resolvedImgPath = getArtworkImagePath(art);
+                  const imageFallbacks = art.images?.map((img: any) => img.fileKey).filter(Boolean) || [];
                   return (
                     <tr key={art.id} className="hover:bg-white transition-all group flex-row">
                       <td className="p-6">
                         <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 bg-white overflow-hidden group-hover:ring-1 group-hover:ring-gallery-gold/30 transition-all border border-gallery-gold/10">
-                            <img alt={art.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={imageUrl} />
+                          {/* Mini Image Thumbnail with click-to-preview */}
+                          <div 
+                            onClick={() => setPreviewArtwork(art)}
+                            className="w-16 h-16 bg-white overflow-hidden group-hover:ring-2 group-hover:ring-gallery-gold/50 transition-all border border-gallery-gold/20 shrink-0 cursor-pointer shadow-xs relative group/thumb rounded-xs"
+                            title="Click to preview artwork"
+                          >
+                            <RobustArtworkImage 
+                              src={resolvedImgPath} 
+                              fallbackUrls={imageFallbacks}
+                              seed={art.id || art.title}
+                              alt={art.title} 
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover/thumb:scale-110" 
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition-opacity text-white">
+                              <span className="material-symbols-outlined text-[18px]">visibility</span>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-display-md text-xl leading-tight mb-1 group-hover:text-gallery-gold transition-colors tracking-tight">{art.title}</p>
+                          
+                          {/* Title & SKU with click-to-preview */}
+                          <div className="cursor-pointer" onClick={() => setPreviewArtwork(art)}>
+                            <p className="font-display-md text-xl leading-tight mb-1 group-hover:text-gallery-gold transition-colors tracking-tight flex items-center gap-2">
+                              {art.title}
+                              <span className="material-symbols-outlined text-[15px] text-gallery-gold/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                                visibility
+                              </span>
+                            </p>
                             <p className="font-label-caps text-[10px] tracking-widest text-primary/50 uppercase">{art.sku}</p>
                           </div>
                         </div>
@@ -438,11 +488,19 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                       <td className="p-6 align-middle">
                         <p className="font-body-md text-base text-primary">{art.artist || 'Unknown Artist'}</p>
                         <p className="font-label-caps text-[10px] tracking-widest text-gallery-gold uppercase mt-1">
-                          ₹{(art.rentalPriceCents).toLocaleString('en-IN')}/mo
+                          ₹{(art.rentalPriceCents || 0).toLocaleString('en-IN')}/mo
                         </p>
                       </td>
                       <td className="p-6 text-right align-middle">
-                        <div className="flex gap-3 justify-end">
+                        <div className="flex gap-2.5 justify-end">
+                          <button 
+                            onClick={() => setPreviewArtwork(art)}
+                            className="px-3 py-1.5 text-[10px] bg-white border border-gallery-gold/60 text-gallery-gold font-label-caps tracking-widest uppercase hover:bg-gallery-gold hover:text-white transition-all cursor-pointer shadow-xs flex items-center gap-1"
+                            title="Preview artwork details"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">visibility</span>
+                            Preview
+                          </button>
                           <button 
                             onClick={() => handleUploadImageClick(art.id)}
                             className="px-3 py-1.5 text-[10px] bg-subtle-smoke border border-gallery-gold/30 text-primary font-label-caps tracking-widest uppercase hover:bg-gallery-gold hover:text-white transition-colors cursor-pointer"
@@ -506,10 +564,10 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                     <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-4 block uppercase">CURRENT IMAGES GALLERY</label>
                     <div className="flex gap-4 overflow-x-auto pb-4">
                       {currentEditingArtwork.images.map((img: any) => {
-                        const url = img.fileKey.startsWith('http') ? img.fileKey : `${API_BASE_URL}${img.fileKey.startsWith('/') ? '' : '/uploads/'}${img.fileKey}`;
+                        const url = sanitizeArtworkImageUrl(img.fileKey, img.id);
                         return (
                           <div key={img.id} className="w-24 h-24 shrink-0 relative group">
-                            <img src={url} alt="artwork" className="w-full h-full object-cover border border-gallery-gold/20" />
+                            <RobustArtworkImage src={url} alt="artwork" className="w-full h-full object-cover border border-gallery-gold/20" />
                             <button
                               type="button"
                               onClick={() => handleDeleteImage(editingArtworkId, img.id)}
@@ -544,15 +602,33 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
                   </div>
 
                   <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
-                    <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">BARCODE / SKU *</label>
-                    <input 
-                      className="w-full bg-transparent focus:outline-none focus:ring-0 font-body-md text-lg placeholder:text-primary/30" 
-                      placeholder="Scan or Enter SKU" 
-                      type="text" 
-                      value={sku}
-                      onChange={(e) => setSku(e.target.value)}
-                      required
-                    />
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-label-caps text-[9px] tracking-widest text-primary/60 block uppercase">
+                        BARCODE / INVENTORY SKU *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setSku(generateNextSku(artworks))}
+                        className="text-[9.5px] font-cinzel text-gallery-gold hover:text-primary tracking-wider uppercase flex items-center gap-1 cursor-pointer transition-colors font-bold"
+                        title="Generate next sequential barcode SKU based on total inventory"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">autorenew</span>
+                        Auto-Assign Sku
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        className="w-full bg-transparent focus:outline-none focus:ring-0 font-mono text-lg font-semibold placeholder:text-primary/30 text-primary" 
+                        placeholder="e.g. TKV-0104" 
+                        type="text" 
+                        value={sku}
+                        onChange={(e) => setSku(e.target.value)}
+                        required
+                      />
+                      <span className="font-mono text-[10px] px-2 py-0.5 bg-gallery-gold/10 text-gallery-gold border border-gallery-gold/30 shrink-0 uppercase tracking-widest font-bold">
+                        BARCODE
+                      </span>
+                    </div>
                   </div>
                   <div className="col-span-2 md:col-span-1 border-b border-primary/20 hover:border-gallery-gold focus-within:border-gallery-gold transition-colors pb-2">
                     <label className="font-label-caps text-[9px] tracking-widest text-primary/60 mb-2 block uppercase">ARTWORK NAME *</label>
@@ -752,6 +828,216 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
           </div>
         </div>
       )}
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          INTERACTIVE ARTWORK INSPECTION & PREVIEW MODAL
+          ───────────────────────────────────────────────────────────────────────────── */}
+      {previewArtwork && (() => {
+        const images = previewArtwork.images && previewArtwork.images.length > 0
+          ? previewArtwork.images.map((img: any) => ({
+              url: sanitizeArtworkImageUrl(img.fileKey, previewArtwork.id),
+              label: img.label || (img.variant === 'insitu' ? 'In-Situ Room View' : 'Gallery Perspective')
+            }))
+          : [{
+              url: getArtworkImagePath(previewArtwork),
+              label: 'Frontal Exhibition View'
+            }];
+
+        const currentDisplayImage = images[activePreviewImageIndex]?.url || images[0].url;
+
+        return (
+          <div 
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 md:p-8 animate-in fade-in duration-200 overflow-y-auto"
+            onClick={() => setPreviewArtwork(null)}
+          >
+            <div 
+              className="bg-[#FAF6F0] text-[#1E1412] border border-[#C5A059]/40 shadow-2xl relative w-full max-w-5xl flex flex-col my-auto max-h-[92vh] overflow-hidden rounded-xs"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="px-6 py-4 border-b border-[#C5A059]/25 flex items-center justify-between bg-[#FAF6F0] shrink-0">
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-[10px] text-[#4A0E17] font-bold px-2 py-0.5 bg-[#4A0E17]/10 border border-[#4A0E17]/20 uppercase">
+                    {previewArtwork.sku || 'TKV-ASSET'}
+                  </span>
+                  <span className="font-cinzel text-[11px] tracking-[0.25em] text-[#C5A059] uppercase font-bold hidden sm:inline">
+                    CURATORIAL INSPECTION DOSSIER
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className={`text-[10px] font-cinzel uppercase tracking-widest px-2.5 py-1 font-bold ${
+                    previewArtwork.status === 'rented' 
+                      ? 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
+                      : previewArtwork.status === 'reserved'
+                      ? 'bg-blue-500/15 text-blue-800 border border-blue-500/30'
+                      : 'bg-emerald-500/15 text-emerald-800 border border-emerald-500/30'
+                  }`}>
+                    {previewArtwork.status || 'AVAILABLE'}
+                  </span>
+                  <button 
+                    onClick={() => setPreviewArtwork(null)}
+                    className="text-[#1E1412]/60 hover:text-[#4A0E17] transition-colors cursor-pointer p-1 flex items-center gap-1 font-sans text-xs"
+                    title="Close (Esc)"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">close</span>
+                    <span className="hidden sm:inline text-[10px] font-mono opacity-60">ESC</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto">
+                {/* Left Column: Visual Showcase */}
+                <div className="lg:col-span-7 bg-[#1A0E12] p-6 sm:p-8 flex flex-col items-center justify-between border-b lg:border-b-0 lg:border-r border-[#C5A059]/20 relative">
+                  <div className="absolute inset-0 bg-radial-gradient from-[#4A0E17]/20 to-transparent pointer-events-none" />
+                  
+                  {/* Main Stage Image */}
+                  <div className="w-full flex-1 flex items-center justify-center min-h-[300px] sm:min-h-[380px] p-2 relative z-10">
+                    <div className="relative shadow-2xl p-2 bg-[#25151A] border border-[#C5A059]/40 max-w-full">
+                      <RobustArtworkImage 
+                        src={currentDisplayImage}
+                        fallbackUrls={images.map(i => i.url)}
+                        seed={previewArtwork.id}
+                        alt={previewArtwork.title}
+                        className="max-h-[360px] sm:max-h-[420px] w-auto h-auto object-contain mx-auto transition-transform duration-300 select-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Ribbon if multiple images exist */}
+                  {images.length > 1 && (
+                    <div className="w-full pt-4 mt-2 border-t border-[#C5A059]/20 flex items-center justify-center gap-3 overflow-x-auto relative z-10">
+                      {images.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActivePreviewImageIndex(idx)}
+                          className={`w-14 h-14 shrink-0 overflow-hidden border transition-all cursor-pointer relative ${
+                            activePreviewImageIndex === idx 
+                              ? 'border-[#DFC07D] ring-2 ring-[#DFC07D]/40 scale-105' 
+                              : 'border-[#C5A059]/30 opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <RobustArtworkImage 
+                            src={img.url}
+                            seed={`${previewArtwork.id}-${idx}`}
+                            alt={img.label}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="w-full pt-3 flex items-center justify-between text-[10px] font-mono text-[#FAF6F0]/60 relative z-10">
+                    <span className="flex items-center gap-1.5 text-[#DFC07D]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+                      VERIFIED HIGH-RES ASSET
+                    </span>
+                    <span>
+                      VIEW {activePreviewImageIndex + 1} OF {images.length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Column: Specifications & Curatorial Details */}
+                <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-6 overflow-y-auto">
+                  <div className="space-y-5">
+                    <div>
+                      <span className="font-cinzel text-[10px] tracking-[0.25em] text-[#C5A059] uppercase font-bold block mb-1">
+                        {previewArtwork.category || 'PAINTING'}
+                      </span>
+                      <h3 className="font-display-md text-2xl sm:text-3xl text-primary font-bold tracking-tight leading-tight">
+                        {previewArtwork.title}
+                      </h3>
+                      <p className="font-body-md text-base text-gallery-gold font-medium mt-1">
+                        {previewArtwork.artist || 'Authenticated Master Artist'}
+                      </p>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="grid grid-cols-2 gap-3 p-4 bg-white border border-[#C5A059]/30 rounded-xs shadow-xs">
+                      <div>
+                        <span className="font-cinzel text-[9px] tracking-widest text-primary/60 uppercase block">MONTHLY LEASE</span>
+                        <p className="font-mono text-xl text-primary font-bold mt-0.5">
+                          ₹{(previewArtwork.rentalPriceCents || 0).toLocaleString('en-IN')}
+                          <span className="text-xs font-sans font-normal text-primary/60">/mo</span>
+                        </p>
+                      </div>
+                      <div className="border-l border-[#C5A059]/20 pl-3">
+                        <span className="font-cinzel text-[9px] tracking-widest text-primary/60 uppercase block">REPLACEMENT VALUE</span>
+                        <p className="font-mono text-xl text-gallery-gold font-bold mt-0.5">
+                          ₹{(previewArtwork.replacementValue || 0).toLocaleString('en-IN')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Specifications Matrix */}
+                    <div className="space-y-2 border-t border-[#C5A059]/20 pt-4 text-xs">
+                      <div className="flex justify-between py-1 border-b border-primary/5">
+                        <span className="font-cinzel text-[10px] tracking-widest text-primary/60 uppercase font-semibold">Medium</span>
+                        <span className="font-sans text-primary font-medium">{previewArtwork.medium || 'Oil on Fine Canvas'}</span>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-primary/5">
+                        <span className="font-cinzel text-[10px] tracking-widest text-primary/60 uppercase font-semibold">Dimensions</span>
+                        <span className="font-mono text-primary font-medium">{previewArtwork.dimensions || 'Custom Framing'}</span>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-primary/5">
+                        <span className="font-cinzel text-[10px] tracking-widest text-primary/60 uppercase font-semibold">Year Created</span>
+                        <span className="font-mono text-primary font-medium">{previewArtwork.yearCreated || '2024'}</span>
+                      </div>
+                      {previewArtwork.style && (
+                        <div className="flex justify-between py-1 border-b border-primary/5">
+                          <span className="font-cinzel text-[10px] tracking-widest text-primary/60 uppercase font-semibold">Style</span>
+                          <span className="font-sans text-primary font-medium">{previewArtwork.style}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Description & Narrative */}
+                    <div>
+                      <span className="font-cinzel text-[10px] tracking-widest text-primary/60 uppercase font-semibold block mb-1.5">
+                        CURATORIAL NARRATIVE &amp; PROVENANCE
+                      </span>
+                      <p className="text-xs text-primary/80 leading-relaxed font-sans bg-white/70 p-3 border border-primary/10 rounded-xs max-h-32 overflow-y-auto">
+                        {previewArtwork.description || 'Certified museum-grade original masterwork held within The Kala Vault physical archives.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Modal Actions */}
+                  <div className="pt-4 border-t border-[#C5A059]/25 flex flex-wrap items-center gap-3">
+                    <a
+                      href={`/artwork/${previewArtwork.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 py-2.5 px-4 bg-primary text-white hover:bg-gallery-gold transition-colors font-cinzel text-[11px] tracking-widest uppercase font-bold text-center flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <span>Public Page</span>
+                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                    </a>
+                    <button
+                      onClick={() => {
+                        const targetArt = previewArtwork;
+                        setPreviewArtwork(null);
+                        startEdit(targetArt);
+                      }}
+                      className="py-2.5 px-4 bg-white border border-gallery-gold/60 text-primary hover:bg-gallery-gold hover:text-white transition-colors font-cinzel text-[11px] tracking-widest uppercase font-bold cursor-pointer"
+                    >
+                      Edit Asset
+                    </button>
+                    <button
+                      onClick={() => setPreviewArtwork(null)}
+                      className="py-2.5 px-4 text-primary/70 hover:text-primary transition-colors font-cinzel text-[11px] tracking-widest uppercase cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

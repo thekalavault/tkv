@@ -1,5 +1,8 @@
 import { addWatermarkToImage, WatermarkOptions } from '../lib/watermark';
 import { auth } from '../lib/firebase';
+import { SHAGUN_AGARWAL_ARTWORKS } from '../data/shagunArtworks';
+import { KASSHIISH_KARIYAA_ARTWORKS } from '../data/kashishArtworks';
+import { ALL_VERIFIED_ARTWORKS } from '../data/dbArtworks';
 
 export interface ArtworkImageView {
   id: string;
@@ -35,345 +38,170 @@ export interface ArtworksResponse {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-// Curated verified high-resolution masterwork paintings with multiple perspective views
-export const LOCAL_ARTWORKS: Artwork[] = [
-  {
-    id: '5',
-    artist: 'Anya Gupta',
-    title: 'Heritage Rhythms',
-    description: 'A vibrant contemporary masterwork using saturated cinnabar reds, raw ochre, and earthy mineral pigments.',
-    medium: 'Acrylic and Earth Pigments',
-    dimensions: '100 x 100 cm',
-    rentalPriceCents: 13000,
-    replacementValue: 85000,
-    status: 'Available for Lease',
-    localImagePath: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '5-front',
-        fileKey: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '5-detail',
-        fileKey: 'https://images.unsplash.com/photo-1579541814924-49fef17c5be5?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Cinnabar & Ochre Pigment Detail',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '5-angle',
-        fileKey: 'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Hand-Carved Gold Leaf Profile',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '5-insitu',
-        fileKey: '/assets/rooms/living_room.png',
-        variant: 'insitu',
-        label: 'Luxury Residence In-Situ',
-        mimeType: 'image/png'
+/**
+ * Interleaves artworks across artists (Shagun Agarwal, Kasshiish Kariyaa, and Archival collection)
+ * in a balanced round-robin order so consecutive artworks always showcase different artists.
+ */
+export function mixArtworksByArtist<T extends { artist?: string; title?: string; name?: string; replacementValue?: number; originalArtwork?: any }>(artworks: T[]): T[] {
+  if (!artworks || artworks.length <= 2) return artworks;
+
+  const isShagun = (a: T) => {
+    const art = (a.artist || a.originalArtwork?.artist || '').toLowerCase();
+    return art.includes('shagun');
+  };
+
+  const isKash = (a: T) => {
+    const art = (a.artist || a.originalArtwork?.artist || '').toLowerCase();
+    return art.includes('kassh') || art.includes('kash') || art.includes('kariyaa');
+  };
+
+  const getVal = (a: T) => a.replacementValue || a.originalArtwork?.replacementValue || 0;
+  const getTitle = (a: T) => (a.title || a.name || a.originalArtwork?.title || '').toLowerCase();
+
+  const shagun = artworks.filter(isShagun);
+  shagun.sort((a, b) => {
+    const wipA = getTitle(a).startsWith('wip');
+    const wipB = getTitle(b).startsWith('wip');
+    if (wipA && !wipB) return 1;
+    if (!wipA && wipB) return -1;
+    return getVal(b) - getVal(a);
+  });
+
+  const kash = artworks.filter(isKash);
+  kash.sort((a, b) => {
+    const untA = getTitle(a).includes('untitled');
+    const untB = getTitle(b).includes('untitled');
+    if (untA && !untB) return 1;
+    if (!untA && untB) return -1;
+    return getVal(b) - getVal(a);
+  });
+
+  const others = artworks.filter(a => !isShagun(a) && !isKash(a));
+  others.sort((a, b) => getVal(b) - getVal(a));
+
+  const buckets = [
+    { name: 'Shagun Agarwal', items: [...shagun] },
+    { name: 'Kasshiish Kariyaa', items: [...kash] },
+    { name: 'Archival Collection', items: [...others] }
+  ];
+
+  const total = shagun.length + kash.length + others.length;
+  const result: T[] = [];
+  let lastArtist = '';
+  let roundIndex = 0;
+
+  for (let i = 0; i < total; i++) {
+    const available = buckets.filter(b => b.items.length > 0);
+    if (available.length === 0) break;
+
+    const totalRemaining = available.reduce((acc, b) => acc + b.items.length, 0);
+    const urgent = available.find(b => b.items.length >= Math.ceil(totalRemaining / 2) && b.name !== lastArtist);
+    let chosenBucket = urgent || null;
+
+    if (!chosenBucket) {
+      for (let step = 0; step < buckets.length; step++) {
+        const idx = (roundIndex + step) % buckets.length;
+        const b = buckets[idx];
+        if (b.items.length > 0 && b.name !== lastArtist) {
+          chosenBucket = b;
+          roundIndex = (idx + 1) % buckets.length;
+          break;
+        }
       }
-    ]
-  },
-  {
-    id: '6',
-    artist: 'Kaito Tanaka',
-    title: 'Zen Garden I',
-    description: 'A serene minimalist sumi ink study of botanical balance and Japanese garden aesthetics.',
-    medium: 'Sumi Ink on Washi Paper',
-    dimensions: '60 x 80 cm',
-    rentalPriceCents: 11000,
-    replacementValue: 70000,
-    status: 'Available for Acquisition',
-    localImagePath: 'https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '6-front',
-        fileKey: 'https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '6-detail',
-        fileKey: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Handmade Washi Paper Fiber',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '6-angle',
-        fileKey: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Ebonized Ash Minimal Frame',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '6-insitu',
-        fileKey: '/assets/rooms/gallery_lounge.png',
-        variant: 'insitu',
-        label: 'Atrium Foyer In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
-  },
-  {
-    id: '7',
-    artist: 'David Vance',
-    title: 'Imperial Noir',
-    description: 'Deep textured impasto and obsidian tones created for monumental executive suites and boardroom walls.',
-    medium: 'Oil & Pigment on Linen',
-    dimensions: '130 x 160 cm',
-    rentalPriceCents: 22000,
-    replacementValue: 160000,
-    status: 'Available for Lease',
-    localImagePath: 'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '7-front',
-        fileKey: 'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '7-detail',
-        fileKey: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Textured Impasto High-Relief',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '7-angle',
-        fileKey: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Dark Bronze Patina Frame',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '7-insitu',
-        fileKey: '/assets/rooms/boardroom.png',
-        variant: 'insitu',
-        label: 'Executive Boardroom In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
-  },
-  {
-    id: '8',
-    artist: 'Claire De Witt',
-    title: 'Elysian Horizon',
-    description: 'Atmospheric sunset study with golden glaze over layered oil glazes, exuding tranquility.',
-    medium: 'Oil Glaze on Panel',
-    dimensions: '110 x 140 cm',
-    rentalPriceCents: 17500,
-    replacementValue: 115000,
-    status: 'Available for Lease',
-    localImagePath: 'https://images.unsplash.com/photo-1579541814924-49fef17c5be5?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '8-front',
-        fileKey: 'https://images.unsplash.com/photo-1579541814924-49fef17c5be5?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '8-detail',
-        fileKey: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Glaze Luminosity & Translucency',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '8-angle',
-        fileKey: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Champagne Gold Leaf Fillet',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '8-insitu',
-        fileKey: '/assets/rooms/living_room.png',
-        variant: 'insitu',
-        label: 'Penthouse Salon In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
-  },
-  {
-    id: '9',
-    artist: 'Rohan Mehra',
-    title: 'Solstice Radiance',
-    description: 'Monumental geometric abstraction exploring solar cycles, radiant cadmium yellows, and raw linen ground.',
-    medium: 'Oil and 24K Gold Leaf on Belgian Linen',
-    dimensions: '150 x 180 cm',
-    rentalPriceCents: 26000,
-    replacementValue: 195000,
-    status: 'Available for Lease',
-    localImagePath: 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '9-front',
-        fileKey: 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '9-detail',
-        fileKey: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Gold Leaf & Cadmium Pigment Detail',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '9-angle',
-        fileKey: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Bespoke Oak Float Frame Profile',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '9-insitu',
-        fileKey: '/assets/rooms/gallery_lounge.png',
-        variant: 'insitu',
-        label: 'Executive Atrium In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
-  },
-  {
-    id: '10',
-    artist: 'Isabella Moreau',
-    title: 'Symphony in Azure',
-    description: 'Layered azure and ultramarine pigment glazes creating a sense of oceanic depth and serenity.',
-    medium: 'Pigment and Acrylic on Raw Cotton',
-    dimensions: '110 x 150 cm',
-    rentalPriceCents: 19000,
-    replacementValue: 135000,
-    status: 'Available for Acquisition',
-    localImagePath: 'https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '10-front',
-        fileKey: 'https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '10-detail',
-        fileKey: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Ultramarine Glaze Depth',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '10-angle',
-        fileKey: 'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Museum Float Profile',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '10-insitu',
-        fileKey: '/assets/rooms/boardroom.png',
-        variant: 'insitu',
-        label: 'Executive Suite In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
-  },
-  {
-    id: '11',
-    artist: 'Tariq Al-Mansoor',
-    title: 'Nomadic Geometry',
-    description: 'Terracotta, sand textures, and geometric rhythmic forms evoking desert architectures and ancient caravans.',
-    medium: 'Sand, Earth & Oil on Canvas',
-    dimensions: '120 x 120 cm',
-    rentalPriceCents: 20500,
-    replacementValue: 145000,
-    status: 'Available for Lease',
-    localImagePath: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '11-front',
-        fileKey: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '11-detail',
-        fileKey: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Terracotta & Sand Grain Relief',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '11-angle',
-        fileKey: 'https://images.unsplash.com/photo-1579541814924-49fef17c5be5?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Raw Teakwood Bevel Angle',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '11-insitu',
-        fileKey: '/assets/rooms/living_room.png',
-        variant: 'insitu',
-        label: 'Lounge Salon In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
-  },
-  {
-    id: '12',
-    artist: 'Ananya Deshmukh',
-    title: 'Monochromatic Silence',
-    description: 'A study in stark contrasts, black gesso impasto, and subtle silver leaf reflections for boardroom environments.',
-    medium: 'Black Gesso, Silver Leaf & Oil',
-    dimensions: '140 x 140 cm',
-    rentalPriceCents: 23000,
-    replacementValue: 170000,
-    status: 'Available for Lease',
-    localImagePath: 'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-    images: [
-      {
-        id: '12-front',
-        fileKey: 'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-        variant: 'front',
-        label: 'Frontal Museum View',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '12-detail',
-        fileKey: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=1200&q=85',
-        variant: 'detail',
-        label: 'Silver Leaf & Obsidian Texture',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '12-angle',
-        fileKey: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
-        variant: 'angle',
-        label: 'Charcoal Hardwood Profile',
-        mimeType: 'image/jpeg'
-      },
-      {
-        id: '12-insitu',
-        fileKey: '/assets/rooms/boardroom.png',
-        variant: 'insitu',
-        label: 'Executive Boardroom In-Situ',
-        mimeType: 'image/png'
-      }
-    ]
+    }
+
+    if (!chosenBucket) {
+      let candidates = available.filter(b => b.name !== lastArtist);
+      if (candidates.length === 0) candidates = available;
+      candidates.sort((a, b) => b.items.length - a.items.length);
+      chosenBucket = candidates[0];
+      roundIndex = (buckets.indexOf(chosenBucket) + 1) % buckets.length;
+    }
+
+    const item = chosenBucket.items.shift();
+    if (item) {
+      result.push(item);
+      lastArtist = chosenBucket.name;
+    }
   }
-];
+
+  return result;
+}
+
+// Combined certified portfolio: Shagun Agarwal (45) + Kasshiish Kariyaa (20 from Advisory PDF) + Authenticated Masterworks (38)
+export const LOCAL_ARTWORKS: Artwork[] = (() => {
+  const map = new Map<string, Artwork>();
+  // 1. Add all verified DB artworks
+  ALL_VERIFIED_ARTWORKS.forEach(a => map.set(a.id, a));
+  // 2. Overlay Shagun's 45 artworks with direct verified local assets
+  SHAGUN_AGARWAL_ARTWORKS.forEach(a => map.set(a.id, a));
+  // 3. Overlay Kasshiish Kariyaa's 20 genuine artworks from the Advisory PDF
+  KASSHIISH_KARIYAA_ARTWORKS.forEach(a => map.set(a.id, a));
+
+  return mixArtworksByArtist(Array.from(map.values()));
+})();
+
+/**
+ * Returns exactly 7 featured premier masterworks for Latest Acquisitions:
+ * - 3 from Shagun Agarwal ("this other guy")
+ * - 2 from Kasshiish Kariyaa ("kashish")
+ * - 2 from Other Authenticated Artists
+ */
+export function getLatestAcquisitionsSelection(artworks: Artwork[]): Artwork[] {
+  const isShagun = (a: Artwork) => !!(a.artist && a.artist.toLowerCase().includes('shagun'));
+  const isKashish = (a: Artwork) => !!(a.artist && (
+    a.artist.toLowerCase().includes('kash') || 
+    a.artist.toLowerCase().includes('kassh') || 
+    a.artist.toLowerCase().includes('kariyaa')
+  ));
+
+  // 1. Shagun Agarwal: 3 premier paintings
+  const allShagun = artworks.filter(isShagun);
+  allShagun.sort((a, b) => {
+    const isWipA = (a.title || '').toLowerCase().startsWith('wip');
+    const isWipB = (b.title || '').toLowerCase().startsWith('wip');
+    if (isWipA && !isWipB) return 1;
+    if (!isWipA && isWipB) return -1;
+    return (b.replacementValue || 0) - (a.replacementValue || 0);
+  });
+  const shagun = allShagun.slice(0, 3);
+
+  // 2. Kasshiish Kariyaa: 2 premier masterworks
+  const allKashish = artworks.filter(isKashish);
+  allKashish.sort((a, b) => {
+    const isUntA = (a.title || '').toLowerCase().includes('untitled');
+    const isUntB = (b.title || '').toLowerCase().includes('untitled');
+    if (isUntA && !isUntB) return 1;
+    if (!isUntA && isUntB) return -1;
+    return (b.replacementValue || 0) - (a.replacementValue || 0);
+  });
+  const kashish = allKashish.slice(0, 2);
+
+  // 3. The 38 classic artworks (with no artist name specified): 2 statement works
+  const allOthers = artworks.filter(a => !isShagun(a) && !isKashish(a)).map(a => ({
+    ...a,
+    artist: undefined
+  }));
+  allOthers.sort((a, b) => (b.replacementValue || 0) - (a.replacementValue || 0));
+  const others = allOthers.slice(0, 2);
+
+  // Interleave round-robin so adjacent acquisitions always showcase different artists:
+  // Shagun -> Kasshiish -> Classic Archival -> Shagun -> Kasshiish -> Classic Archival -> Shagun
+  const selected: Artwork[] = [];
+  const maxL = Math.max(shagun.length, kashish.length, others.length);
+  for (let i = 0; i < maxL; i++) {
+    if (i < shagun.length) selected.push(shagun[i]);
+    if (i < kashish.length) selected.push(kashish[i]);
+    if (i < others.length) selected.push(others[i]);
+  }
+
+  if (selected.length < 7) {
+    const selectedIds = new Set(selected.map(s => s.id));
+    const extra = artworks.filter(a => !selectedIds.has(a.id)).slice(0, 7 - selected.length);
+    selected.push(...extra);
+  }
+  return selected;
+}
 
 // Fallback high-definition museum-grade painting URLs
 export const FALLBACK_PAINTINGS = [
@@ -406,12 +234,19 @@ export function sanitizeArtworkImageUrl(rawUrl?: string, fallbackSeed = '1'): st
 
   // Handle local frontend assets
   if (trimmed.startsWith('/assets/')) {
-    // If it points to missing /assets/artworks/, redirect to corresponding guaranteed painting
-    if (trimmed.startsWith('/assets/artworks/')) {
-      const seed = trimmed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return FALLBACK_PAINTINGS[seed % FALLBACK_PAINTINGS.length];
-    }
     return trimmed;
+  }
+
+  // Handle Kasshiish Kariyaa artworks
+  if (trimmed.includes('kasshiish-kariyaa') || trimmed.includes('kasshiish_kariyaa')) {
+    const filename = trimmed.split('/').pop() || trimmed;
+    return `/assets/artworks/kasshiish_kariyaa/${filename}`;
+  }
+
+  // Handle Shagun Agarwal artworks
+  if (trimmed.includes('shagun-agarwal') || trimmed.includes('shagun_agarwal')) {
+    const filename = trimmed.split('/').pop() || trimmed;
+    return `/assets/artworks/shagun_agarwal/${filename}`;
   }
 
   // Handle backend upload paths
@@ -424,7 +259,7 @@ export function sanitizeArtworkImageUrl(rawUrl?: string, fallbackSeed = '1'): st
   }
 
   // If simple filename or key
-  if (trimmed.endsWith('.jpg') || trimmed.endsWith('.png') || trimmed.endsWith('.webp')) {
+  if (trimmed.endsWith('.jpg') || trimmed.endsWith('.png') || trimmed.endsWith('.webp') || trimmed.endsWith('.jpeg')) {
     return `${API_BASE_URL}/uploads/${trimmed}`;
   }
 
@@ -439,17 +274,29 @@ export function getArtworkImagePath(artwork?: Partial<Artwork> | null): string {
     return FALLBACK_PAINTINGS[0];
   }
 
-  // 1. If explicit localImagePath exists and is not a broken placeholder
-  if (artwork.localImagePath && !artwork.localImagePath.includes('placeholder')) {
-    return sanitizeArtworkImageUrl(artwork.localImagePath, artwork.id || artwork.title || '1');
+  // 1. Highest priority: genuine R2 bucket URL from artwork.images[0].fileKey
+  if (artwork.images && artwork.images.length > 0 && artwork.images[0].fileKey) {
+    const key = artwork.images[0].fileKey.trim();
+    if (key.startsWith('http://') || key.startsWith('https://')) {
+      return key;
+    }
   }
 
-  // 2. If images array exists and has fileKey
+  // 2. Next: explicit R2 or local URL in localImagePath
+  if (artwork.localImagePath && !artwork.localImagePath.includes('placeholder')) {
+    const local = artwork.localImagePath.trim();
+    if (local.startsWith('http://') || local.startsWith('https://')) {
+      return local;
+    }
+    return sanitizeArtworkImageUrl(local, artwork.id || artwork.title || '1');
+  }
+
+  // 3. Fallback to any images[0].fileKey through sanitize
   if (artwork.images && artwork.images.length > 0 && artwork.images[0].fileKey) {
     return sanitizeArtworkImageUrl(artwork.images[0].fileKey, artwork.id || artwork.title || '1');
   }
 
-  // 3. Deterministic fallback matching artwork id or title
+  // 4. Deterministic fallback matching artwork id or title
   const seed = (artwork.id || artwork.title || '1').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return FALLBACK_PAINTINGS[seed % FALLBACK_PAINTINGS.length];
 }
@@ -458,56 +305,25 @@ export function getArtworkImagePath(artwork?: Partial<Artwork> | null): string {
  * Returns a comprehensive, verified array of 4 perspective images (Front, Detail, Frame, In-Situ) for ANY artwork
  */
 export function getArtworkImages(artwork: Artwork): ArtworkImageView[] {
-  const seedNum = (artwork.id || artwork.title || '1').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const primaryUrl = getArtworkImagePath(artwork);
 
-  // If artwork already has complete curated images, sanitize them
-  if (artwork.images && artwork.images.length >= 2) {
+  // If artwork already has genuine images, sanitize them and return only real images
+  if (artwork.images && artwork.images.length > 0) {
     return artwork.images.map((img, idx) => ({
       ...img,
       fileKey: sanitizeArtworkImageUrl(img.fileKey, `${artwork.id}-${idx}`),
-      label: img.label || (idx === 0 ? 'Frontal Museum View' : idx === 1 ? 'Archival Macro Detail' : idx === 2 ? 'Hardwood Frame Profile' : 'Spatial Room In-Situ')
+      label: img.label || (idx === 0 ? 'Frontal Museum View' : (img.variant === 'insitu' ? 'Framed In-Situ View' : 'Alternate Perspective'))
     }));
   }
 
-  // Otherwise, synthesize a rich 4-view multi-angle gallery set for this artwork
-  const detailUrl = FALLBACK_PAINTINGS[(seedNum + 1) % FALLBACK_PAINTINGS.length];
-  const angleUrl = FALLBACK_PAINTINGS[(seedNum + 2) % FALLBACK_PAINTINGS.length];
-  const roomViews = ['/assets/rooms/boardroom.png', '/assets/rooms/living_room.png', '/assets/rooms/gallery_lounge.png'];
-  const insituUrl = roomViews[seedNum % roomViews.length];
-
+  // If only 1 image exists, return ONLY that genuine image without synthesizing fake views
   return [
     {
       id: `${artwork.id}-front`,
       fileKey: primaryUrl,
       variant: 'front',
       label: 'Frontal Museum View',
-      mimeType: 'image/jpeg',
-      fallbackUrls: [FALLBACK_PAINTINGS[seedNum % FALLBACK_PAINTINGS.length]]
-    },
-    {
-      id: `${artwork.id}-detail`,
-      fileKey: detailUrl,
-      variant: 'detail',
-      label: 'Archival Impasto Detail',
-      mimeType: 'image/jpeg',
-      fallbackUrls: [FALLBACK_PAINTINGS[(seedNum + 3) % FALLBACK_PAINTINGS.length]]
-    },
-    {
-      id: `${artwork.id}-angle`,
-      fileKey: angleUrl,
-      variant: 'angle',
-      label: 'Hardwood Frame Profile',
-      mimeType: 'image/jpeg',
-      fallbackUrls: [FALLBACK_PAINTINGS[(seedNum + 4) % FALLBACK_PAINTINGS.length]]
-    },
-    {
-      id: `${artwork.id}-insitu`,
-      fileKey: insituUrl,
-      variant: 'insitu',
-      label: 'Spatial Setting In-Situ',
-      mimeType: 'image/png',
-      fallbackUrls: ['/assets/rooms/boardroom.png']
+      mimeType: 'image/jpeg'
     }
   ];
 }
@@ -515,10 +331,43 @@ export function getArtworkImages(artwork: Artwork): ArtworkImageView[] {
 // Module-level in-memory cache
 let _inMemoryArtworksCache: ArtworksResponse | null = (() => {
   try {
-    const saved = localStorage.getItem('kb_cached_artworks_v4');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kb_cached_artworks_v8');
+      localStorage.removeItem('kb_cached_artworks_v7');
+      localStorage.removeItem('kb_cached_artworks_v6');
+      localStorage.removeItem('kb_cached_artworks_v5');
+      localStorage.removeItem('kb_cached_artworks_v4');
+      localStorage.removeItem('kb_cached_artworks_v3');
+      localStorage.removeItem('kb_cached_artworks_v2');
+      localStorage.removeItem('kb_cached_featured_artworks');
+      localStorage.removeItem('kb_cached_featured_artworks_v5');
+    }
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('kb_cached_artworks_v9') : null;
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed?.items?.length) return parsed;
+      if (parsed?.items?.length && parsed.items.length >= 70) {
+        parsed.items = parsed.items
+          .filter((a: any) => !['5', '6', '7', '8', '9', '10', '11', '12'].includes(a.id))
+          .map((a: any) => {
+            const isShagun = Boolean(a.artist && a.artist.toLowerCase().includes('shagun'));
+            const isKash = Boolean(
+              a.artist && (
+                a.artist.toLowerCase().includes('kassh') ||
+                a.artist.toLowerCase().includes('kash') ||
+                a.artist.toLowerCase().includes('kariyaa')
+              )
+            );
+            const artist = isShagun
+              ? 'Shagun Agarwal'
+              : (isKash ? 'Kasshiish Kariyaa' : undefined);
+            return {
+              ...a,
+              artist
+            };
+          });
+        parsed.items = mixArtworksByArtist(parsed.items);
+        return parsed;
+      }
     }
   } catch (e) {
     // Ignore storage parsing errors
@@ -532,7 +381,7 @@ export async function prefetchArtworks(): Promise<ArtworksResponse> {
   if (_prefetchPromise) return _prefetchPromise;
 
   _prefetchPromise = (async () => {
-    return fetchArtworks(1, 50);
+    return fetchArtworks(1, 500);
   })();
 
   return _prefetchPromise;
@@ -611,7 +460,7 @@ export function preloadAllCatalogAssets(): void {
   });
 
   // 3. Fetch full catalog in background & preload all images into browser cache
-  fetchArtworks(1, 100).then(res => {
+  fetchArtworks(1, 500).then(res => {
     if (res?.items) {
       res.items.forEach(art => {
         _artworkMap.set(art.id, art);
@@ -625,14 +474,29 @@ export function preloadAllCatalogAssets(): void {
   }).catch(() => {});
 }
 
+export function invalidateArtworkCache(): void {
+  _inMemoryArtworksCache = null;
+  _prefetchPromise = null;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem('kb_cached_artworks_v9');
+      localStorage.removeItem('kb_cached_artworks_v8');
+      localStorage.removeItem('kb_cached_artworks_v7');
+      localStorage.removeItem('kb_cached_artworks_v6');
+      localStorage.removeItem('kb_cached_artworks_v5');
+      localStorage.removeItem('kb_cached_artworks_v4');
+    } catch {}
+  }
+}
+
 // Auto-trigger preloading immediately when module loads
 if (typeof window !== 'undefined') {
   preloadAllCatalogAssets();
 }
 
-export async function fetchArtworks(page = 1, limit = 50): Promise<ArtworksResponse> {
-  // If we already have warm cache in memory for initial view, immediately return cached items if page is 1
-  if (page === 1 && _inMemoryArtworksCache && _inMemoryArtworksCache.items.length > 0) {
+export async function fetchArtworks(page = 1, limit = 500, forceRefresh = false): Promise<ArtworksResponse> {
+  // If we already have warm cache in memory with full catalog, immediately return cached items if page is 1
+  if (!forceRefresh && page === 1 && _inMemoryArtworksCache && _inMemoryArtworksCache.items.length >= 70 && limit >= _inMemoryArtworksCache.items.length) {
     return _inMemoryArtworksCache;
   }
 
@@ -662,17 +526,37 @@ export async function fetchArtworks(page = 1, limit = 50): Promise<ArtworksRespo
     if (response.ok) {
       const data = await response.json();
       if (data.items && data.items.length > 0) {
-        data.items = data.items.map((art: Artwork) => ({
-          ...art,
-          localImagePath: getArtworkImagePath(art),
-          images: getArtworkImages(art)
-        }));
+        data.items = data.items
+          .filter((a: Artwork) => !['5', '6', '7', '8', '9', '10', '11', '12'].includes(a.id))
+          .map((art: Artwork) => {
+            const isShagun = Boolean(art.artist && art.artist.toLowerCase().includes('shagun'));
+            const isKash = Boolean(
+              art.artist && (
+                art.artist.toLowerCase().includes('kassh') ||
+                art.artist.toLowerCase().includes('kash') ||
+                art.artist.toLowerCase().includes('kariyaa')
+              )
+            );
+            const artist = isShagun
+              ? 'Shagun Agarwal'
+              : (isKash ? 'Kasshiish Kariyaa' : undefined);
+            return {
+              ...art,
+              artist,
+              localImagePath: getArtworkImagePath(art),
+              images: getArtworkImages(art)
+            };
+          });
+
+        // Interleave by artist so consecutive artworks always rotate between different artists
+        data.items = mixArtworksByArtist(data.items);
 
         data.items.forEach((a: Artwork) => _artworkMap.set(a.id, a));
-        if (page === 1) {
+        // ONLY update in-memory and local cache if we received full catalog (>= 70 items)
+        if (page === 1 && data.items.length >= 70 && data.items.length >= (_inMemoryArtworksCache?.items?.length || 0)) {
           _inMemoryArtworksCache = data;
           try {
-            localStorage.setItem('kb_cached_artworks_v4', JSON.stringify(data));
+            localStorage.setItem('kb_cached_artworks_v9', JSON.stringify(data));
           } catch {}
         }
         return data;

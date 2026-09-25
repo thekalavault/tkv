@@ -157,7 +157,7 @@ if (typeof window !== 'undefined') {
 
 function generateArtistName(artworkName: string): string {
   const artists = [
-    'Elena Rossi', 'Marcus Chen', 'Sana Varma', 'Vikram Seth', 'Anya Gupta',
+    'Kasshiish Kariyaa', 'Marcus Chen', 'Sana Varma', 'Vikram Seth', 'Elena Rossi',
     'Rajesh Kumar', 'Priya Sharma', 'Arjun Patel', 'Deepika Singh', 'Aryan Datta',
     'Nisha Kapoor', 'Rohit Verma', 'Sneha Gupta', 'Aditya Menon', 'Kavya Iyer'
   ];

@@ -303,10 +303,10 @@ export default function ArtworkDetail() {
       <main className="flex-1 flex flex-col lg:flex-row w-full overflow-hidden">
         
         {/* Left Visualizer Panel */}
-        <div className="w-full lg:w-[58%] lg:h-[calc(100vh-96px)] lg:sticky lg:top-[96px] bg-[#F5EFEB] flex flex-col justify-between items-center p-6 md:p-12 border-b lg:border-b-0 lg:border-r border-[#C5A059]/25 select-none overflow-hidden">
+        <div className="w-full lg:w-[58%] lg:min-h-[calc(100vh-96px)] lg:sticky lg:top-[96px] bg-[#F5EFEB] flex flex-col justify-between items-center px-6 py-6 md:px-10 md:py-8 lg:px-12 lg:py-8 border-b lg:border-b-0 lg:border-r border-[#C5A059]/25 select-none overflow-y-auto hide-scrollbar">
           
           {/* Top Bar: Back to Collections Pill */}
-          <div className="w-full flex justify-between items-center z-20">
+          <div className="w-full flex justify-between items-center z-20 mb-3">
             <button
               onClick={() => navigate('/collections')}
               aria-label="Back to Collections"
@@ -318,7 +318,7 @@ export default function ArtworkDetail() {
           </div>
 
           {/* Main Visualizer Container */}
-          <div className="w-full flex-1 flex flex-col items-center justify-center relative select-none my-4">
+          <div className="w-full flex-1 flex flex-col items-center justify-center relative select-none my-2 sm:my-3">
             {!isInsitu ? (
               <div className="flex flex-col items-center justify-center w-full">
                 
@@ -337,7 +337,7 @@ export default function ArtworkDetail() {
                 >
                   <div className="relative inline-flex items-center justify-center p-[4px] bg-gradient-to-b from-[#3E2419] via-[#2A160F] to-[#1E0E08] border-[6px] sm:border-[8px] border-[#341B12] shadow-[0_24px_60px_rgba(26,13,8,0.35)] transition-all duration-300">
                     <div className="relative p-[1.5px] bg-gradient-to-tr from-[#9E7D38]/70 via-[#DFC07D]/90 to-[#9E7D38]/70 overflow-hidden">
-                      <div className="relative overflow-hidden flex items-center justify-center bg-[#120704] min-w-[200px] min-h-[260px]">
+                      <div className="relative overflow-hidden flex items-center justify-center bg-[#120704] min-w-[200px] min-h-[240px]">
                         <RobustArtworkImage
                           src={activeImageUrl}
                           fallbackUrls={currentView?.fallbackUrls}
@@ -345,7 +345,7 @@ export default function ArtworkDetail() {
                           alt={`${artwork.name} - ${currentView?.label || 'Perspective'}`}
                           loading="eager"
                           decoding="async"
-                          className="max-h-[54vh] max-w-full w-auto h-auto block object-contain transition-transform duration-300 ease-out no-drag relative z-10 will-change-transform"
+                          className={`${galleryViews.length > 1 ? 'max-h-[42vh] lg:max-h-[45vh]' : 'max-h-[50vh] lg:max-h-[52vh]'} max-w-full w-auto h-auto block object-contain transition-transform duration-300 ease-out no-drag relative z-10 will-change-transform`}
                           style={{
                             transformOrigin: isZoomed ? `${zoomPos.x}% ${zoomPos.y}%` : 'center',
                             transform: isZoomed ? 'scale(2.2)' : 'scale(1)',
@@ -362,41 +362,43 @@ export default function ArtworkDetail() {
                   </div>
                 </div>
                 
-                {/* Multi-Angle Thumbnails with View Indicator */}
-                <div className="flex flex-col items-center gap-2 mt-5 w-full">
-                  <div className="flex items-center gap-2 text-[10px] font-cinzel text-[#4A0E17] uppercase tracking-[0.2em] font-semibold">
-                    <span>✦ VIEW 0{activeImageIndex + 1} / 0{galleryViews.length}:</span>
-                    <span className="text-[#1E1412] font-bold">{currentView?.label || 'MUSEUM PERSPECTIVE'}</span>
-                  </div>
+                {/* Multi-Angle Thumbnails with View Indicator (Only when multiple real images exist) */}
+                {galleryViews.length > 1 && (
+                  <div className="flex flex-col items-center gap-2.5 mt-6 mb-2 w-full">
+                    <div className="flex items-center gap-2.5 text-[10px] sm:text-[10.5px] font-cinzel text-[#4A0E17] uppercase tracking-[0.2em] font-semibold">
+                      <span>✦ VIEW 0{activeImageIndex + 1} / 0{galleryViews.length}:</span>
+                      <span className="text-[#1E1412] font-bold">{currentView?.label || 'MUSEUM PERSPECTIVE'}</span>
+                    </div>
 
-                  <div className="flex gap-2.5 sm:gap-3 overflow-x-auto py-1 px-4 max-w-full justify-center">
-                    {galleryViews.map((img, idx) => {
-                      const isSelected = activeImageIndex === idx;
-                      return (
-                        <button
-                          key={img.id || idx}
-                          onClick={() => setActiveImageIndex(idx)}
-                          className={`relative group/thumb rounded-lg overflow-hidden border-2 transition-all duration-300 cursor-pointer p-0.5 ${
-                            isSelected 
-                              ? 'border-[#4A0E17] ring-2 ring-[#C5A059]/80 scale-105 shadow-md bg-white' 
-                              : 'border-[#C5A059]/30 opacity-70 hover:opacity-100 hover:border-[#C5A059] bg-[#FAF6F0]'
-                          }`}
-                          title={img.label}
-                        >
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md overflow-hidden bg-[#1E0E08]">
-                            <RobustArtworkImage
-                              src={img.fileKey}
-                              fallbackUrls={img.fallbackUrls}
-                              seed={`${artwork.id}-${idx}`}
-                              alt={img.label}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </button>
-                      );
-                    })}
+                    <div className="flex gap-3 sm:gap-3.5 overflow-x-auto py-2 px-4 max-w-full justify-center">
+                      {galleryViews.map((img, idx) => {
+                        const isSelected = activeImageIndex === idx;
+                        return (
+                          <button
+                            key={img.id || idx}
+                            onClick={() => setActiveImageIndex(idx)}
+                            className={`relative group/thumb rounded-xl overflow-hidden border-2 transition-all duration-300 cursor-pointer p-1 ${
+                              isSelected 
+                                ? 'border-[#4A0E17] ring-2 ring-[#C5A059] scale-105 shadow-md bg-white' 
+                                : 'border-[#C5A059]/35 opacity-75 hover:opacity-100 hover:border-[#C5A059] bg-[#FAF6F0]'
+                            }`}
+                            title={img.label}
+                          >
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden bg-[#1E0E08]">
+                              <RobustArtworkImage
+                                src={img.fileKey}
+                                fallbackUrls={img.fallbackUrls}
+                                seed={`${artwork.id}-${idx}`}
+                                alt={img.label}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
               </div>
             ) : (
@@ -451,7 +453,7 @@ export default function ArtworkDetail() {
           </div>
 
           {/* Bottom Action Pill Controls */}
-          <div className="w-full flex flex-wrap justify-center items-center gap-3 z-20">
+          <div className="w-full flex flex-wrap justify-center items-center gap-3.5 z-20 mt-6 pt-4 pb-2 border-t border-[#C5A059]/20">
             <div className="flex bg-[#FAF6F0]/90 backdrop-blur-md p-1 rounded-full border border-[#C5A059]/30 shadow-xs">
               <button
                 onClick={() => setIsInsitu(false)}
@@ -509,30 +511,38 @@ export default function ArtworkDetail() {
         {/* Right Details & Acquisition Panel */}
         <div
           data-lenis-prevent
-          className="w-full lg:w-[42%] px-6 md:px-12 py-10 lg:py-14 bg-[#FAF6F0] text-[#1E1412] flex flex-col gap-8 lg:h-[calc(100vh-96px)] lg:overflow-y-auto border-l border-[#C5A059]/20 hide-scrollbar overscroll-contain"
+          className="w-full lg:w-[42%] px-6 md:px-12 py-10 lg:py-14 bg-[#FAF6F0] text-[#1E1412] flex flex-col gap-10 lg:h-[calc(100vh-96px)] lg:overflow-y-auto border-l border-[#C5A059]/20 hide-scrollbar overscroll-contain pb-28"
         >
           {/* Header Title & Artist */}
           <div>
             <div className="flex items-center gap-2.5 mb-3">
               <span className="font-cinzel text-[10px] text-[#4A0E17] uppercase tracking-[0.3em] font-bold">
-                MUSEUM ARCHIVAL EDITION
+                FINE ART MASTERWORK
               </span>
               <div className="h-px w-8 bg-[#4A0E17]/40" />
             </div>
 
-            <h1 className="font-cinzel text-3xl sm:text-4xl md:text-5xl text-[#1E1412] font-semibold mb-2 tracking-tight leading-tight">
+            {/* Suite / Multi-Piece Collection Tag */}
+            {galleryViews.length >= 3 && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#4A0E17]/10 border border-[#4A0E17]/30 rounded-full mb-3 text-[10px] sm:text-[10.5px] font-cinzel font-bold text-[#4A0E17] uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4A0E17] animate-pulse" />
+                <span>✦ COMPLETE {galleryViews.length}-PIECE INSTALLATION SUITE</span>
+              </div>
+            )}
+
+            <h1 className="font-cinzel text-3xl sm:text-4xl md:text-5xl text-[#1E1412] font-semibold mb-2.5 tracking-tight leading-tight">
               {artwork.name}
             </h1>
             <p className="font-cormorant italic text-xl text-[#1E1412]/75 mb-6">
               By {artwork.artist || 'Kalavault Curated Masterpiece'}
             </p>
             
-            <p className="font-body-md text-sm md:text-base text-[#1E1412]/80 leading-relaxed mb-6">
+            <p className="font-body-md text-sm md:text-base text-[#1E1412]/80 leading-relaxed mb-7">
               {artwork.description || "A captivating visual exploration that balances architectural geometry and poetic abstraction, ideally scaled to define prestigious commercial or residential environments."}
             </p>
 
             {/* Metric Overview Cards */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-3.5 mb-6">
               <div className="p-4 bg-[#F5EFEB] rounded-2xl border border-[#C5A059]/25 shadow-xs text-center">
                 <p className="font-cinzel text-[9.5px] text-[#4A0E17] uppercase tracking-[0.2em] font-bold mb-1">VALUATION</p>
                 <p className="font-cinzel text-xl text-[#1E1412] font-bold">₹{(artwork.replacementValue || 12000).toLocaleString('en-IN')}</p>
@@ -549,31 +559,86 @@ export default function ArtworkDetail() {
           </div>
 
           {/* Properties Grid */}
-          <div className="border-t border-[#C5A059]/20 pt-6">
-            <h3 className="font-cinzel text-2xl text-[#1E1412] font-semibold mb-4">Specifications</h3>
-            <div className="grid grid-cols-2 gap-y-5 gap-x-4 text-xs font-sans">
+          <div className="border-t border-[#C5A059]/25 pt-8 pb-3">
+            <h3 className="font-cinzel text-2xl text-[#1E1412] font-semibold mb-6">Specifications</h3>
+            <div className="grid grid-cols-2 gap-y-7 gap-x-6 text-xs font-sans">
               <div>
-                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1 font-cinzel text-[10px]">MEDIUM</p>
-                <p className="text-[#1E1412] font-semibold">{artwork.medium || 'Archival Pigment on Fine Art Canvas'}</p>
+                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1.5 font-cinzel text-[10px]">MEDIUM</p>
+                <p className="text-[#1E1412] font-semibold text-[13px]">{artwork.medium || 'Oil & Mixed Media on Fine Canvas'}</p>
               </div>
               <div>
-                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1 font-cinzel text-[10px]">DIMENSIONS</p>
-                <p className="text-[#1E1412] font-semibold">{artwork.size || '36" × 48" Gallery Stretched'}</p>
+                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1.5 font-cinzel text-[10px]">DIMENSIONS</p>
+                <p className="text-[#1E1412] font-semibold text-[13px]">{artwork.size || '36" × 48" Gallery Stretched'}</p>
               </div>
               <div>
-                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1 font-cinzel text-[10px]">PROVENANCE</p>
-                <p className="text-[#1E1412] font-semibold">Certified Vault Registry</p>
+                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1.5 font-cinzel text-[10px]">PROVENANCE</p>
+                <p className="text-[#1E1412] font-semibold text-[13px]">Certified Vault Registry</p>
               </div>
               <div>
-                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1 font-cinzel text-[10px]">CONDITION</p>
-                <p className="text-[#1E1412] font-semibold">Museum Archival Prerelease</p>
+                <p className="text-[#1E1412]/55 uppercase tracking-widest font-bold mb-1.5 font-cinzel text-[10px]">CONDITION</p>
+                <p className="text-[#1E1412] font-semibold text-[13px]">Pristine Vault Condition</p>
               </div>
             </div>
           </div>
 
+          {/* Complete Suite Collection Exhibition View */}
+          {galleryViews.length >= 3 && (
+            <div className="border-t border-[#C5A059]/25 pt-8 pb-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <span className="font-cinzel text-[10px] text-[#4A0E17] uppercase tracking-[0.25em] font-bold block mb-1">
+                    AUTHENTICATED MULTI-PIECE SUITE
+                  </span>
+                  <h3 className="font-cinzel text-xl text-[#1E1412] font-semibold">
+                    Entire Collection ({galleryViews.length} Works)
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono font-bold px-2.5 py-1 bg-[#4A0E17]/10 text-[#4A0E17] rounded-full border border-[#4A0E17]/20 uppercase">
+                  Integrated Series
+                </span>
+              </div>
+              <p className="text-xs text-[#1E1412]/70 mb-5 leading-relaxed">
+                This asset constitutes an integrated suite of {galleryViews.length} registered works. Select any piece below to inspect in high-resolution detail:
+              </p>
+              
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {galleryViews.map((img, idx) => {
+                  const isSelected = activeImageIndex === idx;
+                  return (
+                    <button
+                      key={img.id || idx}
+                      onClick={() => {
+                        setActiveImageIndex(idx);
+                        setIsInsitu(false);
+                      }}
+                      className={`relative group rounded-xl overflow-hidden border-2 p-1.5 transition-all duration-300 cursor-pointer flex flex-col items-center ${
+                        isSelected
+                          ? 'border-[#4A0E17] ring-2 ring-[#C5A059] shadow-md bg-white scale-[1.03]'
+                          : 'border-[#C5A059]/30 hover:border-[#4A0E17]/60 bg-[#F5EFEB]/50'
+                      }`}
+                    >
+                      <div className="w-full aspect-square rounded-lg overflow-hidden bg-[#1E0E08]">
+                        <RobustArtworkImage
+                          src={img.fileKey}
+                          fallbackUrls={img.fallbackUrls}
+                          seed={`${artwork.id}-${idx}`}
+                          alt={img.label}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <span className="font-cinzel text-[9.5px] font-bold text-[#1E1412] mt-1.5 truncate max-w-full px-1">
+                        Piece {String(idx + 1).padStart(2, '0')}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Unified Acquisition Widget */}
-          <div className="border-t border-[#C5A059]/20 pt-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="border-t border-[#C5A059]/25 pt-8 pb-2">
+            <div className="flex items-center justify-between mb-5">
               <span className="font-cinzel text-[10.5px] text-[#4A0E17] uppercase tracking-[0.2em] font-bold">
                 ACQUISITION PROTOCOL
               </span>
@@ -714,7 +779,7 @@ export default function ArtworkDetail() {
 
           {/* Adjacent Artwork Navigation */}
           {(adjacent.prev || adjacent.next) && (
-            <div className="border-t border-[#C5A059]/20 pt-5 mt-auto flex justify-between">
+            <div className="border-t border-[#C5A059]/25 pt-6 pb-2 mt-auto flex justify-between">
               {adjacent.prev ? (
                 <button
                   onClick={() => navigate(`/artwork/${adjacent.prev.id}`)}
@@ -735,6 +800,9 @@ export default function ArtworkDetail() {
           )}
         </div>
       </main>
+
+      {/* Luxury Spacing Buffer before Footer */}
+      <div className="w-full h-8 sm:h-12 bg-[#FAF6F0]" />
 
       <Footer />
 

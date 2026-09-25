@@ -55,9 +55,15 @@ export default function RobustArtworkImage({
 
   const activeSrc = candidates[currentSrcIndex] || FALLBACK_PAINTINGS[0];
 
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
   useEffect(() => {
     setCurrentSrcIndex(0);
-    setIsLoaded(false);
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoaded(true);
+    } else {
+      setIsLoaded(false);
+    }
     setHasError(false);
   }, [src]);
 
@@ -77,20 +83,21 @@ export default function RobustArtworkImage({
 
   return (
     <div className={`relative overflow-hidden flex items-center justify-center ${containerClassName}`}>
-      {/* Shimmer Placeholder while Loading */}
+      {/* Subtle Shimmer Placeholder while Loading */}
       {showShimmer && !isLoaded && (
-        <div className="absolute inset-0 bg-[#EAE2D5]/40 animate-pulse flex items-center justify-center">
-          <div className="w-5 h-5 rounded-full border-2 border-[#C5A059]/30 border-t-[#4A0E17] animate-spin" />
+        <div className="absolute inset-0 bg-[#EAE2D5]/30 flex items-center justify-center transition-opacity duration-150">
+          <div className="w-4 h-4 rounded-full border border-[#C5A059]/40 border-t-[#4A0E17] animate-spin" />
         </div>
       )}
 
       <img
         {...rest}
+        ref={imgRef}
         src={activeSrc}
         alt={alt}
         onLoad={handleImageLoad}
         onError={handleImageError}
-        className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`${className} transition-opacity duration-150 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={style}
         loading={loading}
         decoding={decoding}

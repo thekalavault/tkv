@@ -81,7 +81,7 @@ export default function CustomerDashboard() {
   const loadCatalog = async () => {
     setCatalogLoading(true);
     try {
-      const data = await fetchArtworks(1, 100);
+      const data = await fetchArtworks(1, 500);
       setCatalogArtworks(data.items);
     } catch (err) {
       console.error('Failed to load catalog artworks', err);

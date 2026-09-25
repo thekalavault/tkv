@@ -32,14 +32,26 @@ export class CloudflareR2Service {
     return '';
   }
 
+  private signedUrlCache = new Map<string, { url: string; exp: number }>();
+
   async getSignedAssetUrl(key: string) {
     const publicUrl = this.getPublicAssetUrl(key);
     if (publicUrl) return publicUrl;
+
+    const now = Date.now();
+    const cached = this.signedUrlCache.get(key);
+    if (cached && cached.exp > now) {
+      return cached.url;
+    }
 
     const command = new GetObjectCommand({
       Bucket: config.cloudflareR2Bucket,
       Key: key,
     });
-    return getSignedUrl(r2Client, command, { expiresIn: 900 });
+    // 7 days expiration for asset viewing
+    const url = await getSignedUrl(r2Client, command, { expiresIn: 604800 });
+    // Cache for 6 days (leaving 1 day margin)
+    this.signedUrlCache.set(key, { url, exp: now + 6 * 24 * 3600 * 1000 });
+    return url;
   }
 }

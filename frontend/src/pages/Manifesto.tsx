@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'motion/react';
 import TopNavBar from '../components/TopNavBar';
 import Footer from '../components/Footer';
-import { fetchArtworks, Artwork, getArtworkImagePath, LOCAL_ARTWORKS } from '../services/artworkService';
+import { fetchArtworks, Artwork, getArtworkImagePath, LOCAL_ARTWORKS, mixArtworksByArtist } from '../services/artworkService';
 import { SkeletonArtworkCard } from '../components/SkeletonCard';
 import { Award, ShieldCheck, Sparkles, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 
@@ -169,9 +169,10 @@ export default function Manifesto() {
     async function loadCatalog() {
       try {
         setLoadingArtworks(true);
-        const data = await fetchArtworks(1, 16);
+        const data = await fetchArtworks(1, 500);
         if (data && data.items && data.items.length > 0) {
-          setArtworks(data.items);
+          const mixed = mixArtworksByArtist(data.items);
+          setArtworks(mixed);
           const total = data.total || data.items.length;
           setTotalCount(total);
           
@@ -179,7 +180,7 @@ export default function Manifesto() {
           const uniqueArtists = new Set(data.items.map((a: Artwork) => a.artist).filter(Boolean));
           setArtistCount(Math.max(uniqueArtists.size, 12));
         } else {
-          setArtworks(LOCAL_ARTWORKS);
+          setArtworks(mixArtworksByArtist(LOCAL_ARTWORKS));
           setTotalCount(LOCAL_ARTWORKS.length);
         }
       } catch (err) {

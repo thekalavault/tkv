@@ -7,7 +7,7 @@ import CuratorialProtocolSection from '../components/CuratorialProtocolSection';
 import MuseumArtworkCarousel from '../components/MuseumArtworkCarousel';
 import TrustedPreviousWorksSection from '../components/TrustedPreviousWorksSection';
 import { TkvMonogramSvg } from '../components/KalaVaultLogo';
-import { getArtworkImagePath, fetchArtworks, Artwork, LOCAL_ARTWORKS } from '../services/artworkService';
+import { getArtworkImagePath, fetchArtworks, Artwork, LOCAL_ARTWORKS, getLatestAcquisitionsSelection } from '../services/artworkService';
 import { 
   ArrowRight, 
   Sparkles, 
@@ -23,35 +23,39 @@ import {
 const TESTIMONIALS_DATA = [
   {
     id: 1,
-    client: "Dr. Alisha Kapoor",
-    location: "Private Art Collector, Mumbai",
-    project: "RESIDENTIAL CURATION",
-    quote: "As a private collector, having access to such a diverse range of museum-grade pieces with the flexibility of a monthly subscription is a dream. The placement and framing are masterfully executed.",
-    image: "/assets/reviews/review_01.jpg"
+    badge: "ITC Welcom Project",
+    client: "ITC Welcom Hotels & Resorts",
+    location: "Grand Lobby Installation & Executive Suites, New Delhi",
+    project: "HOTELS & HOSPITALITY",
+    quote: "The monumental jaali architectural installation in our grand lobby and the curated guest suite masterworks have completely redefined our arrival experience. The depth of craftsmanship, rich textural resonance, and authentic regional storytelling leave an indelible impression on our guests.",
+    image: "/assets/projects/itc_welcom_lobby.jpg"
   },
   {
     id: 2,
-    client: "ITC Executive Suites",
-    location: "Flagship Suites, New Delhi",
-    project: "HOSPITALITY PLACEMENT",
-    quote: "The curation process was exceptionally smooth, and the quarterly artwork rotations have completely transformed our flagship executive lounges. It fosters an inspiring, sophisticated atmosphere for our guests.",
-    image: "/assets/reviews/review_02.jpg"
+    badge: "JLL Corporate Office",
+    client: "JLL Commercial Workspaces",
+    location: "Regional Executive Headquarters, Pune",
+    project: "CORPORATES & WORKSPACES",
+    quote: "The authoritative 'Seven Stallions' boardroom masterwork and bespoke architectural mural brought unmatched gravitas, energy, and leadership focus to our executive floor. Kala Vault's white-glove staging was seamless, prompt, and completely elevated our workspace aesthetic.",
+    image: "/assets/projects/jll_office_pune.jpg"
   },
   {
     id: 3,
-    client: "JLL Commercial Properties",
-    location: "Regional HQ, Bangalore",
-    project: "COMMERCIAL PROPERTY CURATION",
-    quote: "The Kala Vault's white-glove service and dynamic leasing model are exactly what modern commercial spaces need. The architectural-scale installations have given our properties a distinct, premium identity that wows stakeholders.",
-    image: "/assets/reviews/review_03.jpg"
+    badge: "Lucia Restaurant Project",
+    client: "Lucia Restaurant & Bar",
+    location: "Fine Dining Atelier, Mumbai",
+    project: "CAFÉS & FINE DINING",
+    quote: "The 'Moods of Lucia' contemporary portraiture triptych established the exact sultry, sophisticated dining ambience our culinary salon required. Having access to authenticated museum-quality original art with rotation flexibility has transformed our dining identity.",
+    image: "/assets/projects/lucia_restaurant.jpg"
   },
   {
     id: 4,
-    client: "Studio Lucia",
-    location: "Luxury Penthouse, Goa",
-    project: "INTERIOR ARCHITECTURAL STAGING",
-    quote: "Having access to authenticated fine art tailored to our design aesthetic without permanent capital outlay has elevated the entire ambience of our luxury showflats and penthouses.",
-    image: "/assets/reviews/review_04.jpg"
+    badge: "Luxury Residence, Pune",
+    client: "Private Residential Estate",
+    location: "Koregaon Park Estate, Pune",
+    project: "BUILDERS & MODEL RESIDENCES",
+    quote: "The bespoke 3D sculpted Shreenathji fiber relief installation is the sacred and artistic centerpiece of our entrance foyer. The craftsmanship, spiritual serenity, and museum-grade tactile finish capture natural and ambient light magnificently.",
+    image: "/assets/projects/residence_shreenathji.jpg"
   }
 ];
 
@@ -69,16 +73,9 @@ export default function LandingPage() {
 
   const [testimonials, setTestimonials] = useState(TESTIMONIALS_DATA);
   const [trustSlide, setTrustSlide] = useState(0);
+  const [totalCatalogCount, setTotalCatalogCount] = useState<number>(() => LOCAL_ARTWORKS.length);
   const [latestArtworks, setLatestArtworks] = useState<Artwork[]>(() => {
-    try {
-      const cached = localStorage.getItem('kb_cached_featured_artworks');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.items?.length) return parsed.items;
-        if (Array.isArray(parsed) && parsed.length) return parsed;
-      }
-    } catch {}
-    return LOCAL_ARTWORKS;
+    return getLatestAcquisitionsSelection(LOCAL_ARTWORKS);
   });
   const [loadingArtworks, setLoadingArtworks] = useState(false);
 
@@ -92,10 +89,14 @@ export default function LandingPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchArtworks(1, 20);
+        const data = await fetchArtworks(1, 500);
         if (data && data.items && data.items.length > 0) {
-          setLatestArtworks(data.items);
-          localStorage.setItem('kb_cached_featured_artworks', JSON.stringify(data.items));
+          const clean = data.items.filter((a: Artwork) => !['5', '6', '7', '8', '9', '10', '11', '12'].includes(a.id));
+          setTotalCatalogCount(data.total || clean.length);
+
+          // Curated Selection: 3 Shagun Agarwal + 2 Kasshiish Kariyaa + 2 Other Masterworks
+          const curatedSelection = getLatestAcquisitionsSelection(clean);
+          setLatestArtworks(curatedSelection);
         }
       } catch (err) {
         console.error('Failed to load featured artworks:', err);
@@ -191,10 +192,10 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4 pb-4 border-b border-[#C5A059]/30">
             <div>
               <span className="font-cinzel text-[10.5px] text-[#7B2431] uppercase tracking-[0.24em] font-bold block mb-1">
-                AUTHENTICATED MASTERWORKS
+                AUTHENTICATED MASTERWORKS • LATEST ACQUISITIONS
               </span>
               <h2 className="font-brand text-3xl sm:text-4xl text-[#1E1412] font-bold">
-                The Curated <span className="font-cormorant italic font-normal text-[#7B2431]">Selection</span>
+                Latest <span className="font-cormorant italic font-normal text-[#7B2431]">Acquisitions</span>
               </h2>
             </div>
 
@@ -203,7 +204,7 @@ export default function LandingPage() {
                 to="/collections" 
                 className="font-cinzel text-xs uppercase tracking-[0.18em] font-bold text-[#7B2431] hover:text-[#8F2C3C] flex items-center gap-1.5 transition-colors"
               >
-                <span>View All Works ({latestArtworks.length})</span>
+                <span>View Full Catalog ({totalCatalogCount || 103}+)</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -375,6 +376,35 @@ export default function LandingPage() {
                     transition={{ duration: 0.45 }}
                   />
                 </AnimatePresence>
+
+                {/* Project Tag Overlay Badge */}
+                <div className="absolute top-4 left-4 bg-[#4A0E17]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#C5A059]/40 shadow-lg">
+                  <span className="font-cinzel text-[10px] uppercase tracking-wider text-[#FAF6F0] font-semibold">
+                    {testimonials[trustSlide]?.badge || testimonials[trustSlide]?.project}
+                  </span>
+                </div>
+              </div>
+
+              {/* Verified Placement Photo Thumbnails */}
+              <div className="grid grid-cols-4 gap-2.5 mt-3.5">
+                {testimonials.map((t, idx) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTrustSlide(idx)}
+                    className={`relative rounded-xl overflow-hidden aspect-[4/3] border transition-all cursor-pointer ${
+                      trustSlide === idx 
+                        ? 'border-[#4A0E17] ring-2 ring-[#4A0E17]/50 shadow-md scale-102 opacity-100' 
+                        : 'border-[#C5A059]/30 opacity-60 hover:opacity-100 hover:border-[#C5A059]'
+                    }`}
+                    aria-label={`View ${t.badge}`}
+                  >
+                    <img 
+                      src={t.image} 
+                      alt={t.badge} 
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
 
