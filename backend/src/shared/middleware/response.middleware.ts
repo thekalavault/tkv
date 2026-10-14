@@ -20,8 +20,6 @@ declare global {
 }
 
 export function responseMiddleware(req: Request, res: Response, next: NextFunction) {
-  const originalJson = res.json.bind(res);
-
   // Success response
   res.sendSuccess = function <T>(data: T, message: string = 'Success', statusCode: number = 200) {
     const response: ApiResponse<T> = {

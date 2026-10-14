@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../../shared/middleware/auth.middleware';
 import { ArtworkService } from './artwork.service';
-import { config } from '../../config';
 
 const artworkService = new ArtworkService();
 

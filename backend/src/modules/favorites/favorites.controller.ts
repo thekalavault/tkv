@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { prisma } from '../../shared/db/prisma';
 import { ApiError } from '../../shared/errors/api-error';
 import { AuthRequest } from '../../shared/middleware/auth.middleware';

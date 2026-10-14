@@ -13,7 +13,7 @@ export class AuthService {
   async login(email: string, password: string) {
     // Authenticate via Supabase
     // Supabase sign‑in returns a session or throws an error
-    const { session, user } = await SupabaseAuthService.signIn(email, password);
+    const { session } = await SupabaseAuthService.signIn(email, password);
     if (!session) {
       throw new ApiError('Invalid credentials', 401);
     }

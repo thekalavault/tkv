@@ -24,7 +24,7 @@ router.post('/:id/images/:imageId/upload-mock',
   roleGuard(['admin', 'operations']),
   express.raw({ type: '*/*', limit: '10mb' }),
   asyncHandler(async (req, res) => {
-    const { id, imageId } = req.params;
+    const { imageId } = req.params;
     const buffer = req.body;
 
     const image = await controller.getArtworkImageById(imageId);

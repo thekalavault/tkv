@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { SupabaseAuthService } from '../../auth/supabase.service';
-import { config } from '../../config';
 import { ApiError } from '../errors/api-error';
 import { prisma } from '../db/prisma';
 
