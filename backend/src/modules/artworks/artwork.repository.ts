@@ -31,7 +31,32 @@ export class ArtworkRepository {
   }
 
   async deleteArtwork(id: string) {
-    return prisma.artwork.delete({ where: { id } });
+    return prisma.$transaction(async (tx) => {
+      // 1. Delete associated artwork images
+      await tx.artworkImage.deleteMany({
+        where: { artworkId: id },
+      });
+
+      // 2. Delete associated favorites
+      await tx.favorite.deleteMany({
+        where: { artworkId: id },
+      });
+
+      // 3. Delete associated cart items
+      await tx.cartItem.deleteMany({
+        where: { artworkId: id },
+      });
+
+      // 4. Delete associated swap requests
+      await tx.swapRequest.deleteMany({
+        where: { artworkId: id },
+      });
+
+      // 5. Delete the artwork itself
+      return tx.artwork.delete({
+        where: { id },
+      });
+    });
   }
 
   async createArtworkImage(data: {

@@ -17,6 +17,18 @@ jest.mock('../src/shared/logger/logger', () => ({
   },
 }));
 
+// Mock firebase-admin in tests
+jest.mock('firebase-admin/app', () => ({
+  getApps: jest.fn(() => []),
+  initializeApp: jest.fn(),
+}));
+
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: jest.fn(() => ({
+    verifyIdToken: jest.fn(),
+  })),
+}));
+
 // Global test utilities
 (global as any).testUtils = {
   generateToken: (payload: any) => {

@@ -474,9 +474,14 @@ export function preloadAllCatalogAssets(): void {
   }).catch(() => {});
 }
 
-export function invalidateArtworkCache(): void {
+export function invalidateArtworkCache(artworkId?: string): void {
   _inMemoryArtworksCache = null;
   _prefetchPromise = null;
+  if (artworkId) {
+    _artworkMap.delete(artworkId);
+  } else {
+    _artworkMap.clear();
+  }
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem('kb_cached_artworks_v9');

@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { ArtworkRepository } from './artwork.repository';
 import { ApiError } from '../../shared/errors/api-error';
 import { CloudflareR2Service } from '../integrations/cloudflare-r2';
@@ -8,6 +10,16 @@ import { prisma } from '../../shared/db/prisma';
 
 const artworkRepository = new ArtworkRepository();
 const r2Service = new CloudflareR2Service();
+
+function tryDeleteLocalFile(fileKey?: string) {
+  if (!fileKey || fileKey.startsWith('http')) return;
+  try {
+    const targetPath = path.join(__dirname, '../../../../uploads', fileKey);
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+  } catch {}
+}
 
 function mixArtworksByArtist<T extends { artist?: string | null; title?: string; replacementValue?: number }>(artworks: T[]): T[] {
   if (!artworks || artworks.length <= 2) return artworks;
@@ -270,6 +282,21 @@ export class ArtworkService {
     if (!artwork) {
       throw new ApiError('Artwork not found', 404);
     }
+
+    // Clean up associated images in storage/R2 and local disk
+    if (artwork.images && artwork.images.length > 0) {
+      for (const img of artwork.images) {
+        if (img.fileKey) {
+          try {
+            await r2Service.deleteAsset(img.fileKey);
+            tryDeleteLocalFile(img.fileKey);
+          } catch (err) {
+            // Keep going so database deletion is not blocked
+          }
+        }
+      }
+    }
+
     await artworkRepository.deleteArtwork(id);
     return true;
   }
@@ -339,6 +366,16 @@ export class ArtworkService {
     if (!image) {
       throw new ApiError('Artwork image not found', 404);
     }
+
+    if (image.fileKey) {
+      try {
+        await r2Service.deleteAsset(image.fileKey);
+        tryDeleteLocalFile(image.fileKey);
+      } catch (err) {
+        // Keep going so database record deletion is not blocked
+      }
+    }
+
     await artworkRepository.deleteArtworkImage(imageId);
     return true;
   }

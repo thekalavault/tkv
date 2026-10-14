@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { config } from '../../config';
 
@@ -54,4 +54,19 @@ export class CloudflareR2Service {
     this.signedUrlCache.set(key, { url, exp: now + 6 * 24 * 3600 * 1000 });
     return url;
   }
+
+  async deleteAsset(key: string): Promise<void> {
+    if (!key || key.startsWith('http://') || key.startsWith('https://')) return;
+    try {
+      this.signedUrlCache.delete(key);
+      const command = new DeleteObjectCommand({
+        Bucket: config.cloudflareR2Bucket,
+        Key: key,
+      });
+      await r2Client.send(command);
+    } catch (err) {
+      // Non-blocking cleanup
+    }
+  }
 }
+

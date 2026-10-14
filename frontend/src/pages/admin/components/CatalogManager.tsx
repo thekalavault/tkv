@@ -327,6 +327,8 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
     if (!window.confirm('Are you sure you want to delete this artwork? This action cannot be undone.')) return;
     
     setLoading(true);
+    setError('');
+    setSuccessMessage('');
     try {
       const token = currentUser ? await currentUser.getIdToken() : '';
       const response = await fetch(`${API_BASE_URL}/api/v1/artworks/${id}`, {
@@ -337,13 +339,19 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete artwork');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to delete artwork');
       }
 
       setSuccessMessage('Artwork deleted successfully!');
+      if (editingArtworkId === id) {
+        resetForm();
+        setIsModalOpen(false);
+      }
       
-      invalidateArtworkCache();
+      invalidateArtworkCache(id);
       queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
       setError(err.message || 'Error occurred while deleting artwork.');
     } finally {
@@ -354,6 +362,8 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
   const handleDeleteImage = async (artworkId: string, imageId: string) => {
     if (!window.confirm('Are you sure you want to delete this image?')) return;
     
+    setError('');
+    setSuccessMessage('');
     try {
       const token = currentUser ? await currentUser.getIdToken() : '';
       const response = await fetch(`${API_BASE_URL}/api/v1/artworks/${artworkId}/images/${imageId}`, {
@@ -364,12 +374,15 @@ export default function CatalogManager({ currentUser }: { currentUser: any }) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete image');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to delete image');
       }
 
       setSuccessMessage('Image deleted successfully!');
       
+      invalidateArtworkCache(artworkId);
       queryClient.invalidateQueries({ queryKey: ['admin-artworks'] });
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
       setError(err.message || 'Error occurred while deleting image.');
     }
