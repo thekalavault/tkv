@@ -533,9 +533,44 @@ export default function ArtworkDetail() {
             <h1 className="font-cinzel text-3xl sm:text-4xl md:text-5xl text-[#1E1412] font-semibold mb-2.5 tracking-tight leading-tight">
               {artwork.name}
             </h1>
-            <p className="font-cormorant italic text-xl text-[#1E1412]/75 mb-6">
-              By {artwork.artist || 'Kalavault Curated Masterpiece'}
-            </p>
+            
+            {(() => {
+              const artName = artwork.artist || '';
+              const slug = artName.toLowerCase().includes('rhishikesh') || artName.toLowerCase().includes('joshi')
+                ? 'rhishikesh-joshi'
+                : artName.toLowerCase().includes('shagun')
+                ? 'shagun-agarwal'
+                : artName.toLowerCase().includes('kash') || artName.toLowerCase().includes('kariyaa')
+                ? 'kasshiish-kariyaa'
+                : null;
+
+              return (
+                <div className="flex flex-wrap items-center gap-3 mb-6">
+                  <p className="font-cormorant italic text-xl text-[#1E1412]/80">
+                    By{' '}
+                    {slug ? (
+                      <button
+                        onClick={() => navigate(`/artist/${slug}`)}
+                        className="text-[#4A0E17] font-semibold hover:text-[#C5A059] underline decoration-[#C5A059]/60 underline-offset-4 cursor-pointer transition-colors"
+                      >
+                        {artwork.artist}
+                      </button>
+                    ) : (
+                      artwork.artist || 'Kalavault Curated Masterpiece'
+                    )}
+                  </p>
+
+                  {slug && (
+                    <button
+                      onClick={() => navigate(`/artist/${slug}`)}
+                      className="px-3 py-1 rounded-full bg-[#C5A059]/15 border border-[#C5A059]/40 text-[#4A0E17] text-[10px] font-cinzel tracking-wider uppercase font-bold hover:bg-[#C5A059]/30 transition-colors cursor-pointer"
+                    >
+                      ✦ Artist Profile &amp; Monograph
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
             
             <p className="font-body-md text-sm md:text-base text-[#1E1412]/80 leading-relaxed mb-7">
               {artwork.description || "A captivating visual exploration that balances architectural geometry and poetic abstraction, ideally scaled to define prestigious commercial or residential environments."}
@@ -580,6 +615,54 @@ export default function ArtworkDetail() {
               </div>
             </div>
           </div>
+
+          {/* Artist Spotlight Box */}
+          {(() => {
+            const artName = artwork.artist || '';
+            const slug = artName.toLowerCase().includes('rhishikesh') || artName.toLowerCase().includes('joshi')
+              ? 'rhishikesh-joshi'
+              : artName.toLowerCase().includes('shagun')
+              ? 'shagun-agarwal'
+              : artName.toLowerCase().includes('kash') || artName.toLowerCase().includes('kariyaa')
+              ? 'kasshiish-kariyaa'
+              : null;
+
+            if (!slug) return null;
+            const isRhishi = slug === 'rhishikesh-joshi';
+
+            return (
+              <div className="border-t border-[#C5A059]/25 pt-6 pb-2">
+                <div className="p-5 rounded-2xl bg-[#F5EFEB] border border-[#C5A059]/40 flex flex-col sm:flex-row items-center gap-4 shadow-xs">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#C5A059] shrink-0 bg-[#120B0A]">
+                    <img 
+                      src={isRhishi ? "/assets/artworks/rhishikesh_joshi/rhishikesh-joshi-portrait.jpg" : (artwork.localPath || "/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg")} 
+                      alt={artwork.artist} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 text-center sm:text-left">
+                    <span className="text-[10px] font-cinzel uppercase tracking-[0.22em] text-[#4A0E17] font-bold block">
+                      Featured Vault Artist
+                    </span>
+                    <h4 className="font-cinzel text-base font-bold text-[#1E1412]">
+                      {artwork.artist}
+                    </h4>
+                    <p className="text-xs font-cormorant italic text-[#1E1412]/75 line-clamp-2 mt-0.5">
+                      {isRhishi 
+                        ? "Sharv Art Studio • Pune-based visual artist & spatial sculptor exploring raw elemental forms and material behavior." 
+                        : "Renowned contemporary artist contributing original works to The Kala Vault collections."}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/artist/${slug}`)}
+                    className="px-4 py-2.5 rounded-full bg-[#4A0E17] hover:bg-[#7D1D2B] text-[#FAF6F0] font-cinzel text-xs font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer shadow-xs"
+                  >
+                    View Monograph →
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Complete Suite Collection Exhibition View */}
           {galleryViews.length >= 3 && (

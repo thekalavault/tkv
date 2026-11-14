@@ -1,4 +1,6 @@
-import { Artwork, getArtworkImagePath } from '../services/artworkService';
+import { Artwork, getArtworkImagePath, mixArtworksByArtist } from '../services/artworkService';
+
+export { mixArtworksByArtist };
 
 export interface CollectionArtwork {
   id: string;
@@ -30,96 +32,6 @@ export function determineTierFromValue(value?: number): 'small' | 'medium' | 'la
   if (value >= 50000) return 'large';
   if (value >= 30000) return 'medium';
   return 'small';
-}
-
-/**
- * Interleaves artworks across artists (Shagun Agarwal, Kasshiish Kariyaa, and Archival collection)
- * in a balanced round-robin order so consecutive artworks always showcase different artists.
- */
-export function mixArtworksByArtist<T extends { artist?: string; title?: string; name?: string; replacementValue?: number; originalArtwork?: any }>(artworks: T[]): T[] {
-  if (!artworks || artworks.length <= 2) return artworks;
-
-  const isShagun = (a: T) => {
-    const art = (a.artist || a.originalArtwork?.artist || '').toLowerCase();
-    return art.includes('shagun');
-  };
-
-  const isKash = (a: T) => {
-    const art = (a.artist || a.originalArtwork?.artist || '').toLowerCase();
-    return art.includes('kassh') || art.includes('kash') || art.includes('kariyaa');
-  };
-
-  const getVal = (a: T) => a.replacementValue || a.originalArtwork?.replacementValue || 0;
-  const getTitle = (a: T) => (a.title || a.name || a.originalArtwork?.title || '').toLowerCase();
-
-  const shagun = artworks.filter(isShagun);
-  shagun.sort((a, b) => {
-    const wipA = getTitle(a).startsWith('wip');
-    const wipB = getTitle(b).startsWith('wip');
-    if (wipA && !wipB) return 1;
-    if (!wipA && wipB) return -1;
-    return getVal(b) - getVal(a);
-  });
-
-  const kash = artworks.filter(isKash);
-  kash.sort((a, b) => {
-    const untA = getTitle(a).includes('untitled');
-    const untB = getTitle(b).includes('untitled');
-    if (untA && !untB) return 1;
-    if (!untA && untB) return -1;
-    return getVal(b) - getVal(a);
-  });
-
-  const others = artworks.filter(a => !isShagun(a) && !isKash(a));
-  others.sort((a, b) => getVal(b) - getVal(a));
-
-  const buckets = [
-    { name: 'Shagun Agarwal', items: [...shagun] },
-    { name: 'Kasshiish Kariyaa', items: [...kash] },
-    { name: 'Archival Collection', items: [...others] }
-  ];
-
-  const total = shagun.length + kash.length + others.length;
-  const result: T[] = [];
-  let lastArtist = '';
-  let roundIndex = 0;
-
-  for (let i = 0; i < total; i++) {
-    const available = buckets.filter(b => b.items.length > 0);
-    if (available.length === 0) break;
-
-    const totalRemaining = available.reduce((acc, b) => acc + b.items.length, 0);
-    const urgent = available.find(b => b.items.length >= Math.ceil(totalRemaining / 2) && b.name !== lastArtist);
-    let chosenBucket = urgent || null;
-
-    if (!chosenBucket) {
-      for (let step = 0; step < buckets.length; step++) {
-        const idx = (roundIndex + step) % buckets.length;
-        const b = buckets[idx];
-        if (b.items.length > 0 && b.name !== lastArtist) {
-          chosenBucket = b;
-          roundIndex = (idx + 1) % buckets.length;
-          break;
-        }
-      }
-    }
-
-    if (!chosenBucket) {
-      let candidates = available.filter(b => b.name !== lastArtist);
-      if (candidates.length === 0) candidates = available;
-      candidates.sort((a, b) => b.items.length - a.items.length);
-      chosenBucket = candidates[0];
-      roundIndex = (buckets.indexOf(chosenBucket) + 1) % buckets.length;
-    }
-
-    const item = chosenBucket.items.shift();
-    if (item) {
-      result.push(item);
-      lastArtist = chosenBucket.name;
-    }
-  }
-
-  return result;
 }
 
 export function buildCollectionsFromData(artworks: Artwork[]): {

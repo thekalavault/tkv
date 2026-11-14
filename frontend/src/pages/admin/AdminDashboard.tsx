@@ -5,6 +5,7 @@ import { auth } from '../../lib/firebase';
 
 // Import Admin Modules
 import CatalogManager from './components/CatalogManager';
+import ArtistsManager from './components/ArtistsManager';
 import HomepageEditor from './components/HomepageEditor';
 import CRMManager from './components/CRMManager';
 import ContractManager from './components/ContractManager';
@@ -15,7 +16,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   
   // Tab Routing State
-  const [activeTab, setActiveTab] = useState<'catalog' | 'homepage' | 'crm' | 'contracts' | 'users'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'artists' | 'homepage' | 'crm' | 'contracts' | 'users'>('catalog');
 
   useEffect(() => {
     if (!authLoading && !currentUser) {
@@ -46,6 +47,18 @@ export default function AdminDashboard() {
           >
             <span className={`material-symbols-outlined text-[18px] ${activeTab !== 'catalog' && 'group-hover:text-gallery-gold'}`}>palette</span>
             <span className="font-label-caps text-[11px] tracking-widest uppercase">Catalog</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('artists')}
+            className={`text-left font-bold py-3 pl-4 flex items-center gap-4 transition-all w-full border-l-2 ${
+              activeTab === 'artists' 
+                ? 'border-gallery-gold bg-gallery-gold/5 text-primary' 
+                : 'border-transparent text-primary/70 hover:bg-gallery-gold/5 hover:text-gallery-gold group'
+            }`}
+          >
+            <span className={`material-symbols-outlined text-[18px] ${activeTab !== 'artists' && 'group-hover:text-gallery-gold'}`}>draw</span>
+            <span className="font-label-caps text-[11px] tracking-widest uppercase">Artists</span>
           </button>
 
           <button 
@@ -150,6 +163,7 @@ export default function AdminDashboard() {
         { /* Dynamic Tab Rendering */ }
         <div className="p-12 flex-1 w-full">
           {activeTab === 'catalog' && <CatalogManager currentUser={currentUser} />}
+          {activeTab === 'artists' && <ArtistsManager />}
           {activeTab === 'homepage' && <HomepageEditor />}
           {activeTab === 'crm' && <CRMManager />}
           {activeTab === 'contracts' && <ContractManager />}

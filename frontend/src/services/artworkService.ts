@@ -2,6 +2,7 @@ import { addWatermarkToImage, WatermarkOptions } from '../lib/watermark';
 import { auth } from '../lib/firebase';
 import { SHAGUN_AGARWAL_ARTWORKS } from '../data/shagunArtworks';
 import { KASSHIISH_KARIYAA_ARTWORKS } from '../data/kashishArtworks';
+import { RHISHIKESH_JOSHI_ARTWORKS } from '../data/rhishikeshArtworks';
 import { ALL_VERIFIED_ARTWORKS } from '../data/dbArtworks';
 
 export interface ArtworkImageView {
@@ -55,6 +56,11 @@ export function mixArtworksByArtist<T extends { artist?: string; title?: string;
     return art.includes('kassh') || art.includes('kash') || art.includes('kariyaa');
   };
 
+  const isRhishikesh = (a: T) => {
+    const art = (a.artist || a.originalArtwork?.artist || '').toLowerCase();
+    return art.includes('rhishikesh') || art.includes('joshi') || art.includes('sharv');
+  };
+
   const getVal = (a: T) => a.replacementValue || a.originalArtwork?.replacementValue || 0;
   const getTitle = (a: T) => (a.title || a.name || a.originalArtwork?.title || '').toLowerCase();
 
@@ -76,16 +82,20 @@ export function mixArtworksByArtist<T extends { artist?: string; title?: string;
     return getVal(b) - getVal(a);
   });
 
-  const others = artworks.filter(a => !isShagun(a) && !isKash(a));
+  const rhishi = artworks.filter(isRhishikesh);
+  rhishi.sort((a, b) => getVal(b) - getVal(a));
+
+  const others = artworks.filter(a => !isShagun(a) && !isKash(a) && !isRhishikesh(a));
   others.sort((a, b) => getVal(b) - getVal(a));
 
   const buckets = [
+    { name: 'Rhishikesh Joshi', items: [...rhishi] },
     { name: 'Shagun Agarwal', items: [...shagun] },
     { name: 'Kasshiish Kariyaa', items: [...kash] },
     { name: 'Archival Collection', items: [...others] }
   ];
 
-  const total = shagun.length + kash.length + others.length;
+  const total = shagun.length + kash.length + rhishi.length + others.length;
   const result: T[] = [];
   let lastArtist = '';
   let roundIndex = 0;
@@ -128,7 +138,7 @@ export function mixArtworksByArtist<T extends { artist?: string; title?: string;
   return result;
 }
 
-// Combined certified portfolio: Shagun Agarwal (45) + Kasshiish Kariyaa (20 from Advisory PDF) + Authenticated Masterworks (38)
+// Combined certified portfolio: Rhishikesh Joshi (16) + Shagun Agarwal (45) + Kasshiish Kariyaa (20 from Advisory PDF) + Authenticated Masterworks (38)
 export const LOCAL_ARTWORKS: Artwork[] = (() => {
   const map = new Map<string, Artwork>();
   // 1. Add all verified DB artworks
@@ -137,6 +147,8 @@ export const LOCAL_ARTWORKS: Artwork[] = (() => {
   SHAGUN_AGARWAL_ARTWORKS.forEach(a => map.set(a.id, a));
   // 3. Overlay Kasshiish Kariyaa's 20 genuine artworks from the Advisory PDF
   KASSHIISH_KARIYAA_ARTWORKS.forEach(a => map.set(a.id, a));
+  // 4. Overlay Rhishikesh Joshi's 16 spatial sculptures & reliefs
+  RHISHIKESH_JOSHI_ARTWORKS.forEach(a => map.set(a.id, a));
 
   return mixArtworksByArtist(Array.from(map.values()));
 })();

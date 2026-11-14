@@ -24,6 +24,8 @@ import Privacy from "./pages/Privacy";
 import Cart from "./pages/Cart";
 import Favorites from "./pages/Favorites";
 import SalesDashboard from "./pages/sales/SalesDashboard";
+import ArtistProfile from "./pages/ArtistProfile";
+import ArtistsDirectory from "./pages/ArtistsDirectory";
 import Preloader from "./components/Preloader";
 import { prefetchArtworks } from "./services/artworkService";
 
@@ -74,6 +76,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/collections" element={<Collections />} />
+            <Route path="/artists" element={<ArtistsDirectory />} />
+            <Route path="/artist" element={<ArtistProfile />} />
+            <Route path="/artist/:slug" element={<ArtistProfile />} />
             <Route path="/artwork/:id" element={<ArtworkDetail />} />
             <Route path="/manifesto" element={<Manifesto />} />
             <Route path="/services" element={<Services />} />

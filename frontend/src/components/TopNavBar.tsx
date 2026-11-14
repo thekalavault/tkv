@@ -59,6 +59,7 @@ export default function TopNavBar() {
 
   const navLinks = [
     { name: 'Collections', path: '/collections' },
+    { name: 'Artists', path: '/artists' },
     { name: 'Services', path: '/services' },
     { name: 'Subscriptions', path: '/subscriptions' },
     { name: 'Manifesto', path: '/manifesto' },

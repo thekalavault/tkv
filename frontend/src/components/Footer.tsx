@@ -94,6 +94,16 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/artists" className="hover:text-[#DFC07D] transition-colors inline-block hover:translate-x-1 duration-200">
+                  Artists Pavilion
+                </Link>
+              </li>
+              <li>
+                <Link to="/artist/rhishikesh-joshi" className="hover:text-[#DFC07D] transition-colors inline-block hover:translate-x-1 duration-200 text-[#DFC07D]/90">
+                  Rhishikesh Joshi (Sharv Art)
+                </Link>
+              </li>
+              <li>
                 <Link to="/services" className="hover:text-[#DFC07D] transition-colors inline-block hover:translate-x-1 duration-200">
                   Curatorial Protocol
                 </Link>

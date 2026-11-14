@@ -54,6 +54,14 @@ const ArtworkCard = memo(function ArtworkCard({
   const fullMrp = getFullMrp();
   const artistName = (artwork as any).artist || (artwork.originalArtwork as any)?.artist || 'Museum Archival Edition';
 
+  const artistSlug = artistName.toLowerCase().includes('rhishikesh') || artistName.toLowerCase().includes('joshi')
+    ? 'rhishikesh-joshi'
+    : artistName.toLowerCase().includes('shagun')
+    ? 'shagun-agarwal'
+    : artistName.toLowerCase().includes('kash') || artistName.toLowerCase().includes('kariyaa')
+    ? 'kasshiish-kariyaa'
+    : null;
+
   const isCollectionsVariant = variant === 'collections';
 
   return (
@@ -143,7 +151,15 @@ const ArtworkCard = memo(function ArtworkCard({
           {/* Author / Artist */}
           <p 
             title={artistName}
-            className="font-cormorant italic text-[14px] sm:text-[15px] text-[#1E1412]/75 tracking-wide truncate max-w-[280px]"
+            onClick={(e) => {
+              if (artistSlug) {
+                e.stopPropagation();
+                navigate(`/artist/${artistSlug}`);
+              }
+            }}
+            className={`font-cormorant italic text-[14px] sm:text-[15px] text-[#1E1412]/75 tracking-wide truncate max-w-[280px] ${
+              artistSlug ? 'hover:text-[#4A0E17] hover:underline cursor-pointer' : ''
+            }`}
           >
             {artistName}
           </p>
@@ -165,7 +181,17 @@ const ArtworkCard = memo(function ArtworkCard({
           <h3 className="font-cinzel text-[13.5px] md:text-[14.5px] font-bold text-[#1E1412] tracking-[0.14em] uppercase group-hover:text-[#4A0E17] transition-colors duration-200 truncate w-full">
             {artwork.name}
           </h3>
-          <p className="font-cormorant italic text-[13.5px] md:text-[14.5px] text-[#1E1412]/70 truncate w-full">
+          <p 
+            onClick={(e) => {
+              if (artistSlug) {
+                e.stopPropagation();
+                navigate(`/artist/${artistSlug}`);
+              }
+            }}
+            className={`font-cormorant italic text-[13.5px] md:text-[14.5px] text-[#1E1412]/70 truncate w-full ${
+              artistSlug ? 'hover:text-[#4A0E17] hover:underline cursor-pointer' : ''
+            }`}
+          >
             {artistName}
           </p>
           <div className="pt-1">
