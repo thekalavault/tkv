@@ -5,8 +5,6 @@ import {
   Sparkles, 
   MapPin, 
   Layers, 
-  Mail, 
-  Phone, 
   ExternalLink, 
   ArrowRight, 
   Heart, 
@@ -215,28 +213,12 @@ export default function ArtistsDirectory() {
                   </div>
                 </div>
 
-                {/* Studio Contact Links */}
-                <div className="mt-6 pt-5 border-t border-stone-200 flex flex-wrap items-center gap-3">
-                  {selectedArtist.contact.whatsapp && (
-                    <a
-                      href={`https://wa.me/${selectedArtist.contact.whatsapp}?text=${encodeURIComponent(`Hello ${selectedArtist.name}, I am contacting you regarding your artworks on The Kala Vault.`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-4 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-cinzel text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-xs"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>WhatsApp Direct</span>
-                    </a>
-                  )}
-
-                  {selectedArtist.contact.email && (
-                    <a
-                      href={`mailto:${selectedArtist.contact.email}`}
-                      className="px-4 py-2 rounded-full bg-[#FAF6F0] hover:bg-stone-200 text-[#1E1412] border border-stone-300 font-cinzel text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2"
-                    >
-                      <Mail className="w-3.5 h-3.5 text-[#4A0E17]" />
-                      <span>{selectedArtist.contact.email}</span>
-                    </a>
+                {/* Studio Details Action */}
+                <div className="mt-6 pt-5 border-t border-stone-200 flex flex-wrap items-center justify-between gap-3">
+                  {selectedArtist.contact.instagram && (
+                    <span className="text-xs font-mono text-stone-600">
+                      Instagram: <strong className="text-[#4A0E17] font-semibold">{selectedArtist.contact.instagram}</strong>
+                    </span>
                   )}
 
                   <button

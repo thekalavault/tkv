@@ -215,18 +215,53 @@ export function getLatestAcquisitionsSelection(artworks: Artwork[]): Artwork[] {
   return selected;
 }
 
-// Fallback high-definition museum-grade painting URLs
+// Fallback high-definition verified museum-grade masterworks from local catalog (no generic unsplash stock photos)
 export const FALLBACK_PAINTINGS = [
-  'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1582561073898-0c675a898b9f?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1579541814924-49fef17c5be5?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&w=1200&q=85',
+  '/assets/artworks/aurelia.jpg',
+  '/assets/artworks/blush_of_morning.jpg',
+  '/assets/artworks/celestial_steeds.jpg',
+  '/assets/artworks/courtyard_of_shadows.jpg',
+  '/assets/artworks/eternal_grace.jpg',
+  '/assets/artworks/jataka_narrative.jpg',
+  '/assets/artworks/monsoon_reverie.jpg',
+  '/assets/artworks/mystic_ghats.jpg',
+  '/assets/artworks/padmapani_bodhisattva.jpg',
+  '/assets/artworks/palace_of_echoes.jpg',
+  '/assets/artworks/river_of_light.jpg',
+  '/assets/artworks/serenity_in_stone.jpg',
+  '/assets/artworks/shreenathji_relief.jpg',
+  '/assets/artworks/solar_pavilion.jpg',
+  '/assets/artworks/temple_pillars.jpg',
+  '/assets/artworks/twilight_glow.jpg',
+  '/assets/artworks/whispers_of_the_deep.jpg',
 ];
+
+// Fast lookup helper to match an artwork against local verified entries
+function findVerifiedLocalArtwork(artwork?: Partial<Artwork> | null): Artwork | undefined {
+  if (!artwork) return undefined;
+
+  // 1. Match by exact ID
+  if (artwork.id) {
+    const byId = LOCAL_ARTWORKS.find(a => a.id === artwork.id);
+    if (byId) return byId;
+  }
+
+  // 2. Match by SKU
+  if (artwork.sku) {
+    const skuNorm = artwork.sku.trim().toUpperCase();
+    const bySku = LOCAL_ARTWORKS.find(a => (a.sku || '').trim().toUpperCase() === skuNorm);
+    if (bySku) return bySku;
+  }
+
+  // 3. Match by normalized Title
+  if (artwork.title) {
+    const titleNorm = artwork.title.trim().toLowerCase();
+    const byTitle = LOCAL_ARTWORKS.find(a => (a.title || '').trim().toLowerCase() === titleNorm);
+    if (byTitle) return byTitle;
+  }
+
+  return undefined;
+}
 
 /**
  * Normalizes and sanitizes any artwork image path or key into a clean, loadable URL
@@ -239,7 +274,13 @@ export function sanitizeArtworkImageUrl(rawUrl?: string, fallbackSeed = '1'): st
 
   const trimmed = rawUrl.trim();
 
-  // Handle direct HTTP/HTTPS URLs
+  // Strip accidental unsplash stock placeholders if encountered
+  if (trimmed.includes('images.unsplash.com')) {
+    const seed = fallbackSeed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return FALLBACK_PAINTINGS[seed % FALLBACK_PAINTINGS.length];
+  }
+
+  // Handle direct HTTP/HTTPS URLs (Cloudflare R2 or other CDNs)
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
@@ -249,16 +290,34 @@ export function sanitizeArtworkImageUrl(rawUrl?: string, fallbackSeed = '1'): st
     return trimmed;
   }
 
-  // Handle Kasshiish Kariyaa artworks
-  if (trimmed.includes('kasshiish-kariyaa') || trimmed.includes('kasshiish_kariyaa')) {
+  // Handle SKU or path references to Shagun Agarwal
+  if (
+    trimmed.includes('shagun-agarwal') || 
+    trimmed.includes('shagun_agarwal') || 
+    trimmed.includes('TKV-SA-')
+  ) {
+    const filename = trimmed.split('/').pop() || trimmed;
+    return `/assets/artworks/shagun_agarwal/${filename}`;
+  }
+
+  // Handle SKU or path references to Kasshiish Kariyaa
+  if (
+    trimmed.includes('kasshiish-kariyaa') || 
+    trimmed.includes('kasshiish_kariyaa') || 
+    trimmed.includes('TKV-KK-')
+  ) {
     const filename = trimmed.split('/').pop() || trimmed;
     return `/assets/artworks/kasshiish_kariyaa/${filename}`;
   }
 
-  // Handle Shagun Agarwal artworks
-  if (trimmed.includes('shagun-agarwal') || trimmed.includes('shagun_agarwal')) {
+  // Handle Rhishikesh Joshi
+  if (
+    trimmed.includes('rhishikesh-joshi') || 
+    trimmed.includes('rhishikesh_joshi') || 
+    trimmed.includes('TKV-RJ-')
+  ) {
     const filename = trimmed.split('/').pop() || trimmed;
-    return `/assets/artworks/shagun_agarwal/${filename}`;
+    return `/assets/artworks/rhishikesh_joshi/${filename}`;
   }
 
   // Handle backend upload paths
@@ -286,29 +345,47 @@ export function getArtworkImagePath(artwork?: Partial<Artwork> | null): string {
     return FALLBACK_PAINTINGS[0];
   }
 
-  // 1. Highest priority: genuine R2 bucket URL from artwork.images[0].fileKey
-  if (artwork.images && artwork.images.length > 0 && artwork.images[0].fileKey) {
-    const key = artwork.images[0].fileKey.trim();
-    if (key.startsWith('http://') || key.startsWith('https://')) {
-      return key;
+  // 1. Highest priority: Check local verified portfolio match
+  // This guarantees 100% correct, verified imagery for Shagun, Kasshiish, Rhishikesh, etc.
+  const localMatch = findVerifiedLocalArtwork(artwork);
+  if (localMatch) {
+    if (localMatch.localImagePath && !localMatch.localImagePath.includes('placeholder')) {
+      const path = localMatch.localImagePath.trim();
+      if (!path.includes('images.unsplash.com')) {
+        return path.startsWith('/assets/') ? path : sanitizeArtworkImageUrl(path, localMatch.id);
+      }
+    }
+    if (localMatch.images && localMatch.images.length > 0 && localMatch.images[0].fileKey) {
+      const key = localMatch.images[0].fileKey.trim();
+      if (!key.includes('images.unsplash.com')) {
+        return key.startsWith('/assets/') ? key : sanitizeArtworkImageUrl(key, localMatch.id);
+      }
     }
   }
 
-  // 2. Next: explicit R2 or local URL in localImagePath
+  // 2. Next: explicit genuine local/HTTP URL in localImagePath
   if (artwork.localImagePath && !artwork.localImagePath.includes('placeholder')) {
     const local = artwork.localImagePath.trim();
-    if (local.startsWith('http://') || local.startsWith('https://')) {
-      return local;
+    if (!local.includes('images.unsplash.com')) {
+      if (local.startsWith('http://') || local.startsWith('https://')) {
+        return local;
+      }
+      return sanitizeArtworkImageUrl(local, artwork.id || artwork.title || '1');
     }
-    return sanitizeArtworkImageUrl(local, artwork.id || artwork.title || '1');
   }
 
-  // 3. Fallback to any images[0].fileKey through sanitize
+  // 3. Next: genuine R2 bucket URL or verified path from artwork.images[0].fileKey
   if (artwork.images && artwork.images.length > 0 && artwork.images[0].fileKey) {
-    return sanitizeArtworkImageUrl(artwork.images[0].fileKey, artwork.id || artwork.title || '1');
+    const key = artwork.images[0].fileKey.trim();
+    if (!key.includes('images.unsplash.com')) {
+      if (key.startsWith('http://') || key.startsWith('https://')) {
+        return key;
+      }
+      return sanitizeArtworkImageUrl(key, artwork.id || artwork.title || '1');
+    }
   }
 
-  // 4. Deterministic fallback matching artwork id or title
+  // 4. Deterministic fallback matching artwork id or title from verified collection assets
   const seed = (artwork.id || artwork.title || '1').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return FALLBACK_PAINTINGS[seed % FALLBACK_PAINTINGS.length];
 }
@@ -344,6 +421,7 @@ export function getArtworkImages(artwork: Artwork): ArtworkImageView[] {
 let _inMemoryArtworksCache: ArtworksResponse | null = (() => {
   try {
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('kb_cached_artworks_v9');
       localStorage.removeItem('kb_cached_artworks_v8');
       localStorage.removeItem('kb_cached_artworks_v7');
       localStorage.removeItem('kb_cached_artworks_v6');
@@ -354,7 +432,7 @@ let _inMemoryArtworksCache: ArtworksResponse | null = (() => {
       localStorage.removeItem('kb_cached_featured_artworks');
       localStorage.removeItem('kb_cached_featured_artworks_v5');
     }
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('kb_cached_artworks_v9') : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('kb_cached_artworks_v10') : null;
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed?.items?.length && parsed.items.length >= 70) {
@@ -374,7 +452,9 @@ let _inMemoryArtworksCache: ArtworksResponse | null = (() => {
               : (isKash ? 'Kasshiish Kariyaa' : undefined);
             return {
               ...a,
-              artist
+              artist,
+              localImagePath: getArtworkImagePath(a),
+              images: getArtworkImages(a)
             };
           });
         parsed.items = mixArtworksByArtist(parsed.items);
@@ -496,6 +576,7 @@ export function invalidateArtworkCache(artworkId?: string): void {
   }
   if (typeof window !== 'undefined') {
     try {
+      localStorage.removeItem('kb_cached_artworks_v10');
       localStorage.removeItem('kb_cached_artworks_v9');
       localStorage.removeItem('kb_cached_artworks_v8');
       localStorage.removeItem('kb_cached_artworks_v7');
@@ -573,7 +654,7 @@ export async function fetchArtworks(page = 1, limit = 500, forceRefresh = false)
         if (page === 1 && data.items.length >= 70 && data.items.length >= (_inMemoryArtworksCache?.items?.length || 0)) {
           _inMemoryArtworksCache = data;
           try {
-            localStorage.setItem('kb_cached_artworks_v9', JSON.stringify(data));
+            localStorage.setItem('kb_cached_artworks_v10', JSON.stringify(data));
           } catch {}
         }
         return data;

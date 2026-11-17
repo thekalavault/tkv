@@ -5,8 +5,6 @@ import {
   Sparkles, 
   MapPin, 
   Layers, 
-  Mail, 
-  Phone, 
   ArrowRight, 
   Maximize2, 
   CheckCircle2, 
@@ -196,33 +194,13 @@ export default function ArtistProfile() {
                   ))}
                 </div>
 
-                {/* Direct Connect Buttons */}
+                {/* Artist Social / Profile Links */}
                 <div className="pt-4 flex flex-wrap items-center gap-3 border-t border-stone-200">
-                  {artist.contact.whatsapp && (
-                    <a
-                      href={`https://wa.me/${artist.contact.whatsapp}?text=${encodeURIComponent(`Hello ${artist.name}, I am interested in your artworks on The Kala Vault.`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-4 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-cinzel text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-xs"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>WhatsApp Direct</span>
-                    </a>
+                  {artist.contact.instagram && (
+                    <span className="text-xs font-mono text-stone-600">
+                      Instagram: <strong className="text-[#4A0E17] font-semibold">{artist.contact.instagram}</strong>
+                    </span>
                   )}
-
-                  {artist.contact.email && (
-                    <a
-                      href={`mailto:${artist.contact.email}`}
-                      className="px-4 py-2 rounded-full bg-[#FAF6F0] hover:bg-stone-200 text-[#1E1412] border border-stone-300 font-cinzel text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2"
-                    >
-                      <Mail className="w-3.5 h-3.5 text-[#4A0E17]" />
-                      <span>{artist.contact.email}</span>
-                    </a>
-                  )}
-
-                  <span className="text-xs font-mono text-stone-500 ml-auto">
-                    Instagram: <strong className="text-[#4A0E17]">{artist.contact.instagram}</strong>
-                  </span>
                 </div>
 
               </div>

@@ -168,6 +168,7 @@ export default function Collections() {
   // Stale-While-Revalidate Caching for Collections Catalog
   const [allArtworks, setAllArtworks] = useState<CollectionArtwork[]>(() => {
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('kb_cached_artworks_v9');
       localStorage.removeItem('kb_cached_artworks_v8');
       localStorage.removeItem('kb_cached_artworks_v7');
       localStorage.removeItem('kb_cached_artworks_v6');
@@ -177,7 +178,7 @@ export default function Collections() {
       localStorage.removeItem('kb_cached_artworks');
     }
     try {
-      const cached = localStorage.getItem('kb_cached_artworks_v9');
+      const cached = localStorage.getItem('kb_cached_artworks_v10');
       if (cached) {
         const parsed = JSON.parse(cached);
         const items = parsed.items || (Array.isArray(parsed) ? parsed : []);
@@ -189,14 +190,14 @@ export default function Collections() {
     } catch (e) {
       console.error(e);
     }
-    // Instant zero-flicker baseline with all 103 artworks
+    // Instant zero-flicker baseline with all verified catalog artworks
     const built = buildCollectionsFromData(LOCAL_ARTWORKS);
     return built.allArtworks;
   });
 
   const [collections, setCollections] = useState<Collection[]>(() => {
     try {
-      const cached = localStorage.getItem('kb_cached_artworks_v9');
+      const cached = localStorage.getItem('kb_cached_artworks_v10');
       if (cached) {
         const parsed = JSON.parse(cached);
         const items = parsed.items || (Array.isArray(parsed) ? parsed : []);
@@ -221,7 +222,7 @@ export default function Collections() {
       try {
         const data = await fetchArtworks(1, 500);
         if (data && data.items && data.items.length >= 70) {
-          localStorage.setItem('kb_cached_artworks_v9', JSON.stringify(data));
+          localStorage.setItem('kb_cached_artworks_v10', JSON.stringify(data));
           const built = buildCollectionsFromData(data.items);
           setAllArtworks(built.allArtworks);
           setCollections(built.collections);
