@@ -466,3 +466,48 @@ body {
   animation-play-state: paused;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   LENIS SMOOTH SCROLLING ESSENTIAL RULES & GPU ACCELERATION
+   ───────────────────────────────────────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Global Hardware Acceleration & Font Smoothing */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Liquid Smooth Image & Surface Composition */
+img,
+video,
+canvas {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Prevent unwanted layout shift on hover states */
+.transform-gpu {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+

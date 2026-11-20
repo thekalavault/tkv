@@ -99,8 +99,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/artist/rhishikesh-joshi" className="hover:text-[#DFC07D] transition-colors inline-block hover:translate-x-1 duration-200 text-[#DFC07D]/90">
-                  Rhishikesh Joshi (Sharv Art)
+                <Link to="/artist/shagun-agarwal" className="hover:text-[#DFC07D] transition-colors inline-block hover:translate-x-1 duration-200 text-[#DFC07D]/90">
+                  Shagun Agarwal
+                </Link>
+              </li>
+              <li>
+                <Link to="/artist/kasshiish-kariyaa" className="hover:text-[#DFC07D] transition-colors inline-block hover:translate-x-1 duration-200 text-[#DFC07D]/90">
+                  Kasshiish Kariyaa
                 </Link>
               </li>
               <li>

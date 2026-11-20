@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { TkvMonogramSvg } from './KalaVaultLogo';
@@ -9,9 +9,9 @@ import { useFavorites } from '../contexts/FavoritesContext';
 export default function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [logoImgError, setLogoImgError] = useState(false);
+  const lastScrollYRef = useRef(0);
 
   const location = useLocation();
   const { user: currentUser, dbUser } = useAuth();
@@ -19,26 +19,30 @@ export default function TopNavBar() {
   const { favorites } = useFavorites();
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > 15) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+    let ticking = false;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+
+          setIsScrolled(currentScrollY > 20);
+
+          if (currentScrollY > lastScrollYRef.current && currentScrollY > 120) {
+            setIsVisible(false);
+          } else {
+            setIsVisible(true);
+          }
+          lastScrollYRef.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
       }
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -68,65 +72,79 @@ export default function TopNavBar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-        } ${
-          isScrolled 
-            ? 'py-2 px-4 md:px-8' 
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          } ${isScrolled
+            ? 'py-2 px-4 md:px-8'
             : 'py-2.5 md:py-3.5 px-4 md:px-8'
-        }`}
+          }`}
       >
-        <div 
-          className={`max-w-[1360px] mx-auto rounded-full transition-all duration-400 ${
-            isScrolled 
-              ? 'bg-[#FCFAF6]/98 backdrop-blur-2xl border border-[#C5A059]/40 shadow-[0_10px_35px_rgba(30,16,12,0.08)] px-5 md:px-7 py-2' 
-              : 'bg-[#FCFAF6]/92 backdrop-blur-xl border border-[#C5A059]/30 shadow-[0_4px_24px_rgba(30,16,12,0.04)] px-6 md:px-8 py-2.5'
-          } flex items-center justify-between gap-4`}
+        <div
+          className={`relative overflow-hidden max-w-[1360px] mx-auto rounded-full transition-all duration-400 ${isScrolled
+            ? 'bg-[#FCFAF6]/98 backdrop-blur-2xl border border-[#C5A059]/40 shadow-[0_10px_35px_rgba(30,16,12,0.08)] px-5 md:px-7 py-2'
+            : 'bg-[#FCFAF6]/92 backdrop-blur-xl border border-[#C5A059]/30 shadow-[0_4px_24px_rgba(30,16,12,0.04)] px-6 md:px-8 py-2.5'
+            } flex items-center justify-between gap-4`}
         >
-          
+          {/* Subtle Ambient Red Spotlight across top of header */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-[#7B2431]/25 to-transparent pointer-events-none" />
+          <motion.div
+            animate={{ opacity: [0.12, 0.22, 0.12] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-7 left-1/2 -translate-x-1/2 w-[520px] h-[45px] bg-[radial-gradient(ellipse_at_top,rgba(123,36,49,0.22)_0%,rgba(197,160,89,0.06)_50%,transparent_75%)] pointer-events-none blur-xs"
+          />
+
           {/* Left Side: Brand Logo & Title */}
-          <Link 
-            to="/" 
-            className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 cursor-pointer select-none"
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 cursor-pointer select-none relative z-10"
           >
             {/* Custom Logo with authentic brand image */}
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.25 }}
               className="shrink-0 flex items-center justify-center"
             >
-              <img 
-                src="/assets/logo.jpeg" 
+              <img
+                src="/assets/logo.jpeg"
                 alt="The Kala Vault Logo"
-                className="h-9 sm:h-10 w-9 sm:w-10 rounded-md object-cover border border-[#C5A059]/40 shadow-xs transition-transform duration-300" 
+                className="h-9 sm:h-10 w-9 sm:w-10 rounded-md object-cover border border-[#C5A059]/40 shadow-xs transition-transform duration-300"
               />
             </motion.div>
 
-            {/* Brand Title */}
+            {/* Brand Title in Unified Cinzel Serif Font */}
             <div className="flex items-center text-left justify-center">
-              <span className="font-brand text-[20px] sm:text-[22px] md:text-[24px] font-bold tracking-[0.14em] uppercase text-[#1E1412] group-hover:text-[#7B2431] transition-colors leading-none">
+              <span className="font-cinzel text-[19px] sm:text-[21px] md:text-[22px] font-bold tracking-[0.16em] uppercase text-[#1E1412] group-hover:text-[#7B2431] transition-colors leading-none">
                 THE KALA VAULT
               </span>
             </div>
           </Link>
 
           {/* Right Side: Navigation Links & Actions */}
-          <div className="hidden lg:flex items-center gap-2.5 xl:gap-4 justify-end shrink-0">
-            
-            {/* Nav Links */}
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 justify-end shrink-0 relative z-10">
+
+            {/* Nav Links with Smooth Sliding Red Spotlight Toggle Animation */}
             {navLinks.map((link) => {
               const active = isActive(link.path);
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`font-cinzel text-[11.5px] xl:text-[12px] font-bold tracking-[0.16em] uppercase px-4 py-1.5 rounded-full transition-all duration-300 whitespace-nowrap ${
-                    active
-                      ? 'bg-[#7B2431] text-[#FAF6F0] shadow-sm border border-[#DFC07D]/40'
-                      : 'text-[#1E1412]/80 hover:text-[#7B2431] hover:bg-[#7B2431]/08'
-                  }`}
+                  className={`relative font-cinzel text-[11px] xl:text-[11.5px] font-bold tracking-[0.18em] uppercase px-4 py-1.5 rounded-full transition-colors duration-200 whitespace-nowrap ${active
+                    ? 'text-[#FAF6F0]'
+                    : 'text-[#1E1412]/80 hover:text-[#7B2431]'
+                    }`}
                 >
-                  {link.name}
+                  {/* Active Toggle Spotlight Capsule */}
+                  {active && (
+                    <motion.div
+                      layoutId="header-active-spotlight"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[#7B2431] via-[#8F2C3C] to-[#7B2431] border border-[#DFC07D]/50 shadow-[0_2px_14px_rgba(123,36,49,0.38)] -z-10"
+                    >
+                      {/* Very light red spotlight glow beam rising from active item */}
+                      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-14 h-7 bg-[radial-gradient(ellipse_at_top,rgba(220,38,38,0.35)_0%,transparent_75%)] blur-[2px] pointer-events-none" />
+                    </motion.div>
+                  )}
+                  <span>{link.name}</span>
                 </Link>
               );
             })}
@@ -142,10 +160,10 @@ export default function TopNavBar() {
                 >
                   <span className="material-symbols-outlined text-[16px]">person</span>
                 </Link>
-                
+
                 {/* Favorites */}
-                <Link 
-                  to="/favorites" 
+                <Link
+                  to="/favorites"
                   title="Saved Favorites"
                   className="relative w-8 h-8 rounded-full flex items-center justify-center text-[#7B2431] bg-[#FAF6F0] border border-[#C5A059]/35 hover:bg-[#7B2431] hover:text-[#FAF6F0] hover:border-[#7B2431] transition-all duration-300 shadow-2xs"
                 >
@@ -158,8 +176,8 @@ export default function TopNavBar() {
                 </Link>
 
                 {/* Bag */}
-                <Link 
-                  to="/cart" 
+                <Link
+                  to="/cart"
                   className="flex items-center gap-1.5 bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] px-3.5 py-1.5 rounded-full border border-[#DFC07D]/40 transition-all duration-300 shadow-xs font-cinzel text-[11px] uppercase font-bold tracking-wider whitespace-nowrap"
                 >
                   <span className="material-symbols-outlined text-[15px] text-[#DFC07D]">shopping_bag</span>
@@ -172,7 +190,7 @@ export default function TopNavBar() {
             ) : (
               <Link
                 to="/signin"
-                className="font-cinzel text-[11.5px] xl:text-[12px] font-bold tracking-[0.18em] uppercase px-6 py-2 rounded-full bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] border border-[#DFC07D]/40 shadow-xs active:scale-95 transition-all duration-300 whitespace-nowrap shrink-0 ml-1 inline-flex items-center justify-center text-center leading-none"
+                className="font-cinzel text-[11px] xl:text-[11.5px] font-bold tracking-[0.18em] uppercase px-5 py-1.5 rounded-full bg-[#7B2431] hover:bg-[#8F2C3C] text-[#FAF6F0] border border-[#DFC07D]/40 shadow-[0_2px_12px_rgba(123,36,49,0.3)] active:scale-95 transition-all duration-300 whitespace-nowrap shrink-0 ml-1 inline-flex items-center justify-center text-center leading-none"
               >
                 SIGN IN
               </Link>
@@ -180,13 +198,15 @@ export default function TopNavBar() {
           </div>
 
           {/* Mobile Menu Toggle Button */}
-          <div className="lg:hidden flex items-center">
-            <button 
+          <div className="lg:hidden flex items-center relative z-10">
+            <button
               onClick={() => setIsMenuOpen(true)}
               aria-label="Toggle navigation menu"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-[#7B2431]/10 border border-[#C5A059]/35 text-[#7B2431] hover:bg-[#7B2431] hover:text-[#FAF6F0] transition-all duration-300"
+              className="relative w-8 h-8 rounded-full flex items-center justify-center bg-[#7B2431]/10 border border-[#C5A059]/35 text-[#7B2431] hover:bg-[#7B2431] hover:text-[#FAF6F0] transition-all duration-300 shadow-2xs group"
             >
-              <span className="material-symbols-outlined text-lg">menu</span>
+              {/* Very light red spotlight glow behind toggle button */}
+              <div className="absolute inset-0 rounded-full bg-[#7B2431]/20 blur-[6px] group-hover:bg-[#7B2431]/35 transition-colors pointer-events-none" />
+              <span className="material-symbols-outlined text-lg relative z-10">menu</span>
             </button>
           </div>
         </div>
@@ -195,7 +215,7 @@ export default function TopNavBar() {
       {/* Mobile Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -206,12 +226,12 @@ export default function TopNavBar() {
               <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3">
                 <TkvMonogramSvg size={28} theme="gold" />
                 <div className="flex items-center text-left">
-                  <span className="font-brand text-lg sm:text-xl font-bold tracking-[0.14em] uppercase text-[#1E1412]">
+                  <span className="font-cinzel text-lg sm:text-xl font-bold tracking-[0.16em] uppercase text-[#1E1412]">
                     THE KALA VAULT
                   </span>
                 </div>
               </Link>
-              <button 
+              <button
                 onClick={() => setIsMenuOpen(false)}
                 className="w-10 h-10 rounded-full bg-[#7B2431]/10 border border-[#C5A059]/30 flex items-center justify-center text-[#7B2431] hover:bg-[#7B2431] hover:text-[#FAF6F0] transition-all duration-300"
               >
@@ -221,30 +241,29 @@ export default function TopNavBar() {
 
             <div className="flex flex-col gap-4 items-center justify-center flex-1">
               {navLinks.map((link) => (
-                <Link 
+                <Link
                   key={link.path}
                   to={link.path}
-                  className={`font-cinzel text-lg uppercase tracking-[0.18em] font-bold px-8 py-3 rounded-full transition-all duration-300 w-full max-w-xs text-center ${
-                    isActive(link.path) 
-                      ? 'bg-[#7B2431] text-[#FAF6F0] border border-[#DFC07D]/40 shadow-sm' 
-                      : 'text-[#1E1412]/80 hover:text-[#7B2431] hover:bg-[#7B2431]/08'
-                  }`}
+                  className={`font-cinzel text-lg uppercase tracking-[0.18em] font-bold px-8 py-3 rounded-full transition-all duration-300 w-full max-w-xs text-center ${isActive(link.path)
+                    ? 'bg-[#7B2431] text-[#FAF6F0] border border-[#DFC07D]/40 shadow-sm'
+                    : 'text-[#1E1412]/80 hover:text-[#7B2431] hover:bg-[#7B2431]/08'
+                    }`}
                 >
                   {link.name}
                 </Link>
               ))}
-              
+
               <div className="mt-8 flex flex-col gap-3 w-full max-w-xs">
                 {currentUser ? (
-                  <Link 
-                    to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"} 
+                  <Link
+                    to={['admin', 'account_manager', 'operations'].includes(dbUser?.role?.name || '') ? "/admin" : "/customer"}
                     className="font-cinzel text-[13px] font-bold uppercase tracking-[0.18em] text-[#FAF6F0] bg-[#7B2431] hover:bg-[#8F2C3C] border border-[#DFC07D]/40 px-8 py-3.5 rounded-full text-center shadow-md transition-all duration-300"
                   >
                     ACCOUNT DASHBOARD
                   </Link>
                 ) : (
-                  <Link 
-                    to="/signin" 
+                  <Link
+                    to="/signin"
                     className="font-cinzel text-[13px] font-bold uppercase tracking-[0.18em] text-[#FAF6F0] bg-[#7B2431] hover:bg-[#8F2C3C] border border-[#DFC07D]/40 px-8 py-3.5 rounded-full text-center shadow-md transition-all duration-300"
                   >
                     SIGN IN

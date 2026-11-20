@@ -536,9 +536,7 @@ export default function ArtworkDetail() {
             
             {(() => {
               const artName = artwork.artist || '';
-              const slug = artName.toLowerCase().includes('rhishikesh') || artName.toLowerCase().includes('joshi')
-                ? 'rhishikesh-joshi'
-                : artName.toLowerCase().includes('shagun')
+              const slug = artName.toLowerCase().includes('shagun')
                 ? 'shagun-agarwal'
                 : artName.toLowerCase().includes('kash') || artName.toLowerCase().includes('kariyaa')
                 ? 'kasshiish-kariyaa'
@@ -619,23 +617,20 @@ export default function ArtworkDetail() {
           {/* Artist Spotlight Box */}
           {(() => {
             const artName = artwork.artist || '';
-            const slug = artName.toLowerCase().includes('rhishikesh') || artName.toLowerCase().includes('joshi')
-              ? 'rhishikesh-joshi'
-              : artName.toLowerCase().includes('shagun')
+            const slug = artName.toLowerCase().includes('shagun')
               ? 'shagun-agarwal'
               : artName.toLowerCase().includes('kash') || artName.toLowerCase().includes('kariyaa')
               ? 'kasshiish-kariyaa'
               : null;
 
             if (!slug) return null;
-            const isRhishi = slug === 'rhishikesh-joshi';
 
             return (
               <div className="border-t border-[#C5A059]/25 pt-6 pb-2">
                 <div className="p-5 rounded-2xl bg-[#F5EFEB] border border-[#C5A059]/40 flex flex-col sm:flex-row items-center gap-4 shadow-xs">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#C5A059] shrink-0 bg-[#120B0A]">
                     <img 
-                      src={isRhishi ? "/assets/artworks/rhishikesh_joshi/rhishikesh-joshi-portrait.jpg" : (artwork.localPath || "/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg")} 
+                      src={artwork.localPath || "/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg"} 
                       alt={artwork.artist} 
                       className="w-full h-full object-cover"
                     />
@@ -648,9 +643,7 @@ export default function ArtworkDetail() {
                       {artwork.artist}
                     </h4>
                     <p className="text-xs font-cormorant italic text-[#1E1412]/75 line-clamp-2 mt-0.5">
-                      {isRhishi 
-                        ? "Sharv Art Studio • Pune-based visual artist & spatial sculptor exploring raw elemental forms and material behavior." 
-                        : "Renowned contemporary artist contributing original works to The Kala Vault collections."}
+                      Renowned contemporary artist contributing original works to The Kala Vault collections.
                     </p>
                   </div>
                   <button

@@ -16,7 +16,7 @@ export default function ArtistsManager() {
   const [artists, setArtists] = useState<ArtistProfile[]>(() => getAllArtists());
   const [selectedArtistId, setSelectedArtistId] = useState<string>(() => {
     const list = getAllArtists();
-    return list[0]?.id || 'artist-rhishikesh-joshi';
+    return list[0]?.id || 'artist-shagun-agarwal';
   });
   
   const [activeSubTab, setActiveSubTab] = useState<'profile' | 'visuals' | 'contact' | 'stats' | 'curation' | 'exhibitions' | 'philosophy' | 'artworks'>('profile');
@@ -168,8 +168,8 @@ export default function ArtistsManager() {
       experienceYears: '5+ Years',
       mediaList: ['Mixed Media', 'Canvas'],
       primaryMediaSummary: 'Mixed Media, Fine Pigments',
-      portraitImage: '/assets/artworks/rhishikesh_joshi/rhishikesh-joshi-portrait.jpg',
-      coverImage: '/assets/artworks/rhishikesh_joshi/sculpture-hero-bronze-head.jpg',
+      portraitImage: '/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg',
+      coverImage: '/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg',
       accentArtworks: [],
       contact: {
         email: 'artist@example.com',
@@ -362,7 +362,7 @@ export default function ArtistsManager() {
                   value={formData.name}
                   onChange={e => handleFieldChange('name', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#4A0E17]"
-                  placeholder="e.g. Rhishikesh Joshi"
+                  placeholder="e.g. Shagun Agarwal"
                 />
               </div>
 
@@ -374,7 +374,7 @@ export default function ArtistsManager() {
                   value={formData.slug}
                   onChange={e => handleFieldChange('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
                   className="w-full px-4 py-2.5 rounded-lg border border-stone-300 text-sm font-mono focus:outline-none focus:border-[#4A0E17]"
-                  placeholder="e.g. rhishikesh-joshi"
+                  placeholder="e.g. shagun-agarwal"
                 />
               </div>
             </div>
@@ -508,7 +508,7 @@ export default function ArtistsManager() {
                   value={formData.portraitImage}
                   onChange={e => handleFieldChange('portraitImage', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-stone-300 text-xs font-mono focus:outline-none focus:border-[#4A0E17]"
-                  placeholder="/assets/artworks/rhishikesh_joshi/rhishikesh-joshi-portrait.jpg"
+                  placeholder="/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg"
                 />
                 <div className="w-48 h-60 rounded-xl overflow-hidden border-2 border-[#C5A059] bg-stone-100 shadow-md">
                   <img
@@ -532,7 +532,7 @@ export default function ArtistsManager() {
                   value={formData.coverImage}
                   onChange={e => handleFieldChange('coverImage', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-stone-300 text-xs font-mono focus:outline-none focus:border-[#4A0E17]"
-                  placeholder="/assets/artworks/rhishikesh_joshi/sculpture-hero-bronze-head.jpg"
+                  placeholder="/assets/artworks/shagun_agarwal/TKV-SA-001_cosmic-glow-original.jpeg"
                 />
                 <div className="w-full h-60 rounded-xl overflow-hidden border-2 border-[#C5A059] bg-stone-100 shadow-md">
                   <img
@@ -611,7 +611,7 @@ export default function ArtistsManager() {
                   value={formData.contact.instagramQr || ''}
                   onChange={e => handleContactChange('instagramQr', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-stone-300 text-xs font-mono focus:outline-none focus:border-[#4A0E17]"
-                  placeholder="/assets/artworks/rhishikesh_joshi/sharv-art-studio-instagram-qr.jpg"
+                  placeholder="/assets/artworks/shagun_agarwal/qr.jpg"
                 />
                 {formData.contact.instagramQr && (
                   <div className="mt-3 w-32 h-32 rounded-lg border border-stone-300 p-2 bg-white">

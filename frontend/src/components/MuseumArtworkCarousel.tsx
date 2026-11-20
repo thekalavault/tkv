@@ -21,21 +21,27 @@ export default function MuseumArtworkCarousel({ artworks = [], loading = false }
   // Double the list for seamless continuous infinite marquee feel
   const duplicatedArtworks = [...displayArtworks, ...displayArtworks];
 
-  // Auto-scroll loop: smooth continuous scroll with pause on hover
+  // Auto-scroll loop: delta-time normalized smooth continuous scroll with pause on hover
   useEffect(() => {
     const track = trackRef.current;
     if (!track || loading) return;
 
     let animationFrameId: number;
-    const speed = 0.75; // pixels per frame
+    const speed = 0.75; // pixels per ~60fps frame
+    let accumulatedScroll = track.scrollLeft;
+    let lastTime = performance.now();
 
-    const step = () => {
+    const step = (currentTime: number) => {
+      const delta = Math.min(32, currentTime - lastTime);
+      lastTime = currentTime;
+
       if (!isPaused && track) {
-        track.scrollLeft += speed;
-        // If reached half the scroll width (end of first set), reset to start seamlessly
-        if (track.scrollLeft >= track.scrollWidth / 2) {
-          track.scrollLeft -= track.scrollWidth / 2;
+        accumulatedScroll += (speed * delta) / 16.67;
+        const halfWidth = track.scrollWidth / 2;
+        if (accumulatedScroll >= halfWidth) {
+          accumulatedScroll -= halfWidth;
         }
+        track.scrollLeft = accumulatedScroll;
       }
       animationFrameId = requestAnimationFrame(step);
     };

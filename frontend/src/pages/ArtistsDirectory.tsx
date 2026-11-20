@@ -40,8 +40,8 @@ export default function ArtistsDirectory() {
     return () => window.removeEventListener('kalavault_artists_updated', handleUpdate);
   }, []);
 
-  // Selected Artist slug from URL param or default to Rhishikesh Joshi
-  const selectedSlug = searchParams.get('artist') || 'rhishikesh-joshi';
+  // Selected Artist slug from URL param or default to first artist
+  const selectedSlug = searchParams.get('artist') || 'shagun-agarwal';
   const selectedArtist: ArtistProfile = useMemo(() => {
     return artists.find(a => a.slug === selectedSlug) || artists[0];
   }, [artists, selectedSlug]);
@@ -331,50 +331,6 @@ export default function ArtistsDirectory() {
               >
                 All ({artworks.length})
               </button>
-              {selectedArtist.slug === 'rhishikesh-joshi' && (
-                <>
-                  <button
-                    onClick={() => setArtworkFilter('cave')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      artworkFilter === 'cave'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Cave Painting
-                  </button>
-                  <button
-                    onClick={() => setArtworkFilter('primal')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      artworkFilter === 'primal'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Primal Relics
-                  </button>
-                  <button
-                    onClick={() => setArtworkFilter('architectural')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      artworkFilter === 'architectural'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Physiognomies
-                  </button>
-                  <button
-                    onClick={() => setArtworkFilter('intimate')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      artworkFilter === 'intimate'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Micro-Studies
-                  </button>
-                </>
-              )}
             </div>
           </div>
 

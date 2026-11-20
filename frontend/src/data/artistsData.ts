@@ -1,5 +1,4 @@
 import { Artwork } from '../services/artworkService';
-import { RHISHIKESH_JOSHI_ARTWORKS } from './rhishikeshArtworks';
 import { SHAGUN_AGARWAL_ARTWORKS } from './shagunArtworks';
 import { KASSHIISH_KARIYAA_ARTWORKS } from './kashishArtworks';
 
@@ -63,144 +62,6 @@ export interface ArtistProfile {
 }
 
 export const ARTISTS_DATABASE: ArtistProfile[] = [
-  {
-    id: 'artist-rhishikesh-joshi',
-    slug: 'rhishikesh-joshi',
-    name: 'Rhishikesh Joshi',
-    studioName: 'Sharv Art Studio',
-    studioLocation: 'Vadgaonsheri, Pune, Maharashtra, India',
-    title: 'Fine Art & Spatial Sculpture',
-    tagline: 'Spatial Tactility & Raw Elemental Forms',
-    quote: 'Moving beyond two-dimensional decoration, my pieces treat walls and pedestals as immersive textural topographies.',
-    bio: 'I am a Pune-based visual artist and practicing interior designer with over a decade of studio research in material behavior. My spatial background informs an architectural treatment of surface texture, chiaroscuro lighting, and mass. Moving beyond two-dimensional decoration, my pieces treat walls and pedestals as immersive textural topographies.',
-    experienceYears: '10+ Years',
-    mediaList: ['Clay', 'Silicate Minerals', 'Paper Pulp', 'Resin & Metal Patinas'],
-    primaryMediaSummary: 'Clay, Silicate, Pulp, Resin',
-    portraitImage: '/assets/artworks/rhishikesh_joshi/rhishikesh-joshi-portrait.jpg',
-    coverImage: '/assets/artworks/rhishikesh_joshi/sculpture-hero-bronze-head.jpg',
-    accentArtworks: [
-      '/assets/artworks/rhishikesh_joshi/the-primal-hunt-and-fauna.jpg',
-      '/assets/artworks/rhishikesh_joshi/sculpture-hero-terracotta-profile.jpg',
-      '/assets/artworks/rhishikesh_joshi/the-crowned-sage.jpg',
-      '/assets/artworks/rhishikesh_joshi/ganesha-bas-relief.jpg'
-    ],
-    contact: {
-      email: 'jr.interio@gmail.com',
-      phone: '+91 9890289326',
-      whatsapp: '919890289326',
-      instagram: '@sharvartstudio',
-      instagramQr: '/assets/artworks/rhishikesh_joshi/sharv-art-studio-instagram-qr.jpg',
-      website: 'www.thekalavault.com'
-    },
-    stats: [
-      { label: 'Studio Practice', value: '10+ Yrs', sublabel: 'Material Research' },
-      { label: 'Core Media', value: '4+ Media', sublabel: 'Clay, Silicate, Pulp, Resin' },
-      { label: 'Sharv Art Studio', value: 'Pune Based', sublabel: 'Maharashtra, India' },
-      { label: 'Curated Catalog', value: '16 Works', sublabel: 'Reliefs & Monographs' }
-    ],
-    curatorialNote: 'Every sculpture in this portfolio represents an exploration of human emotion, material weathering, and timeless form. Works are available for private acquisitions, gallery curation, architectural commissions, and site-specific installations.',
-    engagementPathways: [
-      {
-        title: 'Private Acquisitions',
-        description: 'Available original works, limited series, and curated spatial monographs for discerning private collectors.'
-      },
-      {
-        title: 'Bespoke Commissions',
-        description: 'Site-specific architectural bas-reliefs, custom portrait busts, and monumental installations engineered for high-end residences and luxury lobbies.'
-      },
-      {
-        title: 'Gallery & Museum Curation',
-        description: 'Curatorial inquiries for solo exhibitions, institutional loans, and contemporary fine art showcases.'
-      }
-    ],
-    thematicCurations: [
-      {
-        id: 'cave-painting-series',
-        name: 'Cave Painting Series',
-        badge: 'Featured Masterwork',
-        description: 'Large-scale reliefs inspired by prehistoric rock shelters, archers, and archaic petroglyphs over undulating stone-textured substrates.'
-      },
-      {
-        id: 'primal-relics',
-        name: 'Primal Relics & Earthbound Memory',
-        badge: 'Archaeological Relics',
-        description: 'Artworks that feel like archaeological findings—touched by millennia of natural weathering, mineral erosion, and organic evolution.'
-      },
-      {
-        id: 'architectural-physiognomies',
-        name: 'Architectural Physiognomies & Inner States',
-        badge: 'Psychological Casts',
-        description: 'Character studies where facial architecture and weathered skin tones mirror internal human psychological weights.'
-      },
-      {
-        id: 'intimate-monologues',
-        name: 'Intimate Monologues & Micro-Studies',
-        badge: 'Tactile Miniatures',
-        description: 'Concentrated emotional snapshots scaled down to human touch, forcing an intimate up-close dialogue between the viewer and fleeting expressions.'
-      }
-    ],
-    exhibitions: [
-      {
-        title: 'Asian Art Gallery',
-        venue: 'Asian Art Gallery (Regional / Int\'l)',
-        curatorialFocus: 'Curated showcase of contemporary Indian figurative sculpture and tactile mixed media.'
-      },
-      {
-        title: 'Ceramic & Architectural Busts',
-        venue: 'P. N. Gadgil (PNG) Gallery (Pune)',
-        curatorialFocus: 'Group exhibition presenting ceramic busts, clay portraits, and architectural wall works.'
-      },
-      {
-        title: 'Traditional Synthesis Feature',
-        venue: 'Zapurza Museum (Khadakwasla, Pune)',
-        curatorialFocus: 'Museum feature celebrating traditional artisanal methods synthesized with modern interior forms.'
-      },
-      {
-        title: 'National Visual Art Showcase',
-        venue: 'Kala Spandan Art Fair (Nehru Centre, Mumbai)',
-        curatorialFocus: 'National visual art fair presenting medium-format bas-reliefs, stone silicates, and metal patinas.'
-      },
-      {
-        title: '"Xpression" & "Emotions" Residency',
-        venue: 'Malaka Spice Art Wall (Koregaon Park, Pune)',
-        curatorialFocus: 'Solo artist residency exhibit highlighting the "Xpression" and "Emotions" sculptural bust series.'
-      }
-    ],
-    philosophy: [
-      {
-        title: 'Material Alchemy',
-        type: 'studio_practice',
-        description: 'Combining traditional terracotta slip, lost-wax bronze casting, and hand-applied mineral patinas to achieve aged, weathered surfaces.'
-      },
-      {
-        title: 'Tactile Sculpting Methods',
-        type: 'studio_practice',
-        description: 'Building physical tension from initial raw clay gestures through to oxidized metallic and silicate finishes.'
-      },
-      {
-        title: 'Scale & Spatial Context',
-        type: 'studio_practice',
-        description: 'Designing works ranging from palm-scale micro-monologues to architectural bas-reliefs suited for residential and commercial environments.'
-      },
-      {
-        title: 'Sculpture & Anatomy Masterclasses',
-        type: 'pedagogy',
-        description: 'Conducting intensive hands-on workshops focusing on facial anatomy, expressiveness, character studies, and pedestal mounting.'
-      },
-      {
-        title: 'Patination & Surface Techniques',
-        type: 'pedagogy',
-        description: 'Mentoring artists and enthusiasts in natural mineral glazing, verdigris oxidation, and burnished metallic finishing methods.'
-      },
-      {
-        title: 'Community & Academic Engagement',
-        type: 'pedagogy',
-        description: 'Fostering appreciation for contemporary Indian sculpture through interactive live sculpting sessions and institutional dialogue.'
-      }
-    ],
-    featuredMasterworkId: 'tkv-rj-001',
-    isFeatured: true
-  },
   {
     id: 'artist-shagun-agarwal',
     slug: 'shagun-agarwal',
@@ -419,9 +280,7 @@ export function getArtworksForArtist(artistNameOrSlug: string, customPool?: Artw
   
   // Base collection for known artists
   let base: Artwork[] = [];
-  if (norm.includes('rhishikesh') || norm.includes('joshi') || norm.includes('sharv')) {
-    base = [...RHISHIKESH_JOSHI_ARTWORKS];
-  } else if (norm.includes('shagun')) {
+  if (norm.includes('shagun')) {
     base = [...SHAGUN_AGARWAL_ARTWORKS];
   } else if (norm.includes('kash') || norm.includes('kariyaa')) {
     base = [...KASSHIISH_KARIYAA_ARTWORKS];

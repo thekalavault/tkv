@@ -29,17 +29,17 @@ export default function ArtistProfile() {
   const { addItem } = useCart();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
-  const currentSlug = slug || 'rhishikesh-joshi';
+  const currentSlug = slug || 'shagun-agarwal';
   const [artist, setArtist] = useState<ArtistProfileType>(() => {
-    return getArtistBySlug(currentSlug) || getArtistBySlug('rhishikesh-joshi')!;
+    return getArtistBySlug(currentSlug) || getArtistBySlug('shagun-agarwal')!;
   });
 
   useEffect(() => {
-    const fresh = getArtistBySlug(currentSlug) || getArtistBySlug('rhishikesh-joshi')!;
+    const fresh = getArtistBySlug(currentSlug) || getArtistBySlug('shagun-agarwal')!;
     setArtist(fresh);
 
     const handleUpdate = () => {
-      const updated = getArtistBySlug(currentSlug) || getArtistBySlug('rhishikesh-joshi')!;
+      const updated = getArtistBySlug(currentSlug) || getArtistBySlug('shagun-agarwal')!;
       setArtist(updated);
     };
 
@@ -240,50 +240,6 @@ export default function ArtistProfile() {
               >
                 All Works ({artworks.length})
               </button>
-              {artist.slug === 'rhishikesh-joshi' && (
-                <>
-                  <button
-                    onClick={() => setActiveSeriesTab('cave')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      activeSeriesTab === 'cave'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Cave Painting
-                  </button>
-                  <button
-                    onClick={() => setActiveSeriesTab('primal')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      activeSeriesTab === 'primal'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Primal Relics
-                  </button>
-                  <button
-                    onClick={() => setActiveSeriesTab('architectural')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      activeSeriesTab === 'architectural'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Physiognomies
-                  </button>
-                  <button
-                    onClick={() => setActiveSeriesTab('intimate')}
-                    className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                      activeSeriesTab === 'intimate'
-                        ? 'bg-[#4A0E17] text-white font-bold shadow-xs'
-                        : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-300'
-                    }`}
-                  >
-                    Micro-Studies
-                  </button>
-                </>
-              )}
             </div>
           </div>
 

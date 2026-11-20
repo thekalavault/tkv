@@ -54,9 +54,7 @@ const ArtworkCard = memo(function ArtworkCard({
   const fullMrp = getFullMrp();
   const artistName = (artwork as any).artist || (artwork.originalArtwork as any)?.artist || 'Museum Archival Edition';
 
-  const artistSlug = artistName.toLowerCase().includes('rhishikesh') || artistName.toLowerCase().includes('joshi')
-    ? 'rhishikesh-joshi'
-    : artistName.toLowerCase().includes('shagun')
+  const artistSlug = artistName.toLowerCase().includes('shagun')
     ? 'shagun-agarwal'
     : artistName.toLowerCase().includes('kash') || artistName.toLowerCase().includes('kariyaa')
     ? 'kasshiish-kariyaa'

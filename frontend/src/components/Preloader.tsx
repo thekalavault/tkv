@@ -1,582 +1,395 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { preloadAllCatalogAssets } from '../services/artworkService';
+import { preloadAndWarmCatalog } from '../services/artworkService';
 
 interface PreloaderProps {
   onComplete: () => void;
 }
 
-type AnimationStep = 'tkv' | 'expand_horizontal' | 'morph_vertical' | 'poster_reveal' | 'exit' | 'finished';
-
-/**
- * Deep Imperial Dark Red Flowing Velvet Cloth Component
- * Undulating luxury textile banner in rich bordeaux & midnight wine tones spanning end-to-end
- * across the warm peach canvas, providing dramatic contrast and tactile organic drape motion.
- */
-const FlowingDarkRedVelvetCloth: React.FC<{ isVerticalStack: boolean; isExiting: boolean }> = ({
-  isVerticalStack,
-  isExiting,
-}) => {
-  return (
-    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none w-screen overflow-hidden z-0 flex items-center justify-center">
-      {/* Dynamic Animated Height Container that billows smoothly between horizontal & vertical phases */}
-      <motion.div
-        animate={{
-          height: isVerticalStack ? 510 : 270,
-          opacity: isExiting ? 0 : 1,
-          scaleY: isVerticalStack ? [1, 1.035, 1] : [1, 1.045, 1],
-        }}
-        transition={{
-          height: { duration: 1.1, ease: [0.16, 1, 0.3, 1] },
-          opacity: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
-          scaleY: { duration: 6, repeat: Infinity, ease: 'easeInOut' }
-        }}
-        className="relative w-full overflow-visible flex items-center justify-center"
-      >
-        {/* Soft Ambient Deep Wine Shadow Diffusing onto the Warm Peach Canvas */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[340px] bg-[#3B060F]/22 rounded-full blur-[90px] pointer-events-none -z-10" />
-
-        {/* SVG Deep Dark Red Wavy Fabric with Dramatic Organic Undulations */}
-        <svg
-          className="w-full h-full min-w-[1360px] overflow-visible"
-          viewBox="0 0 1600 520"
-          fill="none"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            {/* Rich Imperial Dark Red Velvet Gradient */}
-            <linearGradient id="darkRedClothGrad" x1="0%" y1="15%" x2="100%" y2="85%">
-              <stop offset="0%" stopColor="#140104" />
-              <stop offset="12%" stopColor="#250308" />
-              <stop offset="28%" stopColor="#3D060F" />
-              <stop offset="50%" stopColor="#580A16" />
-              <stop offset="70%" stopColor="#3A050E" />
-              <stop offset="88%" stopColor="#200206" />
-              <stop offset="100%" stopColor="#100103" />
-            </linearGradient>
-
-            {/* Deepest Fold Cavity Gradient */}
-            <linearGradient id="darkRedShadowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0B0002" />
-              <stop offset="35%" stopColor="#1C0206" />
-              <stop offset="70%" stopColor="#260309" />
-              <stop offset="100%" stopColor="#0A0002" />
-            </linearGradient>
-
-            {/* Velvet Sheen Crest (Subtle deep crimson highlight across curves) */}
-            <linearGradient id="darkRedSheenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#6E0E1C" stopOpacity="0" />
-              <stop offset="25%" stopColor="#7E1220" stopOpacity="0.25" />
-              <stop offset="50%" stopColor="#9C1A2B" stopOpacity="0.45" />
-              <stop offset="75%" stopColor="#7E1220" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#6E0E1C" stopOpacity="0" />
-            </linearGradient>
-
-            {/* Tactile Woven Fabric Filter */}
-            <filter id="darkRedTextureFilter" x="-10%" y="-10%" width="120%" height="120%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.045 0.09" numOctaves="3" result="noise" />
-              <feColorMatrix
-                type="matrix"
-                values="0.33 0.33 0.33 0 0
-                        0.33 0.33 0.33 0 0
-                        0.33 0.33 0.33 0 0
-                        0    0    0    0.20 0"
-                result="texture"
-              />
-              <feComposite in="SourceGraphic" in2="texture" operator="arithmetic" k1="0" k2="1" k3="0.15" k4="0" />
-            </filter>
-
-            {/* Natural Velvet Drop Shadow onto Peach Background */}
-            <filter id="darkRedClothShadow" x="-5%" y="-10%" width="110%" height="135%">
-              <feDropShadow dx="0" dy="18" stdDeviation="24" floodColor="#180104" floodOpacity="0.32" />
-              <feDropShadow dx="0" dy="5" stdDeviation="8" floodColor="#100103" floodOpacity="0.25" />
-            </filter>
-          </defs>
-
-          {/* LAYER 1: Deep Underlay Wave Folds */}
-          <motion.path
-            d="M 0 150 Q 220 50 480 170 T 960 120 T 1600 180 L 1600 460 Q 1320 500 980 420 T 460 480 T 0 400 Z"
-            fill="url(#darkRedShadowGrad)"
-            opacity={0.92}
-            animate={{
-              d: [
-                "M 0 150 Q 220 50 480 170 T 960 120 T 1600 180 L 1600 460 Q 1320 500 980 420 T 460 480 T 0 400 Z",
-                "M 0 180 Q 260 100 520 140 T 1020 160 T 1600 140 L 1600 430 Q 1280 460 940 440 T 440 440 T 0 430 Z",
-                "M 0 150 Q 220 50 480 170 T 960 120 T 1600 180 L 1600 460 Q 1320 500 980 420 T 460 480 T 0 400 Z",
-              ]
-            }}
-            transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-
-          {/* LAYER 2: Main Extra-Flowy Dark Red Cloth Body */}
-          <g filter="url(#darkRedClothShadow)">
-            <motion.path
-              d="M 0 120 Q 300 220 640 90 T 1180 160 T 1600 80 L 1600 400 Q 1240 490 880 380 T 320 450 T 0 350 Z"
-              fill="url(#darkRedClothGrad)"
-              filter="url(#darkRedTextureFilter)"
-              animate={{
-                d: [
-                  "M 0 120 Q 300 220 640 90 T 1180 160 T 1600 80 L 1600 400 Q 1240 490 880 380 T 320 450 T 0 350 Z",
-                  "M 0 90 Q 340 140 680 130 T 1240 100 T 1600 120 L 1600 360 Q 1290 440 930 410 T 380 390 T 0 380 Z",
-                  "M 0 140 Q 280 200 600 110 T 1140 180 T 1600 90 L 1600 420 Q 1220 480 860 360 T 300 440 T 0 340 Z",
-                  "M 0 120 Q 300 220 640 90 T 1180 160 T 1600 80 L 1600 400 Q 1240 490 880 380 T 320 450 T 0 350 Z",
-                ]
-              }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </g>
-
-          {/* LAYER 3: Internal Flowing Folds & Drapery Crests */}
-          <motion.path
-            d="M 0 180 Q 380 280 780 180 T 1600 170"
-            stroke="url(#darkRedSheenGrad)"
-            strokeWidth="38"
-            strokeLinecap="round"
-            opacity={0.4}
-            animate={{
-              d: [
-                "M 0 180 Q 380 280 780 180 T 1600 170",
-                "M 0 160 Q 420 220 830 200 T 1600 190",
-                "M 0 180 Q 380 280 780 180 T 1600 170",
-              ]
-            }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          />
-
-          <motion.path
-            d="M 0 320 Q 480 400 960 300 T 1600 330"
-            stroke="url(#darkRedShadowGrad)"
-            strokeWidth="26"
-            opacity={0.5}
-            animate={{
-              d: [
-                "M 0 320 Q 480 400 960 300 T 1600 330",
-                "M 0 300 Q 510 360 1010 330 T 1600 310",
-                "M 0 320 Q 480 400 960 300 T 1600 330",
-              ]
-            }}
-            transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-
-          {/* Organic Velvet Light Sweep across the dark drapery */}
-          <motion.rect
-            x="-500"
-            y="0"
-            width="380"
-            height="520"
-            fill="url(#darkRedSheenGrad)"
-            opacity={0.25}
-            animate={{ x: ['-450px', '1800px'] }}
-            transition={{ duration: 4, repeat: Infinity, repeatDelay: 1.5, ease: 'easeInOut' }}
-            transform="skewX(-22)"
-          />
-        </svg>
-      </motion.div>
-    </div>
-  );
-};
-
 export default function Preloader({ onComplete }: PreloaderProps) {
-  const [step, setStep] = useState<AnimationStep>('tkv');
   const [progress, setProgress] = useState(0);
+  const [isRevealing, setIsRevealing] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const [targetFlight, setTargetFlight] = useState<{ x: number; y: number; scale: number }>({
+    x: 0,
+    y: 0,
+    scale: 0.42,
+  });
 
-  const handleFinishImmediately = () => {
-    setStep('exit');
-    setTimeout(() => {
-      setStep('finished');
-      onComplete();
-    }, 700);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const completedRef = useRef(false);
+
+  // Compute exact coordinates of header logo for the flight animation
+  const calculateTargetFlight = () => {
+    if (!logoRef.current) return;
+    const currentRect = logoRef.current.getBoundingClientRect();
+    const currentCenterX = currentRect.left + currentRect.width / 2;
+    const currentCenterY = currentRect.top + currentRect.height / 2;
+
+    const targetEl =
+      document.querySelector('header img[alt="The Kala Vault Logo"]') ||
+      document.querySelector('header img') ||
+      document.querySelector('nav img');
+
+    if (targetEl) {
+      const targetRect = targetEl.getBoundingClientRect();
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+      setTargetFlight({
+        x: targetCenterX - currentCenterX,
+        y: targetCenterY - currentCenterY,
+        scale: targetRect.width / currentRect.width,
+      });
+    } else {
+      // Responsive fallback if target element rect is pending in DOM
+      const isDesktop = window.innerWidth >= 1024;
+      const targetLeft = isDesktop
+        ? Math.max(48, (window.innerWidth - 1360) / 2 + 48)
+        : 32;
+      const targetTop = isDesktop ? 28 : 22;
+      const targetSize = isDesktop ? 40 : 36;
+
+      setTargetFlight({
+        x: targetLeft - currentCenterX + targetSize / 2,
+        y: targetTop - currentCenterY + targetSize / 2,
+        scale: targetSize / currentRect.width,
+      });
+    }
   };
 
   useEffect(() => {
-    preloadAllCatalogAssets();
+    // Precalculate flight target on mount and window resize
+    calculateTargetFlight();
+    window.addEventListener('resize', calculateTargetFlight);
 
-    // 5-Second Luxury Calibrated Choreography:
-    // 0ms - 1200ms: Phase 1: "T · K · V" monogram on dark red velvet cloth against peach canvas
-    // 1200ms - 2600ms: Phase 2: Smooth horizontal expansion to "THE KALA VAULT" along the flowing cloth
-    // 2600ms - 3900ms: Phase 3: Morphing smoothly into the vertical 3-tiered poster stack
-    // 3900ms - 5000ms: Phase 4: Full poster glory unveiled with arches, "AN ARTFUL WORLD IS OPENING", & "Curating Joy."
-    // 5000ms: Smooth portal exit welcoming guest into the gallery
-    const t1 = setTimeout(() => setStep('expand_horizontal'), 1200);
-    const t2 = setTimeout(() => setStep('morph_vertical'), 2600);
-    const t3 = setTimeout(() => setStep('poster_reveal'), 3900);
-
+    let assetsLoaded = false;
+    let minTimeElapsed = false;
+    let currentPct = 0;
     const startTime = Date.now();
-    const duration = 5000;
+    const minDuration = 2200; // 2.2s pace to appreciate the artwork animation
 
-    const updateProgress = () => {
+    // 1. Preload catalog & decode images into browser memory
+    preloadAndWarmCatalog((actualPct) => {
+      currentPct = Math.max(currentPct, actualPct);
+      if (actualPct >= 100) {
+        assetsLoaded = true;
+      }
+    }).then(() => {
+      assetsLoaded = true;
+    }).catch(() => {
+      assetsLoaded = true;
+    });
+
+    // 2. Smooth requestAnimationFrame progress updater
+    let frameId: number;
+
+    const tick = () => {
       const elapsed = Date.now() - startTime;
-      const pct = Math.min(100, Math.floor((elapsed / duration) * 100));
-      setProgress(pct);
+      const timePct = Math.min(100, Math.floor((elapsed / minDuration) * 100));
 
-      if (pct < 100) {
-        requestAnimationFrame(updateProgress);
+      if (elapsed >= minDuration) {
+        minTimeElapsed = true;
+      }
+
+      // Smooth visual progress that combines asset preload status & animation pace
+      const displayPct = Math.min(
+        100,
+        assetsLoaded && minTimeElapsed
+          ? 100
+          : Math.max(timePct, Math.floor(currentPct * 0.95))
+      );
+
+      setProgress(displayPct);
+
+      // Complete only when BOTH minimum aesthetic time has elapsed AND assets are ready
+      // (or max timeout of 4.2s to prevent indefinite stall on slow networks)
+      if ((assetsLoaded && minTimeElapsed) || elapsed >= 4200) {
+        setProgress(100);
+        triggerReveal();
       } else {
-        setStep('exit');
-        setTimeout(() => {
-          setStep('finished');
-          onComplete();
-        }, 850);
+        frameId = requestAnimationFrame(tick);
       }
     };
 
-    const animFrame = requestAnimationFrame(updateProgress);
+    frameId = requestAnimationFrame(tick);
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      cancelAnimationFrame(animFrame);
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', calculateTargetFlight);
     };
-  }, [onComplete]);
+  }, []);
 
-  if (step === 'finished') return null;
+  const triggerReveal = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    calculateTargetFlight();
+    setIsRevealing(true);
 
-  const isExiting = step === 'exit';
-  const isPosterMode = step === 'morph_vertical' || step === 'poster_reveal' || step === 'exit';
-  const isHorizontalExpanded = step === 'expand_horizontal';
+    // After logo flight & aperture expansion, hand off to live website
+    setTimeout(() => {
+      setIsFinished(true);
+      onComplete();
+    }, 850);
+  };
+
+  const handleSkip = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    calculateTargetFlight();
+    setIsRevealing(true);
+    setTimeout(() => {
+      setIsFinished(true);
+      onComplete();
+    }, 450);
+  };
+
+  if (isFinished) return null;
+
+  // Real-time responsive aperture expansion during loading
+  const apertureWidthVw = isRevealing ? 100 : Math.min(88, 74 + progress * 0.12);
+  const apertureHeightVh = isRevealing ? 100 : Math.min(62, 48 + progress * 0.1);
 
   return (
     <AnimatePresence>
       <motion.div
-        key="preloader-overlay"
+        key="this-is-norway-inspired-preloader"
         initial={{ opacity: 1 }}
-        animate={{ opacity: isExiting ? 0 : 1 }}
-        transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
-        // Warm, elegant peach parchment background (#F7EDE2) with dark red accents
-        className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#F7EDE2] select-none overflow-hidden"
+        animate={{ opacity: isRevealing ? [1, 1, 0] : 1 }}
+        transition={{ duration: 0.85, times: [0, 0.75, 1], ease: [0.76, 0, 0.24, 1] }}
+        className="fixed inset-0 z-[99999] flex items-center justify-center select-none overflow-hidden bg-[#FAF6F0]"
       >
-        {/* Soft Warm Peach Radial Illumination */}
-        <div className="absolute inset-0 pointer-events-none opacity-25 bg-[radial-gradient(#C5A059_0.8px,transparent_0.8px)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,#FFF8F2_35%,#F4E4D5_100%)] opacity-90" />
-
         {/* ─────────────────────────────────────────────────────────────────────────────
-            OUTER POSTER BORDER FRAME WITH CRISP DARK RED LINES
+            MINIMALIST LUXURY CANVAS BACKGROUND (Clean Warm Linen & Subtle Ambient Aura)
+            All perimeter clutter removed.
             ───────────────────────────────────────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.985 }}
-          animate={{ opacity: isExiting ? 0 : 1, scale: 1 }}
-          transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute inset-3 sm:inset-6 md:inset-8 border border-[#580F1D]/25 pointer-events-none z-20"
-        >
-          {/* Bottom solid burgundy line matching user image */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#580F1D]" />
-          {/* Delicate inner hairline */}
-          <div className="absolute inset-1 sm:inset-2 border border-[#580F1D]/15" />
-        </motion.div>
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Subtle Warm Linen Radial Bloom */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#FFFDF8_25%,#FAF6F0_70%,#F3ECE2_100%)] opacity-95" />
 
-        {/* ─────────────────────────────────────────────────────────────────────────────
-            CONCENTRIC ARCHITECTURAL ARCHES (PORTAL GRAPHIC FROM USER IMAGE)
-            ───────────────────────────────────────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isPosterMode ? 0.85 : 0.35 }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
-        >
-          <svg
-            className="w-full max-w-[820px] h-[780px] sm:h-[840px] text-[#580F1D] opacity-75"
-            viewBox="0 0 800 800"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Outermost Arch */}
-            <path
-              d="M 120 740 L 120 400 A 280 280 0 0 1 680 400 L 680 740"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              strokeOpacity="0.25"
-            />
-            {/* Middle Arch */}
-            <path
-              d="M 160 740 L 160 400 A 240 240 0 0 1 640 400 L 640 740"
-              stroke="currentColor"
-              strokeWidth="1.1"
-              strokeOpacity="0.38"
-            />
-            {/* Inner Radiating Arch */}
-            <path
-              d="M 210 740 L 210 400 A 190 190 0 0 1 590 400 L 590 740"
-              stroke="currentColor"
-              strokeWidth="0.75"
-              strokeOpacity="0.3"
-            />
-            {/* Innermost Delicate Arch */}
-            <path
-              d="M 260 740 L 260 400 A 140 140 0 0 1 540 400 L 540 740"
-              stroke="currentColor"
-              strokeWidth="0.6"
-              strokeOpacity="0.2"
-              strokeDasharray="4 4"
-            />
-            {/* Baseline Guide Rule */}
-            <line x1="80" y1="740" x2="720" y2="740" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.35" />
-          </svg>
-
-          {/* Floating Atmospheric Sparkles (matching image) */}
-          <div className="absolute top-[28%] left-[22%] w-1.5 h-1.5 rounded-full bg-[#580F1D]/40" />
-          <div className="absolute top-[34%] right-[24%] w-1.5 h-1.5 rounded-full bg-[#580F1D]/35" />
-          <div className="absolute top-[42%] left-[18%] w-1 h-1 rounded-full bg-[#580F1D]/30" />
-          <div className="absolute top-[48%] right-[19%] w-1.5 h-1.5 rounded-full bg-[#580F1D]/45" />
-        </motion.div>
-
-        {/* ─────────────────────────────────────────────────────────────────────────────
-            DARK RED FLOWING VELVET CLOTH (END-TO-END BEHIND TEXT ACROSS PEACH CANVAS)
-            Requested: "can u make that cloth thing dark reddd"
-            ───────────────────────────────────────────────────────────────────────────── */}
-        <FlowingDarkRedVelvetCloth isVerticalStack={isPosterMode} isExiting={isExiting} />
-
-        {/* ─────────────────────────────────────────────────────────────────────────────
-            MAIN CENTERPIECE CARD & TEXT ON TOP OF DARK RED CLOTH
-            Sculptural Luminous Ivory Typography with Deep Bordeaux 3D Bevel Shadows
-            ───────────────────────────────────────────────────────────────────────────── */}
-        <div className="relative z-30 flex flex-col items-center justify-center max-w-5xl px-3 sm:px-6 text-center pointer-events-none">
-
-          {/* 1. BRAND LOGO MEDALLION */}
+          {/* Deep Velvet Bordeaux Ambient Aura behind center stage */}
           <motion.div
-            initial={{ scale: 0.75, opacity: 0, y: -12 }}
-            animate={
-              isExiting
-                ? {
-                    scale: 0.45,
-                    opacity: 0,
-                    y: -140,
-                    transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] }
-                  }
-                : {
-                    scale: 1,
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-                  }
-            }
-            className="mb-3 sm:mb-4 relative"
-          >
-            <div className="relative p-1.5 rounded-xl bg-[#FAF6F0] border border-[#C5A059]/70 shadow-[0_12px_35px_rgba(88,15,29,0.22)]">
-              <img
-                src="/assets/logo.jpeg"
-                alt="The Kala Vault Seal"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shadow-xs"
-              />
-            </div>
-          </motion.div>
-
-          {/* 2. TOP BANNER: "AN ARTFUL WORLD IS OPENING" */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{
-              opacity: isPosterMode ? 1 : 0.75,
-              y: 0
-            }}
-            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center mb-2 sm:mb-3"
-          >
-            <p className="font-outfit text-[11px] sm:text-[13px] md:text-[14px] font-semibold tracking-[0.28em] sm:tracking-[0.35em] uppercase text-[#580F1D]">
-              AN ARTFUL WORLD IS OPENING
-            </p>
-            {/* Small center horizontal bar */}
-            <div className="w-10 sm:w-12 h-[2px] bg-[#580F1D] mt-2 sm:mt-2.5 opacity-85" />
-          </motion.div>
-
-          {/* ─────────────────────────────────────────────────────────────────────────
-              3. CORE MORPHING TYPOGRAPHY ON TOP OF DARK RED CLOTH:
-                 - Step 1: "T · K · V" (horizontal monogram)
-                 - Step 2: "THE  KALA  VAULT" (smooth horizontal expansion)
-                 - Step 3: Stacked Vertically into poster typography (THE / KALA / VAULT)
-                 - Sculptural Luminous Ivory Lettering with Multi-Layered Bordeaux 3D Bevel Shadow
-                   (Zero cuts, ultra-crisp, maximum legibility on dark red cloth!)
-              ───────────────────────────────────────────────────────────────────────── */}
-          <div className="relative flex flex-col items-center justify-center my-1 sm:my-2 w-full max-w-4xl overflow-visible">
-            
-            <motion.div
-              layout
-              transition={{
-                layout: { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
-              }}
-              className={`flex overflow-visible ${
-                isPosterMode 
-                  ? 'flex-col items-center gap-0 leading-[0.88] sm:leading-[0.85]' 
-                  : 'flex-row items-baseline justify-center gap-2.5 sm:gap-6 md:gap-8 leading-none px-2 sm:px-4'
-              }`}
-            >
-              {/* WORD 1: "THE" */}
-              <motion.div
-                layout
-                className="overflow-visible flex items-baseline justify-center"
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="cloth-sculpted-char font-syne font-black text-[clamp(2.5rem,7vw,5.5rem)] sm:text-7xl md:text-8xl tracking-tight uppercase">
-                  T
-                </span>
-
-                <AnimatePresence>
-                  {(isHorizontalExpanded || isPosterMode) && (
-                    <motion.span
-                      initial={{ width: 0, opacity: 0, x: -14 }}
-                      animate={{ width: 'auto', opacity: 1, x: 0 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-                      className="cloth-sculpted-char font-syne font-black text-[clamp(2.5rem,7vw,5.5rem)] sm:text-7xl md:text-8xl tracking-tight uppercase inline-block whitespace-nowrap overflow-visible"
-                    >
-                      HE
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* WORD 2: "KALA" */}
-              <motion.div
-                layout
-                className="overflow-visible flex items-baseline justify-center"
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="cloth-sculpted-char font-syne font-black text-[clamp(2.5rem,7vw,5.5rem)] sm:text-7xl md:text-8xl tracking-tight uppercase">
-                  K
-                </span>
-
-                <AnimatePresence>
-                  {(isHorizontalExpanded || isPosterMode) && (
-                    <motion.span
-                      initial={{ width: 0, opacity: 0, x: -14 }}
-                      animate={{ width: 'auto', opacity: 1, x: 0 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                      className="cloth-sculpted-char font-syne font-black text-[clamp(2.5rem,7vw,5.5rem)] sm:text-7xl md:text-8xl tracking-tight uppercase inline-block whitespace-nowrap overflow-visible"
-                    >
-                      ALA
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* WORD 3: "VAULT" */}
-              <motion.div
-                layout
-                className="overflow-visible flex items-baseline justify-center pr-2"
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="cloth-sculpted-char font-syne font-black text-[clamp(2.5rem,7vw,5.5rem)] sm:text-7xl md:text-8xl tracking-tight uppercase">
-                  V
-                </span>
-
-                <AnimatePresence>
-                  {(isHorizontalExpanded || isPosterMode) && (
-                    <motion.span
-                      initial={{ width: 0, opacity: 0, x: -14 }}
-                      animate={{ width: 'auto', opacity: 1, x: 0 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                      className="cloth-sculpted-char font-syne font-black text-[clamp(2.5rem,7vw,5.5rem)] sm:text-7xl md:text-8xl tracking-tight uppercase inline-block whitespace-nowrap overflow-visible"
-                    >
-                      AULT
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </motion.div>
-
-            {/* Micro-label during initial 'TKV' phase */}
-            {step === 'tkv' && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6 }}
-                className="mt-3 text-[10px] sm:text-[11px] font-mono tracking-[0.3em] uppercase text-[#FFFDF9]/90 drop-shadow-md"
-              >
-                TKV ARCHIVAL MONOGRAM
-              </motion.div>
-            )}
-          </div>
-
-          {/* 4. SUBTITLE & TAGLINE (From image: "Curating Joy." & "INSPIRING SPACES") */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{
-              opacity: isPosterMode ? 1 : 0,
-              y: isPosterMode ? 0 : 15
-            }}
-            transition={{ duration: 0.75, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center mt-3 sm:mt-5"
-          >
-            {/* Elegant italic script */}
-            <h2 className="font-cormorant italic text-3xl sm:text-4xl md:text-[42px] font-normal text-[#580F1D] tracking-normal leading-tight">
-              Curating Joy.
-            </h2>
-
-            {/* Spaced small caps tagline */}
-            <p className="font-outfit text-[11px] sm:text-[13px] font-semibold uppercase tracking-[0.32em] text-[#580F1D]/90 mt-1">
-              INSPIRING SPACES
-            </p>
-
-            {/* Delicate horizontal divider with centered diamond (matching user image) */}
-            <div className="flex items-center gap-3 w-40 sm:w-52 mt-3 sm:mt-4 opacity-80">
-              <div className="h-[1px] flex-1 bg-[#580F1D]" />
-              <div className="w-2 h-2 rotate-45 bg-[#580F1D]" />
-              <div className="h-[1px] flex-1 bg-[#580F1D]" />
-            </div>
-          </motion.div>
-
+            animate={{ scale: [1, 1.1, 1], opacity: [0.12, 0.2, 0.12] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[720px] bg-[radial-gradient(circle_at_center,#4A0E17_0%,transparent_65%)] rounded-full blur-[90px]"
+          />
         </div>
 
         {/* ─────────────────────────────────────────────────────────────────────────────
-            MINIMALIST PROGRESS INDICATOR AT BOTTOM (CALIBRATED TO 5 SECONDS)
+            LAYER 1: FILLED HEADING (Sits BEHIND the central aperture window)
+            When the aperture is smaller than the letters, the outer letters
+            are rendered in solid imperial velvet bordeaux against the warm cream canvas.
+            ───────────────────────────────────────────────────────────────────────────── */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 px-4">
+          <motion.div
+            animate={
+              isRevealing
+                ? { scale: 0.98, opacity: 0, y: 15 }
+                : { scale: 1, opacity: 1, y: 0 }
+            }
+            transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+            className="flex flex-col items-center text-center"
+          >
+            {/* Spacer matching the Logo Medallion size & margin */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mb-4 sm:mb-6 shrink-0" />
+
+            {/* Monumental Display Title (Solid Filled Layer) */}
+            <h1 className="font-cinzel text-[clamp(2.1rem,7.4vw,7.6rem)] font-black tracking-[0.16em] uppercase text-[#4A0E17] leading-none select-none whitespace-nowrap">
+              THE KALA VAULT
+            </h1>
+
+            {/* Curatorial Subhead (Solid Filled Layer) */}
+            <p className="font-cormorant italic text-[clamp(1rem,2.2vw,2.1rem)] tracking-[0.26em] uppercase text-[#7B2431]/85 mt-3 sm:mt-5 select-none whitespace-nowrap">
+              Curating Joy • Inspiring Spaces
+            </p>
+          </motion.div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────────────────────
+            LAYER 2: CENTRAL APERTURE WINDOW ("This Is Norway" Signature Cutout)
+            Contains the high-resolution museum gallery hero visual with Ken-Burns motion,
+            surrounded by expanding letterbox framing and 1px gold hairline borders.
+            ───────────────────────────────────────────────────────────────────────────── */}
+        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+          <motion.div
+            animate={{
+              width: `${apertureWidthVw}vw`,
+              height: `${apertureHeightVh}vh`,
+              borderRadius: isRevealing ? '0px' : '3px',
+            }}
+            transition={{
+              duration: isRevealing ? 0.8 : 0.2,
+              ease: [0.76, 0, 0.24, 1],
+            }}
+            className="relative overflow-hidden border border-[#C5A059]/45 shadow-[0_28px_85px_rgba(46,7,13,0.22)]"
+          >
+            {/* High-Resolution Museum Gallery Hero Imagery */}
+            <motion.img
+              src="/assets/museum_gallery_hero.jpg"
+              alt="Museum Gallery Archive"
+              animate={{
+                scale: isRevealing ? 1.15 : [1.03, 1.1],
+              }}
+              transition={{
+                duration: isRevealing ? 0.85 : 3.8,
+                ease: 'easeOut',
+              }}
+              className="absolute inset-0 w-full h-full object-cover object-center"
+            />
+
+            {/* Fine Art Scrim: Contrast Toning & Warm Velvet Hue */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1E1412]/75 via-[#1E1412]/30 to-[#1E1412]/60 pointer-events-none" />
+            <div className="absolute inset-0 bg-[#4A0E17]/20 mix-blend-multiply pointer-events-none" />
+
+            {/* Subtle Gilded Edge Sheen */}
+            <div className="absolute inset-0 border border-[#C5A059]/30 pointer-events-none" />
+
+            {/* Classical Framing Corner Brackets */}
+            <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 border-[#C5A059] opacity-85" />
+            <div className="absolute top-2.5 right-2.5 w-3.5 h-3.5 border-t-2 border-r-2 border-[#C5A059] opacity-85" />
+            <div className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b-2 border-l-2 border-[#C5A059] opacity-85" />
+            <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-[#C5A059] opacity-85" />
+
+            {/* ─────────────────────────────────────────────────────────────────────────
+                OUTLINE HEADING (Nested INSIDE the Aperture Window)
+                Positioned in a w-screen h-screen container centered on the exact same
+                viewport coordinates. Because the aperture has overflow:hidden, this
+                transparent-fill, stroke-outlined text is clipped exactly to the window!
+                ───────────────────────────────────────────────────────────────────────── */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-screen flex flex-col items-center justify-center pointer-events-none px-4">
+              <motion.div
+                animate={
+                  isRevealing
+                    ? { scale: 0.98, opacity: 0, y: 15 }
+                    : { scale: 1, opacity: 1, y: 0 }
+                }
+                transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+                className="flex flex-col items-center text-center"
+              >
+                {/* Spacer matching the Logo Medallion */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mb-4 sm:mb-6 shrink-0" />
+
+                {/* Outlined Title (Transparent fill, Crisp 1.5px Cream Outline) */}
+                <h1
+                  style={{
+                    WebkitTextStroke: '1.5px #FAF6F0',
+                    color: 'transparent',
+                    textShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                  }}
+                  className="font-cinzel text-[clamp(2.1rem,7.4vw,7.6rem)] font-black tracking-[0.16em] uppercase leading-none select-none whitespace-nowrap"
+                >
+                  THE KALA VAULT
+                </h1>
+
+                {/* Outlined Subhead */}
+                <p
+                  style={{
+                    WebkitTextStroke: '0.8px rgba(250, 246, 240, 0.9)',
+                    color: 'rgba(250, 246, 240, 0.95)',
+                    textShadow: '0 2px 12px rgba(0,0,0,0.7)',
+                  }}
+                  className="font-cormorant italic text-[clamp(1rem,2.2vw,2.1rem)] tracking-[0.26em] uppercase mt-3 sm:mt-5 select-none whitespace-nowrap"
+                >
+                  Curating Joy • Inspiring Spaces
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────────────────────
+            LAYER 3: CENTERPIECE BRAND LOGO MEDALLION & CINEMATIC FLIGHT TO HEADER
+            Positioned in center stage, then on reveal gracefully glides & scales
+            directly to the live navbar header logo coordinates!
+            ───────────────────────────────────────────────────────────────────────────── */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 px-4">
+          <div className="flex flex-col items-center text-center">
+            {/* The Authentic Brand Medallion */}
+            <motion.div
+              ref={logoRef}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={
+                isRevealing
+                  ? {
+                      x: targetFlight.x,
+                      y: targetFlight.y,
+                      scale: targetFlight.scale,
+                      opacity: 1,
+                      transition: { duration: 0.82, ease: [0.16, 1, 0.3, 1] },
+                    }
+                  : {
+                      x: 0,
+                      y: 0,
+                      scale: 1,
+                      opacity: 1,
+                      transition: { duration: 0.6, ease: 'easeOut' },
+                    }
+              }
+              className="w-20 h-20 sm:w-24 sm:h-24 mb-4 sm:mb-6 relative shrink-0"
+            >
+              {/* Pulsing Gilded Halo */}
+              <motion.div
+                animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+                transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                className="absolute -inset-2.5 rounded-2xl border border-[#C5A059]/40 border-dashed pointer-events-none"
+              />
+
+              {/* Framed Gold-Bevel Enclosure */}
+              <div className="relative w-full h-full p-1 rounded-2xl bg-gradient-to-tr from-[#7B2431] via-[#C5A059] to-[#FAF6F0] shadow-[0_16px_40px_rgba(74,14,23,0.25)]">
+                <div className="w-full h-full rounded-xl overflow-hidden bg-[#FAF6F0] border border-[#C5A059]/60 flex items-center justify-center relative shadow-inner">
+                  <img
+                    src="/assets/logo.jpeg"
+                    alt="The Kala Vault"
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Diagonal Specular Sheen Passage */}
+                  <motion.div
+                    initial={{ x: '-120%' }}
+                    animate={{ x: '220%' }}
+                    transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1 }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Invisible structural spacer keeping center-point identical */}
+            <div className="opacity-0 pointer-events-none select-none flex flex-col items-center">
+              <h1 className="font-cinzel text-[clamp(2.1rem,7.4vw,7.6rem)] font-black tracking-[0.16em] uppercase leading-none whitespace-nowrap">
+                THE KALA VAULT
+              </h1>
+              <p className="font-cormorant italic text-[clamp(1rem,2.2vw,2.1rem)] tracking-[0.26em] uppercase mt-3 sm:mt-5 whitespace-nowrap">
+                Curating Joy • Inspiring Spaces
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────────────────────
+            MINIMALIST CORNER LOADING BAR (Faithfully matching user's reference image)
+            Positioned in bottom-right corner, showing sleek pill track + "loading..."
+            All bottom-center bar clutter and side elements removed.
             ───────────────────────────────────────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isExiting ? 0 : 1 }}
-          transition={{ duration: 0.5 }}
-          className="absolute bottom-6 sm:bottom-8 z-30 flex flex-col items-center justify-center text-center px-6 max-w-xs w-full pointer-events-none"
+          animate={isRevealing ? { opacity: 0, y: 15 } : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          onClick={handleSkip}
+          className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 flex flex-col items-center cursor-pointer pointer-events-auto"
+          title="Click to enter"
         >
-          {/* Subtle Progress Bar */}
-          <div className="w-48 sm:w-56 h-[2.5px] bg-[#580F1D]/18 rounded-full overflow-hidden mb-2">
+          {/* Rounded Pill Track with Vibrant Gradient Fill */}
+          <div className="w-36 sm:w-44 h-3.5 sm:h-4 rounded-full p-[2px] border-[1.5px] border-[#1E1412]/60 sm:border-[#1E1412]/75 bg-[#FAF6F0]/85 shadow-xs flex items-center overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#580F1D] via-[#8A1628] to-[#C5A059] shadow-[0_0_8px_rgba(88,15,29,0.5)]"
-              style={{ width: `${progress}%` }}
-              transition={{ ease: 'linear' }}
+              className="h-full rounded-full bg-gradient-to-r from-[#FFB703] via-[#FB8500] to-[#E63946] shadow-[0_0_8px_rgba(251,133,0,0.4)]"
+              style={{ width: `${Math.max(6, progress)}%` }}
+              transition={{ ease: 'easeOut', duration: 0.2 }}
             />
           </div>
 
-          <div className="text-[10px] sm:text-[11px] font-mono tracking-[0.25em] text-[#580F1D]/85 uppercase font-semibold">
-            {progress === 100 ? 'ENTERING GALLERY • WELCOME' : `COLLECTION ARCHIVE • ${progress}%`}
-          </div>
+          {/* Clean "loading..." typography underneath */}
+          <span className="font-sans text-[11px] sm:text-[12px] text-[#1E1412]/80 tracking-wide mt-1.5 select-none lowercase">
+            loading...
+          </span>
         </motion.div>
-
-        {/* ─────────────────────────────────────────────────────────────────────────────
-            DISCREET "SKIP / ENTER NOW →" CONTROL (UX BEST PRACTICE)
-            ───────────────────────────────────────────────────────────────────────────── */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
-          onClick={handleFinishImmediately}
-          className="absolute bottom-5 right-5 sm:bottom-7 sm:right-7 z-40 group flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#580F1D]/30 bg-[#F7EDE2]/90 backdrop-blur-md text-[#580F1D] hover:border-[#580F1D] hover:bg-[#580F1D] hover:text-[#FAF6F0] transition-all duration-300 pointer-events-auto cursor-pointer shadow-xs"
-          title="Enter Gallery Directly"
-        >
-          <span className="font-outfit text-[9.5px] sm:text-[10.5px] font-semibold tracking-[0.22em] uppercase">
-            Skip
-          </span>
-          <span className="text-xs group-hover:translate-x-0.5 transition-transform duration-200">
-            →
-          </span>
-        </motion.button>
-
-        {/* Pure, crisp, sculptural 3D typography without any gold cuts or distortions */}
-        <style>{`
-          .cloth-sculpted-char {
-            color: #FFFFFF;
-            /* Multi-layered dark bordeaux depth so white text jumps out vividly on the dark red velvet */
-            text-shadow: 
-              0 1px 3px rgba(255, 255, 255, 0.45),
-              2px 3px 0px #45060E,
-              4px 6px 0px #240206,
-              6px 9px 20px rgba(10, 1, 3, 0.85);
-            line-height: 0.88;
-            filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
-          }
-        `}</style>
-
       </motion.div>
     </AnimatePresence>
   );

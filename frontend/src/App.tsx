@@ -42,9 +42,20 @@ export default function App() {
 
   useEffect(() => {
     lenisRef.current = new Lenis({
-      lerp: 0.05,
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
       smoothWheel: true,
+      wheelMultiplier: 1.05,
+      touchMultiplier: 1.6,
+      infinite: false,
     });
+
+    // Pause smooth scroll during preloader presentation
+    if (showPreloader) {
+      lenisRef.current.stop();
+    }
 
     function raf(time: number) {
       lenisRef.current?.raf(time);
@@ -60,6 +71,14 @@ export default function App() {
       }
     };
   }, []);
+
+  // Resume Lenis once preloader unmounts
+  useEffect(() => {
+    if (!showPreloader && lenisRef.current) {
+      lenisRef.current.start();
+      lenisRef.current.scrollTo(0, { immediate: true });
+    }
+  }, [showPreloader]);
 
   useEffect(() => {
     if (lenisRef.current) {

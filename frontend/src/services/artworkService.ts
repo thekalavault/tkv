@@ -2,7 +2,6 @@ import { addWatermarkToImage, WatermarkOptions } from '../lib/watermark';
 import { auth } from '../lib/firebase';
 import { SHAGUN_AGARWAL_ARTWORKS } from '../data/shagunArtworks';
 import { KASSHIISH_KARIYAA_ARTWORKS } from '../data/kashishArtworks';
-import { RHISHIKESH_JOSHI_ARTWORKS } from '../data/rhishikeshArtworks';
 import { ALL_VERIFIED_ARTWORKS } from '../data/dbArtworks';
 
 export interface ArtworkImageView {
@@ -56,11 +55,6 @@ export function mixArtworksByArtist<T extends { artist?: string; title?: string;
     return art.includes('kassh') || art.includes('kash') || art.includes('kariyaa');
   };
 
-  const isRhishikesh = (a: T) => {
-    const art = (a.artist || a.originalArtwork?.artist || '').toLowerCase();
-    return art.includes('rhishikesh') || art.includes('joshi') || art.includes('sharv');
-  };
-
   const getVal = (a: T) => a.replacementValue || a.originalArtwork?.replacementValue || 0;
   const getTitle = (a: T) => (a.title || a.name || a.originalArtwork?.title || '').toLowerCase();
 
@@ -82,20 +76,16 @@ export function mixArtworksByArtist<T extends { artist?: string; title?: string;
     return getVal(b) - getVal(a);
   });
 
-  const rhishi = artworks.filter(isRhishikesh);
-  rhishi.sort((a, b) => getVal(b) - getVal(a));
-
-  const others = artworks.filter(a => !isShagun(a) && !isKash(a) && !isRhishikesh(a));
+  const others = artworks.filter(a => !isShagun(a) && !isKash(a));
   others.sort((a, b) => getVal(b) - getVal(a));
 
   const buckets = [
-    { name: 'Rhishikesh Joshi', items: [...rhishi] },
     { name: 'Shagun Agarwal', items: [...shagun] },
     { name: 'Kasshiish Kariyaa', items: [...kash] },
     { name: 'Archival Collection', items: [...others] }
   ];
 
-  const total = shagun.length + kash.length + rhishi.length + others.length;
+  const total = shagun.length + kash.length + others.length;
   const result: T[] = [];
   let lastArtist = '';
   let roundIndex = 0;
@@ -138,7 +128,7 @@ export function mixArtworksByArtist<T extends { artist?: string; title?: string;
   return result;
 }
 
-// Combined certified portfolio: Rhishikesh Joshi (16) + Shagun Agarwal (45) + Kasshiish Kariyaa (20 from Advisory PDF) + Authenticated Masterworks (38)
+// Combined certified portfolio: Shagun Agarwal (45) + Kasshiish Kariyaa (20 from Advisory PDF) + Authenticated Masterworks (38)
 export const LOCAL_ARTWORKS: Artwork[] = (() => {
   const map = new Map<string, Artwork>();
   // 1. Add all verified DB artworks
@@ -147,8 +137,6 @@ export const LOCAL_ARTWORKS: Artwork[] = (() => {
   SHAGUN_AGARWAL_ARTWORKS.forEach(a => map.set(a.id, a));
   // 3. Overlay Kasshiish Kariyaa's 20 genuine artworks from the Advisory PDF
   KASSHIISH_KARIYAA_ARTWORKS.forEach(a => map.set(a.id, a));
-  // 4. Overlay Rhishikesh Joshi's 16 spatial sculptures & reliefs
-  RHISHIKESH_JOSHI_ARTWORKS.forEach(a => map.set(a.id, a));
 
   return mixArtworksByArtist(Array.from(map.values()));
 })();
@@ -310,16 +298,6 @@ export function sanitizeArtworkImageUrl(rawUrl?: string, fallbackSeed = '1'): st
     return `/assets/artworks/kasshiish_kariyaa/${filename}`;
   }
 
-  // Handle Rhishikesh Joshi
-  if (
-    trimmed.includes('rhishikesh-joshi') || 
-    trimmed.includes('rhishikesh_joshi') || 
-    trimmed.includes('TKV-RJ-')
-  ) {
-    const filename = trimmed.split('/').pop() || trimmed;
-    return `/assets/artworks/rhishikesh_joshi/${filename}`;
-  }
-
   // Handle backend upload paths
   if (trimmed.startsWith('/uploads/')) {
     return `${API_BASE_URL}${trimmed}`;
@@ -346,7 +324,7 @@ export function getArtworkImagePath(artwork?: Partial<Artwork> | null): string {
   }
 
   // 1. Highest priority: Check local verified portfolio match
-  // This guarantees 100% correct, verified imagery for Shagun, Kasshiish, Rhishikesh, etc.
+  // This guarantees 100% correct, verified imagery for Shagun, Kasshiish, etc.
   const localMatch = findVerifiedLocalArtwork(artwork);
   if (localMatch) {
     if (localMatch.localImagePath && !localMatch.localImagePath.includes('placeholder')) {
@@ -513,27 +491,57 @@ export function getInstantArtworkById(id: string): Artwork | null {
   return LOCAL_ARTWORKS.find(a => a.id === id) || null;
 }
 
-export function preloadAllCatalogAssets(): void {
-  if (typeof window === 'undefined') return;
-  
-  // 1. Preload local artworks and their views
+export async function preloadAndWarmCatalog(
+  onProgress?: (progress: number) => void
+): Promise<{ loaded: number; total: number }> {
+  if (typeof window === 'undefined') return { loaded: 0, total: 0 };
+
+  // 1. Fetch catalog so _inMemoryArtworksCache and _artworkMap are fully populated
+  let catalogItems: Artwork[] = LOCAL_ARTWORKS;
+  try {
+    const res = await fetchArtworks(1, 500);
+    if (res?.items && res.items.length > 0) {
+      catalogItems = res.items;
+    }
+  } catch {
+    catalogItems = LOCAL_ARTWORKS;
+  }
+
+  // 2. Collect all critical image URLs to preload
+  const imageUrls = new Set<string>();
+
+  // Museum hero visual & logo
+  imageUrls.add('/assets/museum_gallery_hero.jpg');
+  imageUrls.add('/assets/logo.jpeg');
+
+  // Priority 1: Homepage featured artworks carousel
+  const featured = getLatestAcquisitionsSelection(catalogItems);
+  featured.forEach(art => {
+    const p = getArtworkImagePath(art);
+    if (p) imageUrls.add(p);
+  });
+
+  // Priority 2: All local catalog artworks & multi-views
   LOCAL_ARTWORKS.forEach(art => {
-    _artworkMap.set(art.id, art);
+    const p = getArtworkImagePath(art);
+    if (p) imageUrls.add(p);
     const views = getArtworkImages(art);
     views.forEach(v => {
-      if (v.fileKey) {
-        const img = new Image();
-        img.src = v.fileKey;
-      }
+      if (v.fileKey) imageUrls.add(v.fileKey);
     });
   });
 
-  // 2. Preload room in-situ scenes and common key art
+  // Priority 3: Full catalog artworks (up to 60)
+  catalogItems.slice(0, 60).forEach(art => {
+    const p = getArtworkImagePath(art);
+    if (p) imageUrls.add(p);
+  });
+
+  // Priority 4: Room visualization backgrounds & curatorial protocols
   const priorityImages = [
     '/assets/rooms/boardroom.png',
     '/assets/rooms/living_room.png',
     '/assets/rooms/gallery_lounge.png',
-    '/assets/museum_gallery_hero.jpg',
     '/assets/artistic_hotel_foyer.jpg',
     '/assets/artistic_boardroom.jpg',
     '/assets/artistic_cafe_dining.jpg',
@@ -546,24 +554,56 @@ export function preloadAllCatalogAssets(): void {
     '/assets/protocol_04_laser_installation.jpg',
     '/assets/protocol_05_dynamic_rotations.jpg',
   ];
-  priorityImages.forEach(src => {
-    const img = new Image();
-    img.src = src;
-  });
+  priorityImages.forEach(src => imageUrls.add(src));
 
-  // 3. Fetch full catalog in background & preload all images into browser cache
-  fetchArtworks(1, 500).then(res => {
-    if (res?.items) {
-      res.items.forEach(art => {
-        _artworkMap.set(art.id, art);
-        const imgUrl = getArtworkImagePath(art);
-        if (imgUrl) {
-          const img = new Image();
-          img.src = imgUrl;
+  const urls = Array.from(imageUrls);
+  const total = urls.length;
+  let loaded = 0;
+
+  if (total === 0) {
+    if (onProgress) onProgress(100);
+    return { loaded: 0, total: 0 };
+  }
+
+  // Preload and decode images concurrently into GPU/RAM
+  const preloadSingle = (url: string): Promise<void> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      let finished = false;
+      const done = () => {
+        if (!finished) {
+          finished = true;
+          loaded++;
+          if (onProgress) {
+            onProgress(Math.min(100, Math.round((loaded / total) * 100)));
+          }
+          resolve();
         }
-      });
-    }
-  }).catch(() => {});
+      };
+
+      img.onload = () => {
+        if ('decode' in img) {
+          img.decode().then(done).catch(done);
+        } else {
+          done();
+        }
+      };
+      img.onerror = done;
+      img.src = url;
+
+      // Fail-safe 2.5s individual image timeout
+      setTimeout(done, 2500);
+    });
+  };
+
+  await Promise.all(urls.map(preloadSingle));
+  if (onProgress) onProgress(100);
+
+  return { loaded, total };
+}
+
+export function preloadAllCatalogAssets(): void {
+  preloadAndWarmCatalog().catch(() => {});
 }
 
 export function invalidateArtworkCache(artworkId?: string): void {
